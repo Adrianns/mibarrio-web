@@ -1,0 +1,262 @@
+// Domain Types for Mi Barrio
+
+// User roles
+export type UserRole = 'visitor' | 'provider';
+
+// Provider types
+export type ProviderType = 'individual' | 'business';
+
+// Category types
+export type CategoryType = 'service' | 'business' | 'both';
+
+// Category from database
+export interface Category {
+	id: string;
+	name: string;
+	label: string;
+	icon: string;
+	color: string;
+	description?: string | null;
+	category_type: CategoryType;
+	is_active: boolean;
+	display_order: number;
+	created_at: string;
+	updated_at?: string;
+}
+
+// User profile
+export interface UserProfile {
+	id: string;
+	email: string;
+	full_name: string;
+	avatar_url?: string | null;
+	phone?: string | null;
+	role: UserRole;
+	is_active: boolean;
+	is_admin: boolean;
+	created_at: string;
+	updated_at?: string;
+}
+
+// Provider profile
+export interface Provider {
+	id: string;
+	user_id: string;
+	provider_type: ProviderType;
+	display_name: string;
+	business_name?: string | null;
+	business_rut?: string | null;
+	logo_url?: string | null;
+	description?: string | null;
+	short_description?: string | null;
+
+	// Contact info
+	contact_phone?: string | null;
+	contact_whatsapp?: string | null;
+	contact_email?: string | null;
+	website_url?: string | null;
+	instagram_url?: string | null;
+	facebook_url?: string | null;
+
+	// Location
+	department: Department;
+	neighborhood?: string | null;
+	address?: string | null;
+	location_lat?: number | null;
+	location_lng?: number | null;
+
+	// Media
+	photos: string[];
+
+	// Status
+	is_verified: boolean;
+	is_active: boolean;
+	is_featured: boolean;
+
+	// Stats
+	view_count: number;
+	contact_click_count: number;
+
+	created_at: string;
+	updated_at?: string;
+
+	// Joined data
+	categories?: Category[];
+	subscription?: Subscription;
+	user?: Partial<UserProfile>;
+}
+
+// Subscription status
+export type SubscriptionStatus = 'pending' | 'active' | 'paused' | 'cancelled' | 'expired';
+
+// Subscription plan
+export interface SubscriptionPlan {
+	id: string;
+	name: string;
+	label: string;
+	description?: string | null;
+	price_monthly: number;
+	features: string[];
+	max_photos: number;
+	highlight_in_search: boolean;
+	show_contact_directly: boolean;
+	priority_order: number;
+	is_active: boolean;
+	mercadopago_plan_id?: string | null;
+	created_at: string;
+	updated_at?: string;
+}
+
+// Subscription
+export interface Subscription {
+	id: string;
+	provider_id: string;
+	plan_id: string;
+	mercadopago_preapproval_id?: string | null;
+	mercadopago_payer_id?: string | null;
+	mercadopago_status?: string | null;
+	status: SubscriptionStatus;
+	started_at?: string | null;
+	current_period_start?: string | null;
+	current_period_end?: string | null;
+	cancelled_at?: string | null;
+	last_payment_at?: string | null;
+	next_payment_at?: string | null;
+	created_at: string;
+	updated_at?: string;
+	// Joined data
+	plan?: SubscriptionPlan;
+}
+
+// Subscription payment history
+export interface SubscriptionPayment {
+	id: string;
+	subscription_id: string;
+	amount: number;
+	status: 'pending' | 'approved' | 'rejected' | 'refunded';
+	mercadopago_payment_id?: string | null;
+	period_start: string;
+	period_end: string;
+	paid_at?: string | null;
+	created_at: string;
+}
+
+// Contact click types
+export type ContactType = 'phone' | 'whatsapp' | 'email' | 'website' | 'instagram' | 'facebook';
+
+// Contact click for analytics
+export interface ContactClick {
+	id: string;
+	provider_id: string;
+	contact_type: ContactType;
+	visitor_ip?: string | null;
+	created_at: string;
+}
+
+// Uruguayan departments
+export const DEPARTMENTS = [
+	'Montevideo',
+	'Canelones',
+	'Maldonado',
+	'Colonia',
+	'Salto',
+	'Paysandú',
+	'Rivera',
+	'Tacuarembó',
+	'Cerro Largo',
+	'Rocha',
+	'Soriano',
+	'Lavalleja',
+	'Artigas',
+	'Durazno',
+	'Florida',
+	'Flores',
+	'San José',
+	'Río Negro',
+	'Treinta y Tres'
+] as const;
+
+export type Department = (typeof DEPARTMENTS)[number];
+
+// Montevideo neighborhoods
+export const MONTEVIDEO_NEIGHBORHOODS = [
+	'Pocitos',
+	'Centro',
+	'Cordón',
+	'Punta Carretas',
+	'Carrasco',
+	'Buceo',
+	'Malvín',
+	'Parque Rodó',
+	'Tres Cruces',
+	'Aguada',
+	'La Blanqueada',
+	'Prado',
+	'Paso Molino',
+	'Sayago',
+	'Colón',
+	'La Teja',
+	'Cerro',
+	'Villa Española',
+	'Unión',
+	'Manga',
+	'Piedras Blancas',
+	'Peñarol',
+	'Brazo Oriental',
+	'Jacinto Vera',
+	'Reducto',
+	'Goes',
+	'Palermo',
+	'Barrio Sur',
+	'Ciudad Vieja',
+	'Parque Batlle'
+] as const;
+
+export type MontevideoNeighborhood = (typeof MONTEVIDEO_NEIGHBORHOODS)[number];
+
+// Default categories for Mi Barrio
+export const DEFAULT_CATEGORIES: Omit<Category, 'id' | 'created_at' | 'updated_at'>[] = [
+	// Professional Services
+	{ name: 'electricista', label: 'Electricistas', icon: 'Zap', color: 'bg-yellow-500', category_type: 'service', is_active: true, display_order: 1 },
+	{ name: 'plomero', label: 'Plomeros', icon: 'Droplets', color: 'bg-blue-500', category_type: 'service', is_active: true, display_order: 2 },
+	{ name: 'albanil', label: 'Albañiles', icon: 'Hammer', color: 'bg-orange-500', category_type: 'service', is_active: true, display_order: 3 },
+	{ name: 'pintor', label: 'Pintores', icon: 'Paintbrush', color: 'bg-purple-500', category_type: 'service', is_active: true, display_order: 4 },
+	{ name: 'carpintero', label: 'Carpinteros', icon: 'Axe', color: 'bg-amber-600', category_type: 'service', is_active: true, display_order: 5 },
+	{ name: 'jardinero', label: 'Jardineros', icon: 'Flower2', color: 'bg-green-500', category_type: 'service', is_active: true, display_order: 6 },
+	{ name: 'mecanico', label: 'Mecánicos', icon: 'Wrench', color: 'bg-zinc-600', category_type: 'service', is_active: true, display_order: 7 },
+	{ name: 'tecnico-pc', label: 'Técnicos PC', icon: 'Monitor', color: 'bg-slate-600', category_type: 'service', is_active: true, display_order: 8 },
+	{ name: 'cerrajero', label: 'Cerrajeros', icon: 'Key', color: 'bg-gray-600', category_type: 'service', is_active: true, display_order: 9 },
+	{ name: 'mudanzas', label: 'Mudanzas', icon: 'Truck', color: 'bg-sky-500', category_type: 'service', is_active: true, display_order: 10 },
+	{ name: 'limpieza', label: 'Limpieza', icon: 'Sparkles', color: 'bg-cyan-500', category_type: 'service', is_active: true, display_order: 11 },
+	{ name: 'cuidado-personas', label: 'Cuidadores', icon: 'Heart', color: 'bg-red-400', category_type: 'service', is_active: true, display_order: 12 },
+	{ name: 'veterinario', label: 'Veterinarios', icon: 'Stethoscope', color: 'bg-emerald-500', category_type: 'service', is_active: true, display_order: 13 },
+	{ name: 'abogado', label: 'Abogados', icon: 'Scale', color: 'bg-gray-700', category_type: 'service', is_active: true, display_order: 14 },
+	{ name: 'contador', label: 'Contadores', icon: 'Calculator', color: 'bg-cyan-600', category_type: 'service', is_active: true, display_order: 15 },
+
+	// Local Businesses
+	{ name: 'restaurante', label: 'Restaurantes', icon: 'UtensilsCrossed', color: 'bg-orange-500', category_type: 'business', is_active: true, display_order: 16 },
+	{ name: 'cafe', label: 'Cafés', icon: 'Coffee', color: 'bg-amber-700', category_type: 'business', is_active: true, display_order: 17 },
+	{ name: 'panaderia', label: 'Panaderías', icon: 'Croissant', color: 'bg-yellow-600', category_type: 'business', is_active: true, display_order: 18 },
+	{ name: 'carniceria', label: 'Carnicerías', icon: 'Beef', color: 'bg-red-600', category_type: 'business', is_active: true, display_order: 19 },
+	{ name: 'verduleria', label: 'Verdulerías', icon: 'Apple', color: 'bg-green-600', category_type: 'business', is_active: true, display_order: 20 },
+	{ name: 'farmacia', label: 'Farmacias', icon: 'Pill', color: 'bg-emerald-600', category_type: 'business', is_active: true, display_order: 21 },
+	{ name: 'ferreteria', label: 'Ferreterías', icon: 'Hammer', color: 'bg-stone-600', category_type: 'business', is_active: true, display_order: 22 },
+	{ name: 'peluqueria', label: 'Peluquerías', icon: 'Scissors', color: 'bg-pink-500', category_type: 'business', is_active: true, display_order: 23 },
+	{ name: 'gimnasio', label: 'Gimnasios', icon: 'Dumbbell', color: 'bg-lime-500', category_type: 'business', is_active: true, display_order: 24 },
+	{ name: 'veterinaria', label: 'Veterinarias', icon: 'PawPrint', color: 'bg-orange-400', category_type: 'business', is_active: true, display_order: 25 },
+	{ name: 'lavadero', label: 'Lavaderos', icon: 'WashingMachine', color: 'bg-blue-400', category_type: 'business', is_active: true, display_order: 26 },
+	{ name: 'kiosco', label: 'Kioscos', icon: 'Store', color: 'bg-violet-500', category_type: 'business', is_active: true, display_order: 27 },
+	{ name: 'mercado', label: 'Mercados', icon: 'ShoppingCart', color: 'bg-teal-500', category_type: 'business', is_active: true, display_order: 28 },
+	{ name: 'taller', label: 'Talleres', icon: 'Settings', color: 'bg-zinc-500', category_type: 'business', is_active: true, display_order: 29 },
+	{ name: 'imprenta', label: 'Imprentas', icon: 'Printer', color: 'bg-indigo-500', category_type: 'business', is_active: true, display_order: 30 },
+	{ name: 'floreria', label: 'Florerías', icon: 'Flower', color: 'bg-rose-500', category_type: 'business', is_active: true, display_order: 31 },
+	{ name: 'libreria', label: 'Librerías', icon: 'BookOpen', color: 'bg-amber-500', category_type: 'business', is_active: true, display_order: 32 },
+	{ name: 'optica', label: 'Ópticas', icon: 'Glasses', color: 'bg-sky-600', category_type: 'business', is_active: true, display_order: 33 },
+	{ name: 'otro', label: 'Otros', icon: 'MoreHorizontal', color: 'bg-gray-500', category_type: 'both', is_active: true, display_order: 99 }
+];
+
+// Generic result type for service methods
+export interface Result<T> {
+	data: T | null;
+	error: Error | null;
+}
