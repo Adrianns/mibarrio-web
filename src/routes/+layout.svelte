@@ -2,8 +2,14 @@
 	import '../app.css';
 	import Toast from '$lib/components/Toast.svelte';
 	import { APP_NAME, APP_DESCRIPTION } from '$lib/config';
+	import { auth } from '$lib/stores/auth';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
+
+	onMount(() => {
+		auth.initialize();
+	});
 </script>
 
 <svelte:head>

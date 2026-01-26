@@ -1,8 +1,11 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import { APP_NAME } from '$lib/config';
+	import { auth, hasMibarrioProvider } from '$lib/stores/auth';
 	import { toast } from '$lib/stores/toast';
 	import { Mail, Lock, Eye, EyeOff } from 'lucide-svelte';
+	import { get } from 'svelte/store';
 
 	let email = $state('');
 	let password = $state('');
@@ -11,13 +14,33 @@
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
+
+		if (!email.trim() || !password.trim()) {
+			toast.error('Completá todos los campos');
+			return;
+		}
+
 		loading = true;
 
-		// TODO: Implement actual login with Supabase
-		setTimeout(() => {
-			toast.info('Login en desarrollo');
+		const result = await auth.login(email, password);
+
+		if (result.error) {
+			toast.error(result.error);
 			loading = false;
-		}, 1000);
+			return;
+		}
+
+		toast.success('¡Bienvenido!');
+
+		// Check if user has a mibarrio provider
+		const hasProvider = get(hasMibarrioProvider);
+
+		if (hasProvider) {
+			goto('/dashboard');
+		} else {
+			// Redirect to register business flow
+			goto('/registrar-negocio');
+		}
 	}
 </script>
 
@@ -43,9 +66,7 @@
 
 				<form onsubmit={handleSubmit} class="space-y-4">
 					<div>
-						<label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-							Email
-						</label>
+						<label for="email" class="block text-sm font-medium text-gray-700 mb-1"> Email </label>
 						<div class="relative">
 							<Mail class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
 							<input
@@ -75,7 +96,7 @@
 							/>
 							<button
 								type="button"
-								onclick={() => showPassword = !showPassword}
+								onclick={() => (showPassword = !showPassword)}
 								class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
 							>
 								{#if showPassword}
@@ -89,7 +110,10 @@
 
 					<div class="flex items-center justify-between">
 						<label class="flex items-center">
-							<input type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+							<input
+								type="checkbox"
+								class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+							/>
 							<span class="ml-2 text-sm text-gray-600">Recordarme</span>
 						</label>
 						<a href="/auth/forgot-password" class="text-sm text-primary-600 hover:text-primary-700">
@@ -108,6 +132,14 @@
 						<a href="/auth/register" class="text-primary-600 hover:text-primary-700 font-medium">
 							Registrate
 						</a>
+					</p>
+				</div>
+
+				<!-- Info about shared account -->
+				<div class="mt-6 p-4 bg-blue-50 rounded-lg">
+					<p class="text-sm text-blue-700">
+						Si ya tenés cuenta en <strong>Appyuda</strong>, podés usar las mismas credenciales para
+						ingresar.
 					</p>
 				</div>
 			</div>

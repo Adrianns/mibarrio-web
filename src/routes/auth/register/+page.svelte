@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import { APP_NAME } from '$lib/config';
+	import { auth } from '$lib/stores/auth';
 	import { toast } from '$lib/stores/toast';
 	import { Mail, Lock, User, Eye, EyeOff } from 'lucide-svelte';
 
@@ -15,8 +17,18 @@
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
 
+		if (!fullName.trim() || !email.trim() || !password.trim()) {
+			toast.error('Completá todos los campos');
+			return;
+		}
+
 		if (password !== confirmPassword) {
 			toast.error('Las contraseñas no coinciden');
+			return;
+		}
+
+		if (password.length < 6) {
+			toast.error('La contraseña debe tener al menos 6 caracteres');
 			return;
 		}
 
@@ -27,11 +39,22 @@
 
 		loading = true;
 
-		// TODO: Implement actual registration with Supabase
-		setTimeout(() => {
-			toast.info('Registro en desarrollo');
+		const result = await auth.register(email, password, fullName);
+
+		if (result.error) {
+			toast.error(result.error);
 			loading = false;
-		}, 1000);
+			return;
+		}
+
+		if (result.emailConfirmationRequired) {
+			toast.success('¡Cuenta creada! Revisá tu email para confirmar tu cuenta.');
+			goto('/auth/login');
+			return;
+		}
+
+		toast.success('¡Cuenta creada exitosamente!');
+		goto('/registrar-negocio');
 	}
 </script>
 
@@ -74,9 +97,7 @@
 					</div>
 
 					<div>
-						<label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-							Email
-						</label>
+						<label for="email" class="block text-sm font-medium text-gray-700 mb-1"> Email </label>
 						<div class="relative">
 							<Mail class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
 							<input
@@ -101,13 +122,13 @@
 								type={showPassword ? 'text' : 'password'}
 								bind:value={password}
 								required
-								minlength="8"
-								placeholder="Mínimo 8 caracteres"
+								minlength="6"
+								placeholder="Mínimo 6 caracteres"
 								class="w-full pl-10 pr-12 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none"
 							/>
 							<button
 								type="button"
-								onclick={() => showPassword = !showPassword}
+								onclick={() => (showPassword = !showPassword)}
 								class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
 							>
 								{#if showPassword}
@@ -143,8 +164,11 @@
 							class="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
 						/>
 						<span class="text-sm text-gray-600">
-							Acepto los <a href="/terms" class="text-primary-600 hover:underline">términos de uso</a>
-							y la <a href="/privacy" class="text-primary-600 hover:underline">política de privacidad</a>
+							Acepto los <a href="/terms" class="text-primary-600 hover:underline"
+								>términos de uso</a
+							>
+							y la
+							<a href="/privacy" class="text-primary-600 hover:underline">política de privacidad</a>
 						</span>
 					</label>
 
@@ -159,6 +183,14 @@
 						<a href="/auth/login" class="text-primary-600 hover:text-primary-700 font-medium">
 							Ingresá
 						</a>
+					</p>
+				</div>
+
+				<!-- Info about shared account -->
+				<div class="mt-6 p-4 bg-blue-50 rounded-lg">
+					<p class="text-sm text-blue-700">
+						Tu cuenta también te servirá para usar <strong>Appyuda</strong>, nuestra plataforma de
+						servicios.
 					</p>
 				</div>
 			</div>
