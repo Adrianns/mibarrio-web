@@ -143,6 +143,20 @@
 		loading = true;
 
 		try {
+			// Guard: check if provider already exists
+			const { data: existingData } = await supabase
+				.from('mb_providers')
+				.select('id')
+				.eq('user_id', currentUser.id)
+				.maybeSingle();
+
+			if (existingData) {
+				await auth.refreshProvider();
+				toast.info('Ya tenés un negocio registrado');
+				goto('/mi-negocio');
+				return;
+			}
+
 			// Get the plan from database (only one plan now: 'basico')
 			const { data: planData, error: planError } = await supabase
 				.from('mb_subscription_plans')
