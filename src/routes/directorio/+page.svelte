@@ -352,6 +352,13 @@
 										loading="lazy"
 										class="w-12 h-12 rounded-full object-cover flex-shrink-0"
 									/>
+								{:else if provider.photos && provider.photos.length > 0}
+									<img
+										src={getThumbUrl(provider.photos[0])}
+										alt={provider.business_name}
+										loading="lazy"
+										class="w-12 h-12 rounded-full object-cover flex-shrink-0"
+									/>
 								{:else}
 									<div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center flex-shrink-0">
 										<span class="text-lg font-bold text-primary-400">

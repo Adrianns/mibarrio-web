@@ -200,40 +200,38 @@
 				<!-- Main content -->
 				<div class="lg:col-span-2">
 					<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-						<!-- Header image -->
-						<div
-							class="h-64 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center"
-						>
-							{#if provider.logo_url}
-								<img
-									src={provider.logo_url}
-									alt={provider.business_name}
-									loading="lazy"
-									class="w-full h-full object-cover"
-								/>
-							{:else if provider.photos && provider.photos.length > 0}
-								<img
-									src={provider.photos[0]}
-									alt={provider.business_name}
-									loading="lazy"
-									class="w-full h-full object-cover"
-								/>
-							{:else}
-								<span class="text-6xl font-bold text-primary-400">
-									{provider.business_name.charAt(0)}
-								</span>
-							{/if}
-						</div>
-
 						<div class="p-6">
 							<div class="flex items-start justify-between mb-4">
-								<div>
-									<div class="flex items-center gap-2 mb-2">
-										<h1 class="text-2xl font-bold text-gray-900 dark:text-white">{provider.business_name}</h1>
-										{#if provider.is_verified}
-											<CheckCircle class="h-6 w-6 text-green-500" />
-										{/if}
-									</div>
+								<div class="flex items-start gap-4">
+									<!-- Profile photo -->
+									{#if provider.logo_url}
+										<img
+											src={provider.logo_url}
+											alt={provider.business_name}
+											loading="lazy"
+											class="w-20 h-20 rounded-full object-cover flex-shrink-0"
+										/>
+									{:else if provider.photos && provider.photos.length > 0}
+										<img
+											src={provider.photos[0]}
+											alt={provider.business_name}
+											loading="lazy"
+											class="w-20 h-20 rounded-full object-cover flex-shrink-0"
+										/>
+									{:else}
+										<div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center flex-shrink-0">
+											<span class="text-3xl font-bold text-primary-400">
+												{provider.business_name.charAt(0)}
+											</span>
+										</div>
+									{/if}
+									<div>
+										<div class="flex items-center gap-2 mb-2">
+											<h1 class="text-2xl font-bold text-gray-900 dark:text-white">{provider.business_name}</h1>
+											{#if provider.is_verified}
+												<CheckCircle class="h-6 w-6 text-green-500" />
+											{/if}
+										</div>
 									<div class="flex flex-wrap gap-2">
 										{#each provider.categories as categoryName}
 											{@const catInfo = getCategoryInfo(categoryName)}
@@ -247,6 +245,7 @@
 											</span>
 										{/if}
 									</div>
+								</div>
 								</div>
 								<button onclick={handleShare} class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
 									<Share2 class="h-5 w-5" />
@@ -267,11 +266,11 @@
 								</div>
 							{/if}
 
-							{#if provider.photos && provider.photos.length > 1}
+							{#if provider.photos && provider.photos.length > 0}
 								<div class="mt-8">
 									<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Fotos</h2>
 									<div class="grid grid-cols-3 gap-4">
-										{#each provider.photos.slice(1) as photo}
+										{#each provider.photos as photo}
 											<img src={photo} alt="Foto" loading="lazy" class="rounded-lg object-cover aspect-square" />
 										{/each}
 									</div>
