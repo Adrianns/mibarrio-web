@@ -44,7 +44,7 @@
 			// Check if user has a mibarrio provider
 			const hasProvider = get(hasMibarrioProvider);
 			if (hasProvider) {
-				goto('/dashboard');
+				goto('/mi-negocio');
 			} else {
 				goto('/registrar-negocio');
 			}
