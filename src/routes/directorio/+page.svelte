@@ -4,8 +4,6 @@
 	import {
 		Search,
 		MapPin,
-		Filter,
-		X,
 		Loader2
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -18,6 +16,7 @@
 	} from '$lib/domain/types';
 	import { APP_NAME } from '$lib/config';
 	import { supabase } from '$lib/supabase';
+	import { getThumbUrl } from '$lib/utils/upload';
 
 	// Types
 	interface Provider {
@@ -45,7 +44,6 @@
 		($page.url.searchParams.get('tipo') as 'service' | 'business') || ''
 	);
 
-	let showFilters = $state(false);
 	let loading = $state(true);
 	let providers = $state<Provider[]>([]);
 
@@ -57,6 +55,13 @@
 	);
 	const businessCategories = categories.filter(
 		(c) => c.category_type === 'business' || c.category_type === 'both'
+	);
+
+	// Derived categories based on selected type
+	let filteredCategories = $derived(
+		selectedType === 'service' ? serviceCategories :
+		selectedType === 'business' ? businessCategories :
+		categories
 	);
 
 	async function fetchProviders() {
@@ -233,65 +238,47 @@
 						</select>
 					</div>
 				{/if}
-				<Button variant="outline" onclick={() => (showFilters = !showFilters)} class="md:w-auto">
-					<Filter class="h-4 w-4 mr-2" />
-					Filtros
-				</Button>
+				</div>
+
+			<!-- Type chips -->
+			<div class="flex gap-2 mt-4">
+				<button
+					onclick={() => { selectedType = ''; selectedCategory = ''; }}
+					class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-colors {selectedType === '' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-300 hover:text-primary-600 dark:hover:text-primary-400'}"
+				>
+					Todos
+				</button>
+				<button
+					onclick={() => { selectedType = 'service'; selectedCategory = ''; }}
+					class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-colors {selectedType === 'service' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-300 hover:text-primary-600 dark:hover:text-primary-400'}"
+				>
+					Profesionales
+				</button>
+				<button
+					onclick={() => { selectedType = 'business'; selectedCategory = ''; }}
+					class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-colors {selectedType === 'business' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-300 hover:text-primary-600 dark:hover:text-primary-400'}"
+				>
+					Comercios
+				</button>
 			</div>
 
-			<!-- Extended Filters -->
-			{#if showFilters}
-				<div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-					<div class="flex flex-wrap gap-4">
-						<div>
-							<label for="filter-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-								>Tipo</label
-							>
-							<select
-								id="filter-type"
-								bind:value={selectedType}
-								class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 outline-none"
-							>
-								<option value="">Todos</option>
-								<option value="service">Profesionales</option>
-								<option value="business">Comercios</option>
-							</select>
-						</div>
-						<div>
-							<label for="filter-category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-								>Categoría</label
-							>
-							<select
-								id="filter-category"
-								bind:value={selectedCategory}
-								class="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 outline-none"
-							>
-								<option value="">Todas</option>
-								{#if !selectedType || selectedType === 'service'}
-									<optgroup label="Profesionales">
-										{#each serviceCategories as cat}
-											<option value={cat.name}>{cat.label}</option>
-										{/each}
-									</optgroup>
-								{/if}
-								{#if !selectedType || selectedType === 'business'}
-									<optgroup label="Comercios">
-										{#each businessCategories as cat}
-											<option value={cat.name}>{cat.label}</option>
-										{/each}
-									</optgroup>
-								{/if}
-							</select>
-						</div>
-						<div class="flex items-end">
-							<Button variant="ghost" onclick={clearFilters}>
-								<X class="h-4 w-4 mr-1" />
-								Limpiar
-							</Button>
-						</div>
-					</div>
-				</div>
-			{/if}
+			<!-- Category chips -->
+			<div class="flex gap-2 mt-3 overflow-x-auto pb-2" style="scrollbar-width: none;">
+				<button
+					onclick={() => { selectedCategory = ''; }}
+					class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-colors {selectedCategory === '' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-300 hover:text-primary-600 dark:hover:text-primary-400'}"
+				>
+					Todas
+				</button>
+				{#each filteredCategories as cat}
+					<button
+						onclick={() => { selectedCategory = cat.name; }}
+						class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-colors {selectedCategory === cat.name ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-300 hover:text-primary-600 dark:hover:text-primary-400'}"
+					>
+						{cat.label}
+					</button>
+				{/each}
+			</div>
 		</div>
 
 		<!-- Appyuda Banner -->
@@ -355,41 +342,56 @@
 						href="/directorio/{provider.id}"
 						class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
 					>
-						<!-- Image -->
-						<div
-							class="h-40 bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center"
-						>
-							{#if provider.logo_url}
-								<img
-									src={provider.logo_url}
-									alt={provider.business_name}
-									class="w-full h-full object-cover"
-								/>
-							{:else if provider.photos && provider.photos.length > 0}
-								<img
-									src={provider.photos[0]}
-									alt={provider.business_name}
-									class="w-full h-full object-cover"
-								/>
-							{:else}
-								<span class="text-4xl font-bold text-primary-400">
-									{provider.business_name.charAt(0)}
-								</span>
-							{/if}
-						</div>
-
 						<div class="p-4">
-							<div class="flex items-start justify-between mb-2">
-								<h3 class="font-semibold text-gray-900 dark:text-white">{provider.business_name}</h3>
-								{#if provider.is_featured}
-									<span class="text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 px-2 py-0.5 rounded-full"
-										>Destacado</span
-									>
+							<div class="flex items-start gap-3 mb-3">
+								<!-- Profile photo -->
+								{#if provider.logo_url}
+									<img
+										src={getThumbUrl(provider.logo_url)}
+										alt={provider.business_name}
+										loading="lazy"
+										class="w-12 h-12 rounded-full object-cover flex-shrink-0"
+									/>
+								{:else}
+									<div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center flex-shrink-0">
+										<span class="text-lg font-bold text-primary-400">
+											{provider.business_name.charAt(0)}
+										</span>
+									</div>
 								{/if}
+								<div class="flex-1 min-w-0">
+									<div class="flex items-start justify-between">
+										<h3 class="font-semibold text-gray-900 dark:text-white truncate">{provider.business_name}</h3>
+										{#if provider.is_featured}
+											<span class="text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 px-2 py-0.5 rounded-full flex-shrink-0 ml-2"
+												>Destacado</span
+											>
+										{/if}
+									</div>
+								</div>
 							</div>
 
 							{#if provider.description}
 								<p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{provider.description}</p>
+							{/if}
+
+							<!-- Gallery thumbnails -->
+							{#if provider.photos && provider.photos.length > 0}
+								<div class="flex gap-2 mb-3 overflow-hidden">
+									{#each provider.photos.slice(0, 4) as photo}
+										<img
+											src={getThumbUrl(photo)}
+											alt="Foto"
+											loading="lazy"
+											class="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+										/>
+									{/each}
+									{#if provider.photos.length > 4}
+										<div class="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+											<span class="text-xs text-gray-500 dark:text-gray-400 font-medium">+{provider.photos.length - 4}</span>
+										</div>
+									{/if}
+								</div>
 							{/if}
 
 							<div class="flex flex-wrap gap-2 mb-3">

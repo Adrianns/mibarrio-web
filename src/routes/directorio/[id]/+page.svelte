@@ -51,6 +51,11 @@
 	let provider = $state<ProviderDetail | null>(null);
 	let error = $state<string | null>(null);
 
+	function ensureProtocol(url: string): string {
+		if (!/^https?:\/\//i.test(url)) return `https://${url}`;
+		return url;
+	}
+
 	function getCategoryInfo(categoryName: string) {
 		const cat = DEFAULT_CATEGORIES.find((c) => c.name === categoryName);
 		return cat || { label: categoryName, color: 'bg-gray-500' };
@@ -164,12 +169,12 @@
 	{/if}
 </svelte:head>
 
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
 	<Header items={[{ label: 'Directorio', href: '/directorio' }]} />
 
 	<div class="container py-8">
 		<!-- Back button -->
-		<a href="/directorio" class="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
+		<a href="/directorio" class="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-6">
 			<ArrowLeft class="h-4 w-4 mr-2" />
 			Volver al directorio
 		</a>
@@ -177,12 +182,12 @@
 		{#if loading}
 			<div class="flex items-center justify-center py-12">
 				<Loader2 class="h-8 w-8 animate-spin text-primary-600" />
-				<span class="ml-2 text-gray-600">Cargando...</span>
+				<span class="ml-2 text-gray-600 dark:text-gray-400">Cargando...</span>
 			</div>
 		{:else if error || !provider}
 			<div class="text-center py-12">
-				<h2 class="text-xl font-semibold text-gray-900 mb-2">No encontrado</h2>
-				<p class="text-gray-600 mb-4">{error || 'El negocio que buscás no existe o fue desactivado.'}</p>
+				<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No encontrado</h2>
+				<p class="text-gray-600 dark:text-gray-400 mb-4">{error || 'El negocio que buscás no existe o fue desactivado.'}</p>
 				<a
 					href="/directorio"
 					class="inline-block bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700"
@@ -194,7 +199,7 @@
 			<div class="grid lg:grid-cols-3 gap-8">
 				<!-- Main content -->
 				<div class="lg:col-span-2">
-					<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+					<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
 						<!-- Header image -->
 						<div
 							class="h-64 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center"
@@ -203,12 +208,14 @@
 								<img
 									src={provider.logo_url}
 									alt={provider.business_name}
+									loading="lazy"
 									class="w-full h-full object-cover"
 								/>
 							{:else if provider.photos && provider.photos.length > 0}
 								<img
 									src={provider.photos[0]}
 									alt={provider.business_name}
+									loading="lazy"
 									class="w-full h-full object-cover"
 								/>
 							{:else}
@@ -222,7 +229,7 @@
 							<div class="flex items-start justify-between mb-4">
 								<div>
 									<div class="flex items-center gap-2 mb-2">
-										<h1 class="text-2xl font-bold text-gray-900">{provider.business_name}</h1>
+										<h1 class="text-2xl font-bold text-gray-900 dark:text-white">{provider.business_name}</h1>
 										{#if provider.is_verified}
 											<CheckCircle class="h-6 w-6 text-green-500" />
 										{/if}
@@ -241,12 +248,12 @@
 										{/if}
 									</div>
 								</div>
-								<button onclick={handleShare} class="p-2 text-gray-400 hover:text-gray-600">
+								<button onclick={handleShare} class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
 									<Share2 class="h-5 w-5" />
 								</button>
 							</div>
 
-							<div class="flex items-center text-gray-500 mb-6">
+							<div class="flex items-center text-gray-500 dark:text-gray-400 mb-6">
 								<MapPin class="h-5 w-5 mr-2" />
 								{provider.address ? `${provider.address}, ` : ''}{provider.neighborhood
 									? `${provider.neighborhood}, `
@@ -255,17 +262,17 @@
 
 							{#if provider.description}
 								<div class="prose max-w-none">
-									<h2 class="text-lg font-semibold text-gray-900 mb-3">Descripción</h2>
-									<p class="text-gray-600 whitespace-pre-line">{provider.description}</p>
+									<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Descripción</h2>
+									<p class="text-gray-600 dark:text-gray-300 whitespace-pre-line">{provider.description}</p>
 								</div>
 							{/if}
 
 							{#if provider.photos && provider.photos.length > 1}
 								<div class="mt-8">
-									<h2 class="text-lg font-semibold text-gray-900 mb-3">Fotos</h2>
+									<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Fotos</h2>
 									<div class="grid grid-cols-3 gap-4">
 										{#each provider.photos.slice(1) as photo}
-											<img src={photo} alt="Foto" class="rounded-lg object-cover aspect-square" />
+											<img src={photo} alt="Foto" loading="lazy" class="rounded-lg object-cover aspect-square" />
 										{/each}
 									</div>
 								</div>
@@ -276,8 +283,8 @@
 
 				<!-- Contact sidebar -->
 				<div class="lg:col-span-1">
-					<div class="bg-white rounded-xl shadow-sm p-6 sticky top-8">
-						<h2 class="text-lg font-semibold text-gray-900 mb-4">Contactar</h2>
+					<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 sticky top-8">
+						<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contactar</h2>
 
 						<div class="space-y-3">
 							{#if provider.contact_phone}
@@ -318,16 +325,16 @@
 						</div>
 
 						{#if provider.website || provider.social_instagram || provider.social_facebook}
-							<hr class="my-6" />
-							<h3 class="text-sm font-medium text-gray-700 mb-3">Redes y web</h3>
+							<hr class="my-6 dark:border-gray-700" />
+							<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Redes y web</h3>
 							<div class="space-y-2">
 								{#if provider.website}
 									<a
-										href={provider.website}
+										href={ensureProtocol(provider.website)}
 										target="_blank"
 										rel="noopener noreferrer"
 										onclick={() => handleContactClick('website')}
-										class="flex items-center text-gray-600 hover:text-primary-600"
+										class="flex items-center text-gray-600 dark:text-gray-400 hover:text-primary-600"
 									>
 										<Globe class="h-5 w-5 mr-2" />
 										Sitio web
@@ -335,11 +342,11 @@
 								{/if}
 								{#if provider.social_instagram}
 									<a
-										href={provider.social_instagram}
+										href={ensureProtocol(provider.social_instagram)}
 										target="_blank"
 										rel="noopener noreferrer"
 										onclick={() => handleContactClick('social')}
-										class="flex items-center text-gray-600 hover:text-pink-600"
+										class="flex items-center text-gray-600 dark:text-gray-400 hover:text-pink-600"
 									>
 										<Instagram class="h-5 w-5 mr-2" />
 										Instagram
@@ -347,11 +354,11 @@
 								{/if}
 								{#if provider.social_facebook}
 									<a
-										href={provider.social_facebook}
+										href={ensureProtocol(provider.social_facebook)}
 										target="_blank"
 										rel="noopener noreferrer"
 										onclick={() => handleContactClick('social')}
-										class="flex items-center text-gray-600 hover:text-blue-600"
+										class="flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600"
 									>
 										<Facebook class="h-5 w-5 mr-2" />
 										Facebook
@@ -360,20 +367,20 @@
 							</div>
 						{/if}
 
-						<hr class="my-6" />
-						<p class="text-xs text-gray-400 text-center">
+						<hr class="my-6 dark:border-gray-700" />
+						<p class="text-xs text-gray-400 dark:text-gray-500 text-center">
 							{provider.view_count} visitas
 						</p>
 
 						<!-- Appyuda Mini Banner -->
-						<div class="mt-6 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg">
-							<p class="text-xs text-purple-800 text-center">
+						<div class="mt-6 p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border border-green-200 dark:border-green-800 rounded-lg">
+							<p class="text-xs text-green-800 dark:text-green-300 text-center">
 								¿Querés más clientes?
 								<a
 									href={APPYUDA_URL}
 									target="_blank"
 									rel="noopener noreferrer"
-									class="font-bold text-purple-600 hover:text-purple-800 underline"
+									class="font-bold text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 underline"
 								>
 									Probá Appyuda
 								</a>
@@ -384,17 +391,17 @@
 			</div>
 
 			<!-- Appyuda Full Banner -->
-			<div class="mt-8 p-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl text-white">
+			<div class="mt-8 p-4 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl text-white">
 				<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 					<div>
 						<p class="font-semibold text-lg">¿Querés captar más clientes y cerrar negocios de forma segura?</p>
-						<p class="text-purple-100 text-sm">Ofrecé tus servicios en nuestra plataforma de confianza</p>
+						<p class="text-green-100 text-sm">Ofrecé tus servicios en nuestra plataforma de confianza</p>
 					</div>
 					<a
 						href={APPYUDA_URL}
 						target="_blank"
 						rel="noopener noreferrer"
-						class="inline-flex items-center justify-center px-6 py-2 bg-white text-purple-600 font-semibold rounded-lg hover:bg-purple-50 transition-colors"
+						class="inline-flex items-center justify-center px-6 py-2 bg-white text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-colors"
 					>
 						Probá Appyuda
 					</a>

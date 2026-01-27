@@ -4,7 +4,12 @@
 	import { Button } from '$lib/components/ui/button';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import { APP_NAME } from '$lib/config';
-	import { auth, isAuthenticated, user } from '$lib/stores/auth';
+	import { auth, isAuthenticated, user, hasMibarrioProvider, provider } from '$lib/stores/auth';
+
+	// Compute the "Mi negocio" link based on whether the user has a provider
+	const miNegocioHref = $derived(
+		$hasMibarrioProvider && $provider ? '/mi-negocio' : '/registrar-negocio'
+	);
 
 	interface NavItem {
 		label: string;
@@ -99,7 +104,7 @@
 
 									<div class="py-1">
 										<a
-											href="/registrar-negocio"
+											href={miNegocioHref}
 											onclick={closeDropdown}
 											class="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
 										>
@@ -201,7 +206,7 @@
 
 						{#if $isAuthenticated}
 							<a
-								href="/registrar-negocio"
+								href={miNegocioHref}
 								onclick={closeMenu}
 								class="flex items-center gap-3 px-4 py-3 text-primary-600 dark:text-primary-400 font-medium hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg"
 							>

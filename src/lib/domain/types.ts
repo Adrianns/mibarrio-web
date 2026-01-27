@@ -252,6 +252,8 @@ export const DEFAULT_CATEGORIES: Omit<Category, 'id' | 'created_at' | 'updated_a
 	{ name: 'floreria', label: 'Florerías', icon: 'Flower', color: 'bg-rose-500', category_type: 'business', is_active: true, display_order: 31 },
 	{ name: 'libreria', label: 'Librerías', icon: 'BookOpen', color: 'bg-amber-500', category_type: 'business', is_active: true, display_order: 32 },
 	{ name: 'optica', label: 'Ópticas', icon: 'Glasses', color: 'bg-sky-600', category_type: 'business', is_active: true, display_order: 33 },
+	{ name: 'informatica', label: 'Informática', icon: 'Cpu', color: 'bg-indigo-600', category_type: 'service', is_active: true, display_order: 34 },
+	{ name: 'ingenieria', label: 'Ingeniería', icon: 'HardHat', color: 'bg-stone-500', category_type: 'service', is_active: true, display_order: 35 },
 	{ name: 'otro', label: 'Otros', icon: 'MoreHorizontal', color: 'bg-gray-500', category_type: 'both', is_active: true, display_order: 99 }
 ];
 

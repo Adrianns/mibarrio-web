@@ -239,8 +239,7 @@
 
 			toast.success('¡Tu negocio fue registrado exitosamente!');
 
-			// For now redirect to directory with success, later will integrate MercadoPago
-			goto(`/directorio/${newProvider.id}?nuevo=1`);
+			goto('/mi-negocio');
 		} catch (err) {
 			console.error('Registration error:', err);
 			toast.error(err instanceof Error ? err.message : 'Error al registrar el negocio');
@@ -251,7 +250,8 @@
 
 	onMount(async () => {
 		// Wait for auth to initialize
-		const unsubscribe = auth.subscribe((state) => {
+		let unsub: (() => void) | undefined;
+		unsub = auth.subscribe((state) => {
 			if (state.initialized) {
 				authChecked = true;
 
@@ -259,10 +259,11 @@
 				if (state.provider) {
 					existingProvider = true;
 					toast.info('Ya tenés un negocio registrado');
-					goto(`/directorio/${state.provider.id}`);
+					goto('/mi-negocio');
 				}
 
-				unsubscribe();
+				// Defer unsubscribe in case callback is called synchronously
+				queueMicrotask(() => unsub?.());
 			}
 		});
 	});
