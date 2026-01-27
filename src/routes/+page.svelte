@@ -13,10 +13,7 @@
 
 	const featuredCategories = DEFAULT_CATEGORIES.filter((c) => c.is_active).slice(0, 8);
 
-	const navItems = [
-		{ label: 'Directorio', href: '/directorio' },
-		{ label: 'Planes', href: '/planes' }
-	];
+	const navItems: { label: string; href: string }[] = [];
 
 	function handleSearch() {
 		const params = new URLSearchParams();
