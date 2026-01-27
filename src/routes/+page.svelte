@@ -1,14 +1,22 @@
 <script lang="ts">
-	import { Search, MapPin, Building2, User, ArrowRight } from 'lucide-svelte';
+	import { Search, MapPin, Building2, User, ArrowRight, ExternalLink } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
-	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+	import Header from '$lib/components/Header.svelte';
+	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 	import { DEFAULT_CATEGORIES, DEPARTMENTS, type Department } from '$lib/domain/types';
 	import { APP_NAME, APP_TAGLINE } from '$lib/config';
+
+	const APPYUDA_URL = 'https://appyuda.com.uy';
 
 	let searchQuery = $state('');
 	let selectedDepartment = $state<Department | ''>('');
 
 	const featuredCategories = DEFAULT_CATEGORIES.filter((c) => c.is_active).slice(0, 8);
+
+	const navItems = [
+		{ label: 'Directorio', href: '/directorio' },
+		{ label: 'Planes', href: '/planes' }
+	];
 
 	function handleSearch() {
 		const params = new URLSearchParams();
@@ -19,19 +27,7 @@
 </script>
 
 <div class="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors">
-	<!-- Header -->
-	<header class="container py-4">
-		<nav class="flex items-center justify-between">
-			<a href="/" class="text-2xl font-bold text-primary-600">{APP_NAME}</a>
-			<div class="flex items-center gap-4">
-				<a href="/directorio" class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Directorio</a>
-				<a href="/planes" class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Planes</a>
-				<a href="/auth/login" class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Ingresar</a>
-				<ThemeToggle />
-				<Button href="/registrar-negocio">Registrar negocio</Button>
-			</div>
-		</nav>
-	</header>
+	<Header items={navItems} variant="transparent" />
 
 	<!-- Hero -->
 	<section class="container py-16 md:py-24">
@@ -85,9 +81,7 @@
 					class="flex flex-col items-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 dark:border-gray-700"
 				>
 					<div class="w-12 h-12 rounded-full {category.color} flex items-center justify-center mb-3">
-						<span class="text-white text-xl">
-							{category.label.charAt(0)}
-						</span>
+						<CategoryIcon name={category.icon} class="w-6 h-6 text-white" />
 					</div>
 					<span class="text-gray-900 dark:text-white font-medium">{category.label}</span>
 				</a>
@@ -101,20 +95,48 @@
 		</div>
 	</section>
 
+	<!-- Appyuda Banner -->
+	<section class="container py-8">
+		<div class="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-8 md:p-12 text-white">
+			<div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8">
+				<div class="flex-1 text-center md:text-left">
+					<h2 class="text-2xl md:text-3xl font-bold mb-3">
+						¿Querés captar más clientes y cerrar negocios de forma segura?
+					</h2>
+					<p class="text-green-100 text-lg">
+						Ofrecé tus servicios profesionales en nuestra plataforma de confianza.
+						Conectá con clientes que buscan exactamente lo que ofrecés.
+					</p>
+				</div>
+				<div class="flex-shrink-0">
+					<a
+						href={APPYUDA_URL}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-flex items-center gap-2 px-8 py-4 bg-white text-green-600 font-bold text-lg rounded-xl hover:bg-green-50 transition-colors shadow-lg"
+					>
+						Probá Appyuda
+						<ExternalLink class="h-5 w-5" />
+					</a>
+				</div>
+			</div>
+		</div>
+	</section>
+
 	<!-- CTA for Providers -->
 	<section class="container py-16">
 		<div class="bg-primary-600 rounded-2xl p-8 md:p-12 text-center text-white">
 			<h2 class="text-3xl font-bold mb-4">¿Tenés un negocio o servicio?</h2>
 			<p class="text-primary-100 mb-8 max-w-2xl mx-auto">
 				Registrate en Mi Barrio y que miles de personas te encuentren.
-				Planes desde $390/mes.
+				Primer mes GRATIS, después $390/mes.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-4 justify-center">
 				<Button href="/registrar-negocio" variant="secondary" size="lg" class="inline-flex items-center gap-2">
 					<User class="h-5 w-5" />
 					Soy particular
 				</Button>
-				<Button href="/registrar-negocio" variant="outline" size="lg" class="inline-flex items-center gap-2 !text-white !border-white hover:!bg-white/10">
+				<Button href="/registrar-negocio" variant="outline" size="lg" class="inline-flex items-center gap-2 !bg-transparent !text-white !border-white hover:!bg-white/10">
 					<Building2 class="h-5 w-5" />
 					Tengo empresa
 				</Button>

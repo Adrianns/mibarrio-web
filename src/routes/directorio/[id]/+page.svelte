@@ -1,66 +1,147 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { Phone, MessageCircle, Mail, Globe, Instagram, Facebook, MapPin, ArrowLeft, Share2, CheckCircle } from 'lucide-svelte';
+	import { onMount } from 'svelte';
+	import {
+		Phone,
+		MessageCircle,
+		Mail,
+		Globe,
+		Instagram,
+		Facebook,
+		MapPin,
+		ArrowLeft,
+		Share2,
+		CheckCircle,
+		Loader2
+	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
+	import Header from '$lib/components/Header.svelte';
 	import { APP_NAME } from '$lib/config';
 	import { toast } from '$lib/stores/toast';
+	import { supabase } from '$lib/supabase';
+	import { DEFAULT_CATEGORIES } from '$lib/domain/types';
 
 	const providerId = $page.params.id;
+	const APPYUDA_URL = 'https://appyuda.com.uy';
 
-	// Mock data - in production this comes from Supabase
-	const provider = {
-		id: providerId,
-		display_name: 'Juan Pérez Electricidad',
-		description: `Electricista matriculado con más de 15 años de experiencia en instalaciones eléctricas residenciales y comerciales.
+	// Types
+	interface ProviderDetail {
+		id: string;
+		business_name: string;
+		business_type: string;
+		description: string | null;
+		department: string;
+		neighborhood: string | null;
+		address: string | null;
+		contact_phone: string | null;
+		contact_whatsapp: string | null;
+		contact_email: string | null;
+		website: string | null;
+		social_instagram: string | null;
+		social_facebook: string | null;
+		logo_url: string | null;
+		photos: string[];
+		is_verified: boolean;
+		is_featured: boolean;
+		view_count: number;
+		categories: string[];
+	}
 
-Servicios que ofrezco:
-- Instalaciones eléctricas nuevas
-- Reparaciones y mantenimiento
-- Tableros eléctricos
-- Iluminación LED
-- Detección de fallas
-- Emergencias 24 horas
+	let loading = $state(true);
+	let provider = $state<ProviderDetail | null>(null);
+	let error = $state<string | null>(null);
 
-Trabajo con garantía y materiales de primera calidad. Presupuestos sin cargo.`,
-		short_description: 'Electricista matriculado con 15 años de experiencia',
-		department: 'Montevideo',
-		neighborhood: 'Pocitos',
-		address: 'Av. Brasil 2500',
-		contact_phone: '099123456',
-		contact_whatsapp: '59899123456',
-		contact_email: 'juan@electricidad.com',
-		website_url: 'https://juanelectricidad.com',
-		instagram_url: 'https://instagram.com/juanelectricidad',
-		facebook_url: 'https://facebook.com/juanelectricidad',
-		is_verified: true,
-		is_featured: true,
-		provider_type: 'individual',
-		categories: [
-			{ name: 'electricista', label: 'Electricistas', color: 'bg-yellow-500' }
-		],
-		photos: [],
-		view_count: 245,
-		created_at: '2024-01-15'
-	};
+	function getCategoryInfo(categoryName: string) {
+		const cat = DEFAULT_CATEGORIES.find((c) => c.name === categoryName);
+		return cat || { label: categoryName, color: 'bg-gray-500' };
+	}
 
-	function handleContactClick(type: string) {
-		// In production, this would call the API to log the click
-		console.log('Contact click:', type, providerId);
+	async function fetchProvider() {
+		loading = true;
+		error = null;
 
-		if (type === 'phone') {
+		// Fetch provider
+		const { data, error: fetchError } = await supabase
+			.from('mb_providers')
+			.select(
+				`
+				id,
+				business_name,
+				business_type,
+				description,
+				department,
+				neighborhood,
+				address,
+				contact_phone,
+				contact_whatsapp,
+				contact_email,
+				website,
+				social_instagram,
+				social_facebook,
+				logo_url,
+				photos,
+				is_verified,
+				is_featured,
+				is_active,
+				view_count
+			`
+			)
+			.eq('id', providerId)
+			.eq('is_active', true)
+			.single();
+
+		if (fetchError || !data) {
+			error = 'No se encontró el negocio';
+			loading = false;
+			return;
+		}
+
+		// Fetch categories
+		const { data: categoriesData } = await supabase
+			.from('mb_provider_categories')
+			.select('category_name')
+			.eq('provider_id', providerId);
+
+		provider = {
+			...data,
+			categories: categoriesData?.map((c) => c.category_name) || []
+		};
+
+		// Increment view count
+		await supabase.rpc('mb_increment_view_count', { provider_id: providerId });
+
+		loading = false;
+	}
+
+	async function handleContactClick(type: 'phone' | 'whatsapp' | 'email' | 'website' | 'social') {
+		if (!provider) return;
+
+		// Log contact click
+		await supabase.from('mb_contact_clicks').insert({
+			provider_id: providerId,
+			contact_type: type
+		});
+
+		if (type === 'phone' && provider.contact_phone) {
 			window.location.href = `tel:${provider.contact_phone}`;
-		} else if (type === 'whatsapp') {
-			window.open(`https://wa.me/${provider.contact_whatsapp}?text=Hola, te contacto desde Mi Barrio`, '_blank');
-		} else if (type === 'email') {
+		} else if (type === 'whatsapp' && provider.contact_whatsapp) {
+			const whatsappNumber = provider.contact_whatsapp.replace(/\D/g, '');
+			window.open(
+				`https://wa.me/${whatsappNumber}?text=Hola, te contacto desde Mi Barrio`,
+				'_blank'
+			);
+		} else if (type === 'email' && provider.contact_email) {
 			window.location.href = `mailto:${provider.contact_email}`;
 		}
 	}
 
 	function handleShare() {
+		if (!provider) return;
+
 		if (navigator.share) {
 			navigator.share({
-				title: provider.display_name,
-				text: provider.short_description,
+				title: provider.business_name,
+				text: provider.description || '',
 				url: window.location.href
 			});
 		} else {
@@ -68,26 +149,23 @@ Trabajo con garantía y materiales de primera calidad. Presupuestos sin cargo.`,
 			toast.success('Enlace copiado al portapapeles');
 		}
 	}
+
+	onMount(() => {
+		fetchProvider();
+	});
 </script>
 
 <svelte:head>
-	<title>{provider.display_name} - {APP_NAME}</title>
-	<meta name="description" content={provider.short_description} />
+	{#if provider}
+		<title>{provider.business_name} - {APP_NAME}</title>
+		<meta name="description" content={provider.description || ''} />
+	{:else}
+		<title>Cargando... - {APP_NAME}</title>
+	{/if}
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50">
-	<!-- Header -->
-	<header class="bg-white border-b border-gray-200">
-		<div class="container py-4">
-			<nav class="flex items-center justify-between">
-				<a href="/" class="text-2xl font-bold text-primary-600">{APP_NAME}</a>
-				<div class="flex items-center gap-4">
-					<a href="/directorio" class="text-gray-600 hover:text-gray-900">Directorio</a>
-					<Button href="/registrar-negocio">Registrar negocio</Button>
-				</div>
-			</nav>
-		</div>
-	</header>
+	<Header items={[{ label: 'Directorio', href: '/directorio' }]} />
 
 	<div class="container py-8">
 		<!-- Back button -->
@@ -96,161 +174,232 @@ Trabajo con garantía y materiales de primera calidad. Presupuestos sin cargo.`,
 			Volver al directorio
 		</a>
 
-		<div class="grid lg:grid-cols-3 gap-8">
-			<!-- Main content -->
-			<div class="lg:col-span-2">
-				<div class="bg-white rounded-xl shadow-sm overflow-hidden">
-					<!-- Header image -->
-					<div class="h-64 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
-						{#if provider.photos.length > 0}
-							<img src={provider.photos[0]} alt={provider.display_name} class="w-full h-full object-cover" />
-						{:else}
-							<span class="text-6xl font-bold text-primary-400">
-								{provider.display_name.charAt(0)}
-							</span>
-						{/if}
-					</div>
+		{#if loading}
+			<div class="flex items-center justify-center py-12">
+				<Loader2 class="h-8 w-8 animate-spin text-primary-600" />
+				<span class="ml-2 text-gray-600">Cargando...</span>
+			</div>
+		{:else if error || !provider}
+			<div class="text-center py-12">
+				<h2 class="text-xl font-semibold text-gray-900 mb-2">No encontrado</h2>
+				<p class="text-gray-600 mb-4">{error || 'El negocio que buscás no existe o fue desactivado.'}</p>
+				<a
+					href="/directorio"
+					class="inline-block bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700"
+				>
+					Volver al directorio
+				</a>
+			</div>
+		{:else}
+			<div class="grid lg:grid-cols-3 gap-8">
+				<!-- Main content -->
+				<div class="lg:col-span-2">
+					<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+						<!-- Header image -->
+						<div
+							class="h-64 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center"
+						>
+							{#if provider.logo_url}
+								<img
+									src={provider.logo_url}
+									alt={provider.business_name}
+									class="w-full h-full object-cover"
+								/>
+							{:else if provider.photos && provider.photos.length > 0}
+								<img
+									src={provider.photos[0]}
+									alt={provider.business_name}
+									class="w-full h-full object-cover"
+								/>
+							{:else}
+								<span class="text-6xl font-bold text-primary-400">
+									{provider.business_name.charAt(0)}
+								</span>
+							{/if}
+						</div>
 
-					<div class="p-6">
-						<div class="flex items-start justify-between mb-4">
-							<div>
-								<div class="flex items-center gap-2 mb-2">
-									<h1 class="text-2xl font-bold text-gray-900">{provider.display_name}</h1>
-									{#if provider.is_verified}
-										<CheckCircle class="h-6 w-6 text-green-500" />
-									{/if}
+						<div class="p-6">
+							<div class="flex items-start justify-between mb-4">
+								<div>
+									<div class="flex items-center gap-2 mb-2">
+										<h1 class="text-2xl font-bold text-gray-900">{provider.business_name}</h1>
+										{#if provider.is_verified}
+											<CheckCircle class="h-6 w-6 text-green-500" />
+										{/if}
+									</div>
+									<div class="flex flex-wrap gap-2">
+										{#each provider.categories as categoryName}
+											{@const catInfo = getCategoryInfo(categoryName)}
+											<span class="text-sm {catInfo.color} text-white px-3 py-1 rounded-full">
+												{catInfo.label}
+											</span>
+										{/each}
+										{#if provider.is_featured}
+											<span class="text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full">
+												Destacado
+											</span>
+										{/if}
+									</div>
 								</div>
-								<div class="flex flex-wrap gap-2">
-									{#each provider.categories as cat}
-										<span class="text-sm {cat.color} text-white px-3 py-1 rounded-full">
-											{cat.label}
-										</span>
-									{/each}
-									{#if provider.is_featured}
-										<span class="text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full">
-											Destacado
-										</span>
-									{/if}
-								</div>
+								<button onclick={handleShare} class="p-2 text-gray-400 hover:text-gray-600">
+									<Share2 class="h-5 w-5" />
+								</button>
 							</div>
-							<button onclick={handleShare} class="p-2 text-gray-400 hover:text-gray-600">
-								<Share2 class="h-5 w-5" />
-							</button>
-						</div>
 
-						<div class="flex items-center text-gray-500 mb-6">
-							<MapPin class="h-5 w-5 mr-2" />
-							{provider.address ? `${provider.address}, ` : ''}{provider.neighborhood}, {provider.department}
-						</div>
-
-						<div class="prose max-w-none">
-							<h2 class="text-lg font-semibold text-gray-900 mb-3">Descripción</h2>
-							<p class="text-gray-600 whitespace-pre-line">{provider.description}</p>
-						</div>
-
-						{#if provider.photos.length > 1}
-							<div class="mt-8">
-								<h2 class="text-lg font-semibold text-gray-900 mb-3">Fotos</h2>
-								<div class="grid grid-cols-3 gap-4">
-									{#each provider.photos.slice(1) as photo}
-										<img src={photo} alt="Foto" class="rounded-lg object-cover aspect-square" />
-									{/each}
-								</div>
+							<div class="flex items-center text-gray-500 mb-6">
+								<MapPin class="h-5 w-5 mr-2" />
+								{provider.address ? `${provider.address}, ` : ''}{provider.neighborhood
+									? `${provider.neighborhood}, `
+									: ''}{provider.department}
 							</div>
-						{/if}
+
+							{#if provider.description}
+								<div class="prose max-w-none">
+									<h2 class="text-lg font-semibold text-gray-900 mb-3">Descripción</h2>
+									<p class="text-gray-600 whitespace-pre-line">{provider.description}</p>
+								</div>
+							{/if}
+
+							{#if provider.photos && provider.photos.length > 1}
+								<div class="mt-8">
+									<h2 class="text-lg font-semibold text-gray-900 mb-3">Fotos</h2>
+									<div class="grid grid-cols-3 gap-4">
+										{#each provider.photos.slice(1) as photo}
+											<img src={photo} alt="Foto" class="rounded-lg object-cover aspect-square" />
+										{/each}
+									</div>
+								</div>
+							{/if}
+						</div>
 					</div>
 				</div>
-			</div>
 
-			<!-- Contact sidebar -->
-			<div class="lg:col-span-1">
-				<div class="bg-white rounded-xl shadow-sm p-6 sticky top-8">
-					<h2 class="text-lg font-semibold text-gray-900 mb-4">Contactar</h2>
+				<!-- Contact sidebar -->
+				<div class="lg:col-span-1">
+					<div class="bg-white rounded-xl shadow-sm p-6 sticky top-8">
+						<h2 class="text-lg font-semibold text-gray-900 mb-4">Contactar</h2>
 
-					<div class="space-y-3">
-						{#if provider.contact_phone}
-							<Button
-								variant="default"
-								size="lg"
-								class="w-full justify-start"
-								onclick={() => handleContactClick('phone')}
-							>
-								<Phone class="h-5 w-5 mr-3" />
-								Llamar: {provider.contact_phone}
-							</Button>
+						<div class="space-y-3">
+							{#if provider.contact_phone}
+								<Button
+									variant="default"
+									size="lg"
+									class="w-full justify-start"
+									onclick={() => handleContactClick('phone')}
+								>
+									<Phone class="h-5 w-5 mr-3" />
+									Llamar: {provider.contact_phone}
+								</Button>
+							{/if}
+
+							{#if provider.contact_whatsapp}
+								<Button
+									variant="secondary"
+									size="lg"
+									class="w-full justify-start"
+									onclick={() => handleContactClick('whatsapp')}
+								>
+									<MessageCircle class="h-5 w-5 mr-3" />
+									WhatsApp
+								</Button>
+							{/if}
+
+							{#if provider.contact_email}
+								<Button
+									variant="outline"
+									size="lg"
+									class="w-full justify-start"
+									onclick={() => handleContactClick('email')}
+								>
+									<Mail class="h-5 w-5 mr-3" />
+									Email
+								</Button>
+							{/if}
+						</div>
+
+						{#if provider.website || provider.social_instagram || provider.social_facebook}
+							<hr class="my-6" />
+							<h3 class="text-sm font-medium text-gray-700 mb-3">Redes y web</h3>
+							<div class="space-y-2">
+								{#if provider.website}
+									<a
+										href={provider.website}
+										target="_blank"
+										rel="noopener noreferrer"
+										onclick={() => handleContactClick('website')}
+										class="flex items-center text-gray-600 hover:text-primary-600"
+									>
+										<Globe class="h-5 w-5 mr-2" />
+										Sitio web
+									</a>
+								{/if}
+								{#if provider.social_instagram}
+									<a
+										href={provider.social_instagram}
+										target="_blank"
+										rel="noopener noreferrer"
+										onclick={() => handleContactClick('social')}
+										class="flex items-center text-gray-600 hover:text-pink-600"
+									>
+										<Instagram class="h-5 w-5 mr-2" />
+										Instagram
+									</a>
+								{/if}
+								{#if provider.social_facebook}
+									<a
+										href={provider.social_facebook}
+										target="_blank"
+										rel="noopener noreferrer"
+										onclick={() => handleContactClick('social')}
+										class="flex items-center text-gray-600 hover:text-blue-600"
+									>
+										<Facebook class="h-5 w-5 mr-2" />
+										Facebook
+									</a>
+								{/if}
+							</div>
 						{/if}
 
-						{#if provider.contact_whatsapp}
-							<Button
-								variant="secondary"
-								size="lg"
-								class="w-full justify-start"
-								onclick={() => handleContactClick('whatsapp')}
-							>
-								<MessageCircle class="h-5 w-5 mr-3" />
-								WhatsApp
-							</Button>
-						{/if}
-
-						{#if provider.contact_email}
-							<Button
-								variant="outline"
-								size="lg"
-								class="w-full justify-start"
-								onclick={() => handleContactClick('email')}
-							>
-								<Mail class="h-5 w-5 mr-3" />
-								Email
-							</Button>
-						{/if}
-					</div>
-
-					{#if provider.website_url || provider.instagram_url || provider.facebook_url}
 						<hr class="my-6" />
-						<h3 class="text-sm font-medium text-gray-700 mb-3">Redes y web</h3>
-						<div class="space-y-2">
-							{#if provider.website_url}
-								<a
-									href={provider.website_url}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="flex items-center text-gray-600 hover:text-primary-600"
-								>
-									<Globe class="h-5 w-5 mr-2" />
-									Sitio web
-								</a>
-							{/if}
-							{#if provider.instagram_url}
-								<a
-									href={provider.instagram_url}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="flex items-center text-gray-600 hover:text-pink-600"
-								>
-									<Instagram class="h-5 w-5 mr-2" />
-									Instagram
-								</a>
-							{/if}
-							{#if provider.facebook_url}
-								<a
-									href={provider.facebook_url}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="flex items-center text-gray-600 hover:text-blue-600"
-								>
-									<Facebook class="h-5 w-5 mr-2" />
-									Facebook
-								</a>
-							{/if}
-						</div>
-					{/if}
+						<p class="text-xs text-gray-400 text-center">
+							{provider.view_count} visitas
+						</p>
 
-					<hr class="my-6" />
-					<p class="text-xs text-gray-400 text-center">
-						{provider.view_count} visitas
-					</p>
+						<!-- Appyuda Mini Banner -->
+						<div class="mt-6 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg">
+							<p class="text-xs text-purple-800 text-center">
+								¿Querés más clientes?
+								<a
+									href={APPYUDA_URL}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="font-bold text-purple-600 hover:text-purple-800 underline"
+								>
+									Probá Appyuda
+								</a>
+							</p>
+						</div>
+					</div>
 				</div>
 			</div>
-		</div>
+
+			<!-- Appyuda Full Banner -->
+			<div class="mt-8 p-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl text-white">
+				<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+					<div>
+						<p class="font-semibold text-lg">¿Querés captar más clientes y cerrar negocios de forma segura?</p>
+						<p class="text-purple-100 text-sm">Ofrecé tus servicios en nuestra plataforma de confianza</p>
+					</div>
+					<a
+						href={APPYUDA_URL}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-flex items-center justify-center px-6 py-2 bg-white text-purple-600 font-semibold rounded-lg hover:bg-purple-50 transition-colors"
+					>
+						Probá Appyuda
+					</a>
+				</div>
+			</div>
+		{/if}
 	</div>
 </div>

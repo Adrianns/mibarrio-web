@@ -138,8 +138,15 @@
 				<!-- Info about shared account -->
 				<div class="mt-6 p-4 bg-blue-50 rounded-lg">
 					<p class="text-sm text-blue-700">
-						Si ya tenés cuenta en <strong>Appyuda</strong>, podés usar las mismas credenciales para
-						ingresar.
+						Si ya tenés cuenta en{' '}
+						<a
+							href="https://appyuda.com.uy"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="font-bold text-blue-600 hover:text-blue-800 underline"
+						>
+							Appyuda
+						</a>, podés usar las mismas credenciales para ingresar.
 					</p>
 				</div>
 			</div>

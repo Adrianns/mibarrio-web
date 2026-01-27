@@ -5,7 +5,7 @@ import { browser } from '$app/environment';
 export type Theme = 'light' | 'dark';
 
 function getInitialTheme(): Theme {
-	if (!browser) return 'light';
+	if (!browser) return 'dark';
 
 	// Check localStorage first
 	const stored = localStorage.getItem('mibarrio-theme') as Theme | null;
@@ -13,12 +13,8 @@ function getInitialTheme(): Theme {
 		return stored;
 	}
 
-	// Check system preference
-	if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-		return 'dark';
-	}
-
-	return 'light';
+	// Default to dark theme
+	return 'dark';
 }
 
 function createThemeStore() {

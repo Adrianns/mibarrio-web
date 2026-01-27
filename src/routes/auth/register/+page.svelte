@@ -189,8 +189,15 @@
 				<!-- Info about shared account -->
 				<div class="mt-6 p-4 bg-blue-50 rounded-lg">
 					<p class="text-sm text-blue-700">
-						Tu cuenta también te servirá para usar <strong>Appyuda</strong>, nuestra plataforma de
-						servicios.
+						Tu cuenta también te servirá para usar{' '}
+						<a
+							href="https://appyuda.com.uy"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="font-bold text-blue-600 hover:text-blue-800 underline"
+						>
+							Appyuda
+						</a>, nuestra plataforma de servicios.
 					</p>
 				</div>
 			</div>
