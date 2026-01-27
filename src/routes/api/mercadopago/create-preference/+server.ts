@@ -6,8 +6,8 @@ import { getUserSupabase } from '$lib/server/supabase';
 import { env } from '$env/dynamic/public';
 
 const PRICES = {
-	monthly: 50,
-	annual: 500
+	monthly: 390,
+	annual: 3900
 } as const;
 
 export const POST: RequestHandler = async ({ request, url }) => {

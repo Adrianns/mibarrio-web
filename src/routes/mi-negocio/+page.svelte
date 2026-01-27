@@ -624,7 +624,7 @@
 									>
 										<span class="font-medium">Mensual</span>
 										<br />
-										<span class="text-gray-500 dark:text-gray-400">{formatPrice(50)}/mes</span>
+										<span class="text-gray-500 dark:text-gray-400">{formatPrice(390)}/mes</span>
 									</button>
 									<button
 										type="button"
@@ -636,7 +636,7 @@
 										<span class="absolute -top-2.5 right-2 text-xs bg-primary-600 text-white px-2 py-0.5 rounded-full">2 meses gratis</span>
 										<span class="font-medium">Anual</span>
 										<br />
-										<span class="text-gray-500 dark:text-gray-400">{formatPrice(500)}/año</span>
+										<span class="text-gray-500 dark:text-gray-400">{formatPrice(3900)}/año</span>
 									</button>
 								</div>
 
@@ -673,7 +673,7 @@
 								>
 									<span class="font-medium">Mensual</span>
 									<br />
-									<span class="text-gray-500 dark:text-gray-400">{formatPrice(50)}/mes</span>
+									<span class="text-gray-500 dark:text-gray-400">{formatPrice(390)}/mes</span>
 								</button>
 								<button
 									type="button"
@@ -685,7 +685,7 @@
 									<span class="absolute -top-2.5 right-2 text-xs bg-primary-600 text-white px-2 py-0.5 rounded-full">2 meses gratis</span>
 									<span class="font-medium">Anual</span>
 									<br />
-									<span class="text-gray-500 dark:text-gray-400">{formatPrice(500)}/año</span>
+									<span class="text-gray-500 dark:text-gray-400">{formatPrice(3900)}/año</span>
 								</button>
 							</div>
 
@@ -735,7 +735,7 @@
 								>
 									<span class="font-medium">Mensual</span>
 									<br />
-									<span class="text-gray-500 dark:text-gray-400">{formatPrice(50)}/mes</span>
+									<span class="text-gray-500 dark:text-gray-400">{formatPrice(390)}/mes</span>
 								</button>
 								<button
 									type="button"
@@ -747,7 +747,7 @@
 									<span class="absolute -top-2.5 right-2 text-xs bg-primary-600 text-white px-2 py-0.5 rounded-full">2 meses gratis</span>
 									<span class="font-medium">Anual</span>
 									<br />
-									<span class="text-gray-500 dark:text-gray-400">{formatPrice(500)}/año</span>
+									<span class="text-gray-500 dark:text-gray-400">{formatPrice(3900)}/año</span>
 								</button>
 							</div>
 
