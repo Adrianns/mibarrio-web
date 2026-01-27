@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { SUPABASE_SERVICE_ROLE_KEY } from '$env/static/private';
+import { env as privateEnv } from '$env/dynamic/private';
 import { env } from '$env/dynamic/public';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -10,10 +10,10 @@ let serviceClient: SupabaseClient<any, 'public', any> | null = null;
 export function getServiceSupabase() {
 	if (!serviceClient) {
 		const url = env.PUBLIC_SUPABASE_URL;
-		if (!url || !SUPABASE_SERVICE_ROLE_KEY) {
+		if (!url || !privateEnv.SUPABASE_SERVICE_ROLE_KEY) {
 			throw new Error('Missing Supabase service role environment variables');
 		}
-		serviceClient = createClient(url, SUPABASE_SERVICE_ROLE_KEY);
+		serviceClient = createClient(url, privateEnv.SUPABASE_SERVICE_ROLE_KEY);
 	}
 	return serviceClient;
 }

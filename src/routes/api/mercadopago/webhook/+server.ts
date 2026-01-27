@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { Payment } from 'mercadopago';
 import { getMercadoPagoClient } from '$lib/server/mercadopago';
 import { getServiceSupabase } from '$lib/server/supabase';
-import { MERCADOPAGO_WEBHOOK_SECRET } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { createHmac } from 'crypto';
 
 function verifyWebhookSignature(
@@ -11,7 +11,7 @@ function verifyWebhookSignature(
 	xRequestId: string | null,
 	dataId: string
 ): boolean {
-	if (!MERCADOPAGO_WEBHOOK_SECRET || !xSignature) return true; // Skip if no secret configured
+	if (!env.MERCADOPAGO_WEBHOOK_SECRET || !xSignature) return true; // Skip if no secret configured
 
 	const parts = xSignature.split(',');
 	let ts = '';
@@ -26,7 +26,7 @@ function verifyWebhookSignature(
 	if (!ts || !hash) return false;
 
 	const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
-	const computedHash = createHmac('sha256', MERCADOPAGO_WEBHOOK_SECRET)
+	const computedHash = createHmac('sha256', env.MERCADOPAGO_WEBHOOK_SECRET)
 		.update(manifest)
 		.digest('hex');
 
