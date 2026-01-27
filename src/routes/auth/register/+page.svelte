@@ -1,10 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
+	import Header from '$lib/components/Header.svelte';
 	import { APP_NAME } from '$lib/config';
 	import { auth } from '$lib/stores/auth';
 	import { toast } from '$lib/stores/toast';
 	import { Mail, Lock, User, Eye, EyeOff } from 'lucide-svelte';
+	import { get } from 'svelte/store';
+
+	const redirectTo = get(page).url.searchParams.get('redirect');
+	const tipo = get(page).url.searchParams.get('tipo');
 
 	let fullName = $state('');
 	let email = $state('');
@@ -54,7 +60,9 @@
 		}
 
 		toast.success('¡Cuenta creada exitosamente!');
-		goto('/registrar-negocio');
+		const dest = redirectTo || '/registrar-negocio';
+		const params = tipo ? `?tipo=${tipo}` : '';
+		goto(`${dest}${params}`);
 	}
 </script>
 
@@ -62,25 +70,20 @@
 	<title>Registrarse - {APP_NAME}</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gray-50 flex flex-col">
-	<!-- Header -->
-	<header class="bg-white border-b border-gray-200">
-		<div class="container py-4">
-			<a href="/" class="text-2xl font-bold text-primary-600">{APP_NAME}</a>
-		</div>
-	</header>
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+	<Header showAuthLinks={false} />
 
 	<div class="flex-1 flex items-center justify-center px-4 py-12">
 		<div class="w-full max-w-md">
-			<div class="bg-white rounded-2xl shadow-sm p-8">
+			<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8">
 				<div class="text-center mb-8">
-					<h1 class="text-2xl font-bold text-gray-900 mb-2">Crear cuenta</h1>
-					<p class="text-gray-600">Registrate para publicar tu negocio o servicio</p>
+					<h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Crear cuenta</h1>
+					<p class="text-gray-600 dark:text-gray-400">Registrate para publicar tu negocio o servicio</p>
 				</div>
 
 				<form onsubmit={handleSubmit} class="space-y-4">
 					<div>
-						<label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">
+						<label for="fullName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
 							Nombre completo
 						</label>
 						<div class="relative">
@@ -91,13 +94,13 @@
 								bind:value={fullName}
 								required
 								placeholder="Tu nombre"
-								class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none"
+								class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
 							/>
 						</div>
 					</div>
 
 					<div>
-						<label for="email" class="block text-sm font-medium text-gray-700 mb-1"> Email </label>
+						<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"> Email </label>
 						<div class="relative">
 							<Mail class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
 							<input
@@ -106,13 +109,13 @@
 								bind:value={email}
 								required
 								placeholder="tu@email.com"
-								class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none"
+								class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
 							/>
 						</div>
 					</div>
 
 					<div>
-						<label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+						<label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
 							Contraseña
 						</label>
 						<div class="relative">
@@ -124,7 +127,7 @@
 								required
 								minlength="6"
 								placeholder="Mínimo 6 caracteres"
-								class="w-full pl-10 pr-12 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none"
+								class="w-full pl-10 pr-12 py-3 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
 							/>
 							<button
 								type="button"
@@ -141,7 +144,7 @@
 					</div>
 
 					<div>
-						<label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">
+						<label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
 							Confirmar contraseña
 						</label>
 						<div class="relative">
@@ -152,7 +155,7 @@
 								bind:value={confirmPassword}
 								required
 								placeholder="Repetí tu contraseña"
-								class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none"
+								class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
 							/>
 						</div>
 					</div>
@@ -163,7 +166,7 @@
 							bind:checked={acceptTerms}
 							class="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
 						/>
-						<span class="text-sm text-gray-600">
+						<span class="text-sm text-gray-600 dark:text-gray-400">
 							Acepto los <a href="/terms" class="text-primary-600 hover:underline"
 								>términos de uso</a
 							>
@@ -178,7 +181,7 @@
 				</form>
 
 				<div class="mt-6 text-center">
-					<p class="text-gray-600">
+					<p class="text-gray-600 dark:text-gray-400">
 						¿Ya tenés cuenta?
 						<a href="/auth/login" class="text-primary-600 hover:text-primary-700 font-medium">
 							Ingresá
@@ -187,14 +190,14 @@
 				</div>
 
 				<!-- Info about shared account -->
-				<div class="mt-6 p-4 bg-blue-50 rounded-lg">
-					<p class="text-sm text-blue-700">
+				<div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+					<p class="text-sm text-blue-700 dark:text-blue-300">
 						Tu cuenta también te servirá para usar{' '}
 						<a
 							href="https://appyuda.com.uy"
 							target="_blank"
 							rel="noopener noreferrer"
-							class="font-bold text-blue-600 hover:text-blue-800 underline"
+							class="font-bold text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 underline"
 						>
 							Appyuda
 						</a>, nuestra plataforma de servicios.

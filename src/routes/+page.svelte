@@ -129,14 +129,14 @@
 				Primer mes GRATIS, después $390/mes.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-4 justify-center">
-				<Button href="/registrar-negocio" variant="secondary" size="lg" class="inline-flex items-center gap-2">
+				<a href="/auth/login?redirect=/registrar-negocio&tipo=individual" class="inline-flex items-center justify-center gap-2 h-12 px-8 text-base rounded-lg bg-secondary-500 text-white hover:bg-secondary-600 font-medium transition-colors">
 					<User class="h-5 w-5" />
 					Soy particular
-				</Button>
-				<Button href="/registrar-negocio" variant="outline" size="lg" class="inline-flex items-center gap-2 !bg-transparent !text-white !border-white hover:!bg-white/10">
+				</a>
+				<a href="/auth/login?redirect=/registrar-negocio&tipo=business" class="inline-flex items-center justify-center gap-2 h-12 px-8 text-base rounded-lg border border-white text-white hover:bg-white/10 font-medium transition-colors">
 					<Building2 class="h-5 w-5" />
 					Tengo empresa
-				</Button>
+				</a>
 			</div>
 		</div>
 	</section>
@@ -160,7 +160,7 @@
 				<div>
 					<h4 class="text-white font-medium mb-4">Para negocios</h4>
 					<ul class="space-y-2 text-sm">
-						<li><a href="/registrar-negocio" class="hover:text-white">Registrar negocio</a></li>
+						<li><a href="/auth/login?redirect=/registrar-negocio" class="hover:text-white">Registrar negocio</a></li>
 						<li><a href="/planes" class="hover:text-white">Ver planes</a></li>
 						<li><a href="/auth/login" class="hover:text-white">Ingresar</a></li>
 					</ul>
