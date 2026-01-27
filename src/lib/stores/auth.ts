@@ -86,7 +86,7 @@ function createAuthStore() {
 			.from('mb_providers')
 			.select('id, user_id, business_name, business_type, department, is_active, is_verified')
 			.eq('user_id', userId)
-			.single();
+			.maybeSingle();
 
 		if (error || !data) return null;
 		return data as MibarrioProvider;
@@ -254,17 +254,16 @@ function createAuthStore() {
 	}
 
 	async function refreshProvider() {
-		const state = await new Promise<AuthState>((resolve) => {
-			const unsub = subscribe((s) => {
-				resolve(s);
-				unsub();
-			});
+		let currentState: AuthState | undefined;
+		const unsub = subscribe((s) => {
+			currentState = s;
 		});
+		unsub();
 
-		if (state.user) {
-			const provider = await fetchMibarrioProvider(state.user.id);
+		if (currentState?.user) {
+			const provider = await fetchMibarrioProvider(currentState.user.id);
 			update((s) => ({ ...s, provider }));
-			setStorageCache(state.user, provider);
+			setStorageCache(currentState.user, provider);
 		}
 	}
 

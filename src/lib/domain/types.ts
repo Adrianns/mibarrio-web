@@ -107,21 +107,24 @@ export interface SubscriptionPlan {
 	updated_at?: string;
 }
 
+// Billing cycle
+export type BillingCycle = 'monthly' | 'annual';
+
 // Subscription
 export interface Subscription {
 	id: string;
 	provider_id: string;
 	plan_id: string;
-	mercadopago_preapproval_id?: string | null;
-	mercadopago_payer_id?: string | null;
-	mercadopago_status?: string | null;
 	status: SubscriptionStatus;
-	started_at?: string | null;
-	current_period_start?: string | null;
-	current_period_end?: string | null;
+	billing_cycle?: BillingCycle | null;
+	amount?: number | null;
+	mp_subscription_id?: string | null;
+	mp_preapproval_id?: string | null;
+	mp_payment_id?: string | null;
+	mp_preference_id?: string | null;
+	starts_at?: string | null;
+	ends_at?: string | null;
 	cancelled_at?: string | null;
-	last_payment_at?: string | null;
-	next_payment_at?: string | null;
 	created_at: string;
 	updated_at?: string;
 	// Joined data
@@ -134,9 +137,12 @@ export interface SubscriptionPayment {
 	subscription_id: string;
 	amount: number;
 	status: 'pending' | 'approved' | 'rejected' | 'refunded';
-	mercadopago_payment_id?: string | null;
-	period_start: string;
-	period_end: string;
+	mp_payment_id?: string | null;
+	mp_preference_id?: string | null;
+	mp_status?: string | null;
+	billing_cycle?: BillingCycle | null;
+	period_start?: string | null;
+	period_end?: string | null;
 	paid_at?: string | null;
 	created_at: string;
 }

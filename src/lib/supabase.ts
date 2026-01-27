@@ -5,10 +5,10 @@ let supabaseInstance: SupabaseClient | null = null;
 
 function getEnvVar(name: string): string {
 	if (browser) {
-		// Client-side: read from window (injected by hooks)
+		// Client-side: read from window (injected by layout)
 		return (window as unknown as Record<string, string>)[name] || '';
 	}
-	// Server-side: read from process.env
+	// Server-side: fallback to process.env (populated in production Node.js)
 	return process.env[name] || '';
 }
 
