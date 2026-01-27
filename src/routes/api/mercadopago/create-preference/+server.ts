@@ -10,7 +10,7 @@ const PRICES = {
 	annual: 500
 } as const;
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, url }) => {
 	try {
 		// Get auth token from request
 		const authHeader = request.headers.get('authorization');
@@ -53,7 +53,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		const sub = subscription as Record<string, string>;
 
 		const amount = PRICES[billing_cycle as keyof typeof PRICES];
-		const appUrl = env.PUBLIC_APP_URL || 'http://localhost:5173';
+		const appUrl = env.PUBLIC_APP_URL || `${url.protocol}//${url.host}`;
 
 		// Create MercadoPago preference
 		const client = getMercadoPagoClient();
