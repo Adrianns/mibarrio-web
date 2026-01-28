@@ -168,7 +168,7 @@
 	>
 		<div class="flex flex-col h-full">
 			<!-- Drawer Header -->
-			<div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+			<div class="flex items-center justify-between p-4">
 				<span class="text-lg font-bold text-primary-600">{APP_NAME}</span>
 				<button
 					onclick={closeMenu}
@@ -202,8 +202,6 @@
 					{/each}
 
 					{#if showAuthLinks}
-						<hr class="my-3 border-gray-200 dark:border-gray-700" />
-
 						{#if $isAuthenticated}
 							<a
 								href={miNegocioHref}
@@ -224,36 +222,16 @@
 							<a
 								href="/auth/login"
 								onclick={closeMenu}
-								class="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+								class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
 							>
-								<User class="h-5 w-5" />
-								Ingresar
-							</a>
-							<a
-								href="/auth/register"
-								onclick={closeMenu}
-								class="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-							>
-								<User class="h-5 w-5" />
-								Crear cuenta
+								Ofrecer servicios
 							</a>
 						{/if}
 					{/if}
 				</nav>
 			</div>
 
-			<!-- Drawer Footer -->
-			{#if showAuthLinks && !$isAuthenticated}
-				<div class="p-4 border-t border-gray-200 dark:border-gray-700">
-					<a
-						href="/registrar-negocio"
-						onclick={closeMenu}
-						class="block w-full text-center bg-primary-600 text-white font-medium py-3 rounded-lg hover:bg-primary-700"
-					>
-						Registrar negocio
-					</a>
-				</div>
-			{/if}
+			<!-- Drawer footer removed: app is now 100% free -->
 		</div>
 	</div>
 </header>
