@@ -197,7 +197,7 @@
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-	<Header items={[{ label: 'Planes', href: '/planes' }]} />
+	<Header items={[{ label: 'Registrar negocio', href: '/registrar-negocio' }]} />
 
 	<div class="container py-8">
 		<!-- Search and Filters -->

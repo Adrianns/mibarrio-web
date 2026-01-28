@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
-	import { APP_NAME, formatPrice } from '$lib/config';
+	import { APP_NAME } from '$lib/config';
 	import { toast } from '$lib/stores/toast';
 	import { auth, isAuthenticated, user, hasMibarrioProvider, provider as providerStore } from '$lib/stores/auth';
 	import { supabase } from '$lib/supabase';
@@ -31,8 +31,8 @@
 	} from 'lucide-svelte';
 	import { get } from 'svelte/store';
 
-	// Get plan from URL if provided
-	const preselectedPlan = $page.url.searchParams.get('plan') || '';
+	// Plan selection disabled: app is now 100% free
+	// const preselectedPlan = $page.url.searchParams.get('plan') || '';
 
 	let step = $state(1);
 	let loading = $state(false);
@@ -61,24 +61,13 @@
 	let instagramUrl = $state('');
 	let facebookUrl = $state('');
 
-	// Step 5: Plan
-	let selectedPlan = $state(preselectedPlan || 'basico');
+	// Step 5 (Plan) disabled: app is now 100% free
+	// let selectedPlan = $state(preselectedPlan || 'basico');
 
 	const APPYUDA_URL = 'https://appyuda.com.uy';
 
-	const plan = {
-		name: 'mensual',
-		label: 'Plan Mensual',
-		price: 390,
-		trialDays: 30,
-		features: [
-			'1 mes GRATIS de prueba',
-			'Perfil completo en directorio',
-			'Contacto directo (teléfono, WhatsApp, email)',
-			'Hasta 3 categorías',
-			'Fotos de tu negocio'
-		]
-	};
+	// Plan info disabled: app is now 100% free
+	// const plan = { ... };
 
 	const categories = DEFAULT_CATEGORIES.filter((c) => c.is_active);
 
@@ -157,16 +146,16 @@
 				return;
 			}
 
-			// Get the plan from database (only one plan now: 'basico')
-			const { data: planData, error: planError } = await supabase
-				.from('mb_subscription_plans')
-				.select('id')
-				.eq('name', 'basico')
-				.single();
-
-			if (planError || !planData) {
-				throw new Error('No se pudo obtener el plan');
-			}
+			// Subscription plan lookup disabled: app is now 100% free
+			// const { data: planData, error: planError } = await supabase
+			// 	.from('mb_subscription_plans')
+			// 	.select('id')
+			// 	.eq('name', 'basico')
+			// 	.single();
+			//
+			// if (planError || !planData) {
+			// 	throw new Error('No se pudo obtener el plan');
+			// }
 
 			// Format social URLs
 			const formatInstagram = (url: string) => {
@@ -201,7 +190,7 @@
 					website: websiteUrl.trim() || null,
 					social_instagram: formatInstagram(instagramUrl),
 					social_facebook: formatFacebook(facebookUrl),
-					is_active: true, // Active immediately - 1 month free trial
+					is_active: true, // Active immediately - app is 100% free
 					is_verified: false,
 					is_featured: false
 				})
@@ -230,17 +219,16 @@
 				}
 			}
 
-			// Create pending subscription
-			const { error: subscriptionError } = await supabase.from('mb_subscriptions').insert({
-				provider_id: newProvider.id,
-				plan_id: planData.id,
-				status: 'pending' // Will be activated after payment
-			});
-
-			if (subscriptionError) {
-				console.error('Subscription error:', subscriptionError);
-				// Don't throw, subscription can be created later
-			}
+			// Subscription creation disabled: app is now 100% free
+			// const { error: subscriptionError } = await supabase.from('mb_subscriptions').insert({
+			// 	provider_id: newProvider.id,
+			// 	plan_id: planData.id,
+			// 	status: 'pending'
+			// });
+			//
+			// if (subscriptionError) {
+			// 	console.error('Subscription error:', subscriptionError);
+			// }
 
 			// Update user profile to indicate they have a mibarrio provider
 			await supabase
@@ -288,7 +276,7 @@
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-	<Header items={[{ label: 'Planes', href: '/planes' }]} />
+	<Header items={[{ label: 'Directorio', href: '/directorio' }]} />
 
 	{#if !authChecked}
 		<div class="flex items-center justify-center py-12">
@@ -316,7 +304,7 @@
 			<!-- Progress -->
 			<div class="mb-8">
 				<div class="flex items-center justify-between mb-2">
-					{#each [1, 2, 3, 4, 5] as s}
+					{#each [1, 2, 3, 4] as s}
 						<div
 							class="w-10 h-10 rounded-full flex items-center justify-center font-medium {s <= step
 								? 'bg-primary-600 text-white'
@@ -328,7 +316,7 @@
 								{s}
 							{/if}
 						</div>
-						{#if s < 5}
+						{#if s < 4}
 							<div class="flex-1 h-1 mx-2 {s < step ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'}"></div>
 						{/if}
 					{/each}
@@ -338,7 +326,6 @@
 					<span>Categorías</span>
 					<span>Ubicación</span>
 					<span>Contacto</span>
-					<span>Plan</span>
 				</div>
 			</div>
 
@@ -623,62 +610,7 @@
 					</div>
 				{/if}
 
-				<!-- Step 5: Plan -->
-				{#if step === 5}
-					<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Tu plan</h2>
-					<p class="text-gray-600 dark:text-gray-400 mb-6">Probá Mi Barrio gratis por 1 mes</p>
-
-					<div class="p-6 rounded-xl border-2 border-primary-500 bg-primary-50 dark:bg-primary-900/30">
-						<div class="flex items-center gap-3 mb-4">
-							<div class="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center">
-								<Check class="h-6 w-6 text-white" />
-							</div>
-							<div>
-								<div class="font-bold text-xl text-gray-900 dark:text-white">{plan.label}</div>
-								<div class="text-primary-600 dark:text-primary-400 font-medium">
-									<span class="text-lg">{formatPrice(plan.price)}</span>/mes
-								</div>
-							</div>
-						</div>
-
-						<div class="bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 px-4 py-2 rounded-lg mb-4 font-medium text-center">
-							Primer mes GRATIS
-						</div>
-
-						<ul class="space-y-2">
-							{#each plan.features as feature}
-								<li class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-									<Check class="h-4 w-4 text-green-500 flex-shrink-0" />
-									{feature}
-								</li>
-							{/each}
-						</ul>
-					</div>
-
-					<div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
-						<p class="text-sm text-blue-700 dark:text-blue-300">
-							Tu negocio se publicará inmediatamente. Tendrás 30 días gratis para probarlo.
-							Después se te cobrará {formatPrice(plan.price)}/mes vía MercadoPago.
-						</p>
-					</div>
-
-					<!-- Appyuda Banner -->
-					<div class="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border border-green-200 dark:border-green-800 rounded-lg">
-						<p class="text-sm text-green-800 dark:text-green-300">
-							<span class="font-semibold">¿Querés captar más clientes y cerrar negocios de forma segura?</span>
-							<br />
-							Probá{' '}
-							<a
-								href={APPYUDA_URL}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="font-bold text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 underline"
-							>
-								Appyuda
-							</a>, nuestra plataforma de servicios.
-						</p>
-					</div>
-				{/if}
+				<!-- Step 5 (Plan) removed: app is now 100% free -->
 
 				<!-- Navigation -->
 				<div class="flex justify-between mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
@@ -691,7 +623,7 @@
 						<div></div>
 					{/if}
 
-					{#if step < 5}
+					{#if step < 4}
 						<Button onclick={nextStep}>
 							Siguiente
 							<ArrowRight class="h-4 w-4 ml-2" />

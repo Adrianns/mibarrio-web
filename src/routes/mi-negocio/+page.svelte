@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
-	import { APP_NAME, formatPrice, formatDate } from '$lib/config';
+	import { APP_NAME } from '$lib/config';
 	import { toast } from '$lib/stores/toast';
 	import { auth, isAuthenticated, user, provider as providerStore } from '$lib/stores/auth';
 	import { supabase } from '$lib/supabase';
@@ -13,10 +12,7 @@
 		DEFAULT_CATEGORIES,
 		DEPARTMENTS,
 		MONTEVIDEO_NEIGHBORHOODS,
-		type Department,
-		type Subscription,
-		type SubscriptionPayment,
-		type BillingCycle
+		type Department
 	} from '$lib/domain/types';
 	import {
 		Camera,
@@ -25,13 +21,7 @@
 		Loader2,
 		Save,
 		Eye,
-		Trash2,
-		CreditCard,
-		CheckCircle,
-		AlertTriangle,
-		XCircle,
-		Clock,
-		RefreshCw
+		Trash2
 	} from 'lucide-svelte';
 	import { get } from 'svelte/store';
 
@@ -57,12 +47,12 @@
 	let photos = $state<string[]>([]);
 	let selectedCategories = $state<string[]>([]);
 
-	// Subscription state
-	let subscription = $state<Subscription | null>(null);
-	let payments = $state<SubscriptionPayment[]>([]);
-	let loadingPayment = $state(false);
-	let verifyingPayment = $state(false);
-	let selectedCycle = $state<BillingCycle>('monthly');
+	// Subscription state - disabled: app is now 100% free
+	// let subscription = $state<Subscription | null>(null);
+	// let payments = $state<SubscriptionPayment[]>([]);
+	// let loadingPayment = $state(false);
+	// let verifyingPayment = $state(false);
+	// let selectedCycle = $state<BillingCycle>('monthly');
 
 	// File inputs
 	let logoInput: HTMLInputElement;
@@ -117,28 +107,27 @@
 
 		selectedCategories = cats?.map((c) => c.category_name) || [];
 
-		// Load subscription with plan
-		const { data: subData } = await supabase
-			.from('mb_subscriptions')
-			.select('*, plan:mb_subscription_plans(*)')
-			.eq('provider_id', data.id)
-			.maybeSingle();
-
-		if (subData) {
-			subscription = subData as unknown as Subscription;
-			if (subData.billing_cycle) {
-				selectedCycle = subData.billing_cycle as BillingCycle;
-			}
-
-			// Load payment history
-			const { data: paymentData } = await supabase
-				.from('mb_subscription_payments')
-				.select('*')
-				.eq('subscription_id', subData.id)
-				.order('created_at', { ascending: false });
-
-			payments = (paymentData || []) as unknown as SubscriptionPayment[];
-		}
+		// Subscription loading disabled: app is now 100% free
+		// const { data: subData } = await supabase
+		// 	.from('mb_subscriptions')
+		// 	.select('*, plan:mb_subscription_plans(*)')
+		// 	.eq('provider_id', data.id)
+		// 	.maybeSingle();
+		//
+		// if (subData) {
+		// 	subscription = subData as unknown as Subscription;
+		// 	if (subData.billing_cycle) {
+		// 		selectedCycle = subData.billing_cycle as BillingCycle;
+		// 	}
+		//
+		// 	const { data: paymentData } = await supabase
+		// 		.from('mb_subscription_payments')
+		// 		.select('*')
+		// 		.eq('subscription_id', subData.id)
+		// 		.order('created_at', { ascending: false });
+		//
+		// 	payments = (paymentData || []) as unknown as SubscriptionPayment[];
+		// }
 
 		loading = false;
 	}
@@ -290,92 +279,10 @@
 		saving = false;
 	}
 
-	async function handlePayment() {
-		if (!subscription) return;
-
-		loadingPayment = true;
-
-		try {
-			const session = await supabase.auth.getSession();
-			const token = session.data.session?.access_token;
-			if (!token) {
-				toast.error('Sesión expirada. Volvé a iniciar sesión.');
-				loadingPayment = false;
-				return;
-			}
-
-			const res = await fetch('/api/mercadopago/create-preference', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`
-				},
-				body: JSON.stringify({
-					subscription_id: subscription.id,
-					billing_cycle: selectedCycle
-				})
-			});
-
-			const data = await res.json();
-
-			if (!res.ok) {
-				toast.error(data.error || 'Error al crear el pago');
-				loadingPayment = false;
-				return;
-			}
-
-			// Redirect to MercadoPago checkout
-			window.location.href = data.init_point;
-		} catch {
-			toast.error('Error al procesar el pago');
-			loadingPayment = false;
-		}
-	}
-
-	async function handleVerify() {
-		if (!subscription) return;
-
-		verifyingPayment = true;
-
-		try {
-			const session = await supabase.auth.getSession();
-			const token = session.data.session?.access_token;
-			if (!token) {
-				toast.error('Sesión expirada');
-				verifyingPayment = false;
-				return;
-			}
-
-			const res = await fetch('/api/mercadopago/verify', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`
-				},
-				body: JSON.stringify({ subscription_id: subscription.id })
-			});
-
-			const data = await res.json();
-
-			if (data.status === 'active') {
-				toast.success('Pago confirmado. Tu suscripción está activa.');
-				await loadProvider();
-			} else {
-				toast.info('Tu pago aún no fue confirmado. Intentá de nuevo en unos minutos.');
-			}
-		} catch {
-			toast.error('Error al verificar el pago');
-		}
-
-		verifyingPayment = false;
-	}
-
-	function isExpiringSoon(): boolean {
-		if (!subscription?.ends_at) return false;
-		const endsAt = new Date(subscription.ends_at);
-		const daysLeft = (endsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24);
-		return daysLeft <= 7;
-	}
+	// Payment functions disabled: app is now 100% free
+	// async function handlePayment() { ... }
+	// async function handleVerify() { ... }
+	// function isExpiringSoon() { ... }
 
 	function toggleCategory(name: string) {
 		if (selectedCategories.includes(name)) {
@@ -386,23 +293,7 @@
 	}
 
 	onMount(async () => {
-		// Handle payment return query params
-		const currentPage = get(page);
-		const paymentStatus = currentPage.url.searchParams.get('payment');
-		if (paymentStatus === 'success') {
-			toast.success('Pago realizado. Verificando tu suscripción...');
-		} else if (paymentStatus === 'failure') {
-			toast.error('El pago no se pudo completar. Intentá de nuevo.');
-		} else if (paymentStatus === 'pending') {
-			toast.info('Tu pago está pendiente de confirmación.');
-		}
-
-		// Clean URL params
-		if (paymentStatus) {
-			const url = new URL(window.location.href);
-			url.searchParams.delete('payment');
-			history.replaceState({}, '', url.pathname);
-		}
+		// Payment return handling disabled: app is now 100% free
 
 		let unsub: (() => void) | undefined;
 		unsub = auth.subscribe((state) => {
@@ -412,12 +303,7 @@
 				} else if (!state.provider) {
 					goto('/registrar-negocio');
 				} else {
-					loadProvider().then(() => {
-						// Auto-verify if returning from payment success
-						if (paymentStatus === 'success' && subscription && subscription.status !== 'active') {
-							handleVerify();
-						}
-					});
+					loadProvider();
 				}
 				queueMicrotask(() => unsub?.());
 			}
@@ -579,224 +465,7 @@
 				/>
 			</div>
 
-			<!-- Subscription -->
-			{#if subscription}
-				<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 mb-6">
-					<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Suscripción</h2>
-
-					<!-- Status Banner -->
-					{#if subscription.status === 'active'}
-						<div class="flex items-start gap-3 p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 mb-4">
-							<CheckCircle class="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
-							<div>
-								<p class="font-medium text-green-800 dark:text-green-300">Suscripción activa</p>
-								{#if subscription.ends_at}
-									<p class="text-sm text-green-700 dark:text-green-400">
-										Válida hasta {formatDate(subscription.ends_at)}
-										{#if subscription.billing_cycle === 'annual'}
-											<span class="ml-1 text-xs bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">Anual</span>
-										{:else}
-											<span class="ml-1 text-xs bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">Mensual</span>
-										{/if}
-									</p>
-								{/if}
-							</div>
-						</div>
-
-						{#if isExpiringSoon()}
-							<div class="flex items-start gap-3 p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 mb-4">
-								<AlertTriangle class="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 shrink-0" />
-								<div>
-									<p class="font-medium text-yellow-800 dark:text-yellow-300">Tu suscripción está por vencer</p>
-									<p class="text-sm text-yellow-700 dark:text-yellow-400">Renová para no perder tu perfil activo en el directorio.</p>
-								</div>
-							</div>
-
-							<!-- Renew -->
-							<div class="space-y-3 mb-4">
-								<div class="flex gap-3">
-									<button
-										type="button"
-										onclick={() => selectedCycle = 'monthly'}
-										class="flex-1 p-3 rounded-lg border-2 text-center text-sm transition-colors {selectedCycle === 'monthly'
-											? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 dark:text-white'
-											: 'border-gray-200 dark:border-gray-600 dark:text-gray-300 hover:border-gray-300'}"
-									>
-										<span class="font-medium">Mensual</span>
-										<br />
-										<span class="text-gray-500 dark:text-gray-400">{formatPrice(390)}/mes</span>
-									</button>
-									<button
-										type="button"
-										onclick={() => selectedCycle = 'annual'}
-										class="flex-1 p-3 rounded-lg border-2 text-center text-sm transition-colors relative {selectedCycle === 'annual'
-											? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 dark:text-white'
-											: 'border-gray-200 dark:border-gray-600 dark:text-gray-300 hover:border-gray-300'}"
-									>
-										<span class="absolute -top-2.5 right-2 text-xs bg-primary-600 text-white px-2 py-0.5 rounded-full">2 meses gratis</span>
-										<span class="font-medium">Anual</span>
-										<br />
-										<span class="text-gray-500 dark:text-gray-400">{formatPrice(3900)}/año</span>
-									</button>
-								</div>
-
-								<Button onclick={handlePayment} disabled={loadingPayment} class="w-full">
-									{#if loadingPayment}
-										<Loader2 class="h-4 w-4 mr-2 animate-spin" />
-										Procesando...
-									{:else}
-										<CreditCard class="h-4 w-4 mr-2" />
-										Renovar suscripción
-									{/if}
-								</Button>
-							</div>
-						{/if}
-
-					{:else if subscription.status === 'pending'}
-						<div class="flex items-start gap-3 p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 mb-4">
-							<Clock class="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 shrink-0" />
-							<div>
-								<p class="font-medium text-yellow-800 dark:text-yellow-300">Periodo de prueba</p>
-								<p class="text-sm text-yellow-700 dark:text-yellow-400">Activá tu suscripción para aparecer en el directorio.</p>
-							</div>
-						</div>
-
-						<!-- Billing cycle selector -->
-						<div class="space-y-3 mb-4">
-							<div class="flex gap-3">
-								<button
-									type="button"
-									onclick={() => selectedCycle = 'monthly'}
-									class="flex-1 p-3 rounded-lg border-2 text-center text-sm transition-colors {selectedCycle === 'monthly'
-										? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 dark:text-white'
-										: 'border-gray-200 dark:border-gray-600 dark:text-gray-300 hover:border-gray-300'}"
-								>
-									<span class="font-medium">Mensual</span>
-									<br />
-									<span class="text-gray-500 dark:text-gray-400">{formatPrice(390)}/mes</span>
-								</button>
-								<button
-									type="button"
-									onclick={() => selectedCycle = 'annual'}
-									class="flex-1 p-3 rounded-lg border-2 text-center text-sm transition-colors relative {selectedCycle === 'annual'
-										? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 dark:text-white'
-										: 'border-gray-200 dark:border-gray-600 dark:text-gray-300 hover:border-gray-300'}"
-								>
-									<span class="absolute -top-2.5 right-2 text-xs bg-primary-600 text-white px-2 py-0.5 rounded-full">2 meses gratis</span>
-									<span class="font-medium">Anual</span>
-									<br />
-									<span class="text-gray-500 dark:text-gray-400">{formatPrice(3900)}/año</span>
-								</button>
-							</div>
-
-							<Button onclick={handlePayment} disabled={loadingPayment} class="w-full">
-								{#if loadingPayment}
-									<Loader2 class="h-4 w-4 mr-2 animate-spin" />
-									Procesando...
-								{:else}
-									<CreditCard class="h-4 w-4 mr-2" />
-									Pagar con MercadoPago
-								{/if}
-							</Button>
-
-							<button
-								type="button"
-								onclick={handleVerify}
-								disabled={verifyingPayment}
-								class="w-full text-center text-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center justify-center gap-1"
-							>
-								{#if verifyingPayment}
-									<Loader2 class="h-3 w-3 animate-spin" />
-								{:else}
-									<RefreshCw class="h-3 w-3" />
-								{/if}
-								Ya pagué, verificar pago
-							</button>
-						</div>
-
-					{:else if subscription.status === 'expired'}
-						<div class="flex items-start gap-3 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 mb-4">
-							<XCircle class="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 shrink-0" />
-							<div>
-								<p class="font-medium text-red-800 dark:text-red-300">Suscripción expirada</p>
-								<p class="text-sm text-red-700 dark:text-red-400">Tu perfil no está visible en el directorio. Reactivá tu suscripción.</p>
-							</div>
-						</div>
-
-						<!-- Reactivate -->
-						<div class="space-y-3 mb-4">
-							<div class="flex gap-3">
-								<button
-									type="button"
-									onclick={() => selectedCycle = 'monthly'}
-									class="flex-1 p-3 rounded-lg border-2 text-center text-sm transition-colors {selectedCycle === 'monthly'
-										? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 dark:text-white'
-										: 'border-gray-200 dark:border-gray-600 dark:text-gray-300 hover:border-gray-300'}"
-								>
-									<span class="font-medium">Mensual</span>
-									<br />
-									<span class="text-gray-500 dark:text-gray-400">{formatPrice(390)}/mes</span>
-								</button>
-								<button
-									type="button"
-									onclick={() => selectedCycle = 'annual'}
-									class="flex-1 p-3 rounded-lg border-2 text-center text-sm transition-colors relative {selectedCycle === 'annual'
-										? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 dark:text-white'
-										: 'border-gray-200 dark:border-gray-600 dark:text-gray-300 hover:border-gray-300'}"
-								>
-									<span class="absolute -top-2.5 right-2 text-xs bg-primary-600 text-white px-2 py-0.5 rounded-full">2 meses gratis</span>
-									<span class="font-medium">Anual</span>
-									<br />
-									<span class="text-gray-500 dark:text-gray-400">{formatPrice(3900)}/año</span>
-								</button>
-							</div>
-
-							<Button onclick={handlePayment} disabled={loadingPayment} class="w-full">
-								{#if loadingPayment}
-									<Loader2 class="h-4 w-4 mr-2 animate-spin" />
-									Procesando...
-								{:else}
-									<CreditCard class="h-4 w-4 mr-2" />
-									Reactivar suscripción
-								{/if}
-							</Button>
-						</div>
-					{/if}
-
-					<!-- Payment History -->
-					{#if payments.length > 0}
-						<div class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-							<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Historial de pagos</h3>
-							<div class="space-y-2">
-								{#each payments as payment}
-									<div class="flex items-center justify-between text-sm p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-										<div class="flex items-center gap-2">
-											{#if payment.status === 'approved'}
-												<CheckCircle class="h-4 w-4 text-green-500" />
-											{:else if payment.status === 'pending'}
-												<Clock class="h-4 w-4 text-yellow-500" />
-											{:else if payment.status === 'rejected'}
-												<XCircle class="h-4 w-4 text-red-500" />
-											{:else}
-												<AlertTriangle class="h-4 w-4 text-gray-400" />
-											{/if}
-											<span class="text-gray-700 dark:text-gray-300">{formatPrice(payment.amount)}</span>
-											{#if payment.billing_cycle}
-												<span class="text-xs text-gray-500 dark:text-gray-400">
-													({payment.billing_cycle === 'monthly' ? 'Mensual' : 'Anual'})
-												</span>
-											{/if}
-										</div>
-										<span class="text-gray-500 dark:text-gray-400">
-											{payment.paid_at ? formatDate(payment.paid_at) : formatDate(payment.created_at)}
-										</span>
-									</div>
-								{/each}
-							</div>
-						</div>
-					{/if}
-				</div>
-			{/if}
+			<!-- Subscription section disabled: app is now 100% free -->
 
 			<!-- Business Info -->
 			<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 mb-6">
