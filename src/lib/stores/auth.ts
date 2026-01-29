@@ -212,22 +212,10 @@ function createAuthStore() {
 			return { success: true, error: null, emailConfirmationRequired: true };
 		}
 
-		// If auto-confirmed, create profile
+		// If auto-confirmed, fetch profile (trigger creates it)
 		if (data.user && data.session) {
-			// Create profile in profiles table
-			const { error: profileError } = await supabase.from('profiles').insert({
-				id: data.user.id,
-				email: data.user.email,
-				full_name: fullName,
-				role: 'seeker', // Default role for new mibarrio users
-				is_active: true,
-				is_mibarrio_provider: false
-			});
-
-			if (profileError) {
-				console.error('Error creating profile:', profileError);
-			}
-
+			// Profile is created by handle_new_user trigger in Supabase
+			// Just fetch it and set the state
 			const profile = await fetchUserProfile(data.user.id);
 			set({
 				user: profile,
