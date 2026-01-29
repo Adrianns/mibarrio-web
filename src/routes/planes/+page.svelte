@@ -2,7 +2,7 @@
 	import { Check, ExternalLink } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
-	import { APP_NAME } from '$lib/config';
+	import { APP_NAME, EMAIL_SUPPORT } from '$lib/config';
 
 	const APPYUDA_URL = 'https://appyuda.com.uy';
 
@@ -68,8 +68,8 @@
 					{/each}
 				</ul>
 
-				<Button href="/registrar-negocio" size="lg" class="w-full text-lg">
-					Registrar mi negocio
+				<Button href="/auth/login?redirect=/registrar-negocio" size="lg" class="w-full text-lg">
+					Ofrecer servicios
 				</Button>
 			</div>
 		</div>
@@ -143,7 +143,7 @@
 			<p class="text-gray-600 dark:text-gray-300 mb-4">
 				Contactanos y te ayudamos con lo que necesites.
 			</p>
-			<Button variant="outline" href="mailto:contacto@mibarrio.uy">
+			<Button variant="outline" href={`mailto:${EMAIL_SUPPORT}`}>
 				Contactar
 			</Button>
 		</div>

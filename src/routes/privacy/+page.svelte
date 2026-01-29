@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { APP_NAME } from '$lib/config';
+	import { APP_NAME, EMAIL_INFO } from '$lib/config';
 </script>
 
 <svelte:head>
@@ -165,7 +165,7 @@
 						<li>Eliminación de su cuenta (sujeta a retención por obligaciones legales).</li>
 					</ul>
 					<p class="text-gray-600 dark:text-gray-400 mt-3">
-						Para ejercer estos derechos, contacte a info@mibarrio.com.uy. {APP_NAME} podrá
+						Para ejercer estos derechos, contacte a <a href={`mailto:${EMAIL_INFO}`} class="text-primary-600 hover:underline">{EMAIL_INFO}</a>. {APP_NAME} podrá
 						rechazar solicitudes en ciertos casos permitidos por la ley.
 					</p>
 				</section>
@@ -216,7 +216,7 @@
 				<section>
 					<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">15. Contacto</h2>
 					<p class="text-gray-600 dark:text-gray-400">
-						Para consultas sobre privacidad: info@mibarrio.com.uy
+						Para consultas sobre privacidad: <a href={`mailto:${EMAIL_INFO}`} class="text-primary-600 hover:underline">{EMAIL_INFO}</a>
 					</p>
 				</section>
 			</div>

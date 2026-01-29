@@ -206,7 +206,7 @@
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-	<Header items={[{ label: 'Registrar negocio', href: '/registrar-negocio' }]} />
+	<Header />
 
 	<div class="container py-8">
 		<!-- Search and Filters -->
@@ -332,10 +332,10 @@
 					<Button variant="outline" onclick={clearFilters}>Limpiar filtros</Button>
 				{:else}
 					<a
-						href="/registrar-negocio"
+						href="/auth/login?redirect=/registrar-negocio"
 						class="inline-block bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700"
 					>
-						Registrar mi negocio
+						Ofrecer servicios
 					</a>
 				{/if}
 			</div>

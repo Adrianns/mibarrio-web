@@ -138,7 +138,7 @@
 						</div>
 					{:else}
 						<a href="/auth/login" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Ingresar</a>
-						<Button href="/registrar-negocio">Ofrecer Servicios</Button>
+						<Button href="/auth/login?redirect=/registrar-negocio">Ofrecer Servicios</Button>
 					{/if}
 				{/if}
 			</div>
@@ -240,9 +240,16 @@
 							</button>
 						{:else}
 							<a
-								href="/auth/login"
+								href="/auth/login?redirect=/registrar-negocio"
 								onclick={closeMenu}
 								class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+							>
+								Ingresar
+							</a>
+							<a
+								href="/auth/login?redirect=/registrar-negocio"
+								onclick={closeMenu}
+								class="flex items-center px-4 py-3 bg-primary-600 text-white font-medium hover:bg-primary-700 rounded-lg"
 							>
 								Ofrecer servicios
 							</a>

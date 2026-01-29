@@ -12,7 +12,10 @@
 		ArrowLeft,
 		Share2,
 		CheckCircle,
-		Loader2
+		Loader2,
+		X,
+		ChevronLeft,
+		ChevronRight
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
@@ -50,6 +53,38 @@
 	let loading = $state(true);
 	let provider = $state<ProviderDetail | null>(null);
 	let error = $state<string | null>(null);
+
+	// Lightbox state
+	let lightboxOpen = $state(false);
+	let lightboxIndex = $state(0);
+
+	function openLightbox(index: number) {
+		lightboxIndex = index;
+		lightboxOpen = true;
+	}
+
+	function closeLightbox() {
+		lightboxOpen = false;
+	}
+
+	function nextImage() {
+		if (provider?.photos) {
+			lightboxIndex = (lightboxIndex + 1) % provider.photos.length;
+		}
+	}
+
+	function prevImage() {
+		if (provider?.photos) {
+			lightboxIndex = (lightboxIndex - 1 + provider.photos.length) % provider.photos.length;
+		}
+	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (!lightboxOpen) return;
+		if (e.key === 'Escape') closeLightbox();
+		if (e.key === 'ArrowRight') nextImage();
+		if (e.key === 'ArrowLeft') prevImage();
+	}
 
 	function ensureProtocol(url: string): string {
 		if (!/^https?:\/\//i.test(url)) return `https://${url}`;
@@ -162,6 +197,8 @@
 	});
 </script>
 
+<svelte:window onkeydown={handleKeydown} />
+
 <svelte:head>
 	{#if provider}
 		<title>{provider.business_name} - {APP_NAME}</title>
@@ -235,7 +272,7 @@
 											{/if}
 										</div>
 									<div class="flex flex-wrap gap-2">
-										{#each provider.categories as categoryName}
+										{#each provider.categories as categoryName (categoryName)}
 											{@const catInfo = getCategoryInfo(categoryName)}
 											<span class="text-sm {catInfo.color} text-white px-3 py-1 rounded-full">
 												{catInfo.label}
@@ -272,8 +309,14 @@
 								<div class="mt-8">
 									<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Fotos</h2>
 									<div class="grid grid-cols-3 gap-4">
-										{#each provider.photos as photo}
-											<img src={photo} alt="Foto" loading="lazy" class="rounded-lg object-cover aspect-square" />
+										{#each provider.photos as photo, i (photo)}
+											<button
+												type="button"
+												onclick={() => openLightbox(i)}
+												class="cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-lg overflow-hidden"
+											>
+												<img src={photo} alt="Foto" loading="lazy" class="rounded-lg object-cover aspect-square w-full h-full hover:scale-105 transition-transform" />
+											</button>
 										{/each}
 									</div>
 								</div>
@@ -411,3 +454,66 @@
 		{/if}
 	</div>
 </div>
+
+<!-- Lightbox Modal -->
+{#if lightboxOpen && provider?.photos}
+	<div class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center">
+		<!-- Close button -->
+		<button
+			type="button"
+			onclick={closeLightbox}
+			class="absolute top-4 right-4 p-2 text-white/70 hover:text-white transition-colors z-10"
+			aria-label="Cerrar"
+		>
+			<X class="h-8 w-8" />
+		</button>
+
+		<!-- Previous button -->
+		{#if provider.photos.length > 1}
+			<button
+				type="button"
+				onclick={prevImage}
+				class="absolute left-4 p-2 text-white/70 hover:text-white transition-colors z-10"
+				aria-label="Anterior"
+			>
+				<ChevronLeft class="h-10 w-10" />
+			</button>
+		{/if}
+
+		<!-- Image -->
+		<div class="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+			<img
+				src={provider.photos[lightboxIndex]}
+				alt="Foto {lightboxIndex + 1}"
+				class="max-w-full max-h-[90vh] object-contain"
+			/>
+		</div>
+
+		<!-- Next button -->
+		{#if provider.photos.length > 1}
+			<button
+				type="button"
+				onclick={nextImage}
+				class="absolute right-4 p-2 text-white/70 hover:text-white transition-colors z-10"
+				aria-label="Siguiente"
+			>
+				<ChevronRight class="h-10 w-10" />
+			</button>
+		{/if}
+
+		<!-- Counter -->
+		{#if provider.photos.length > 1}
+			<div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm">
+				{lightboxIndex + 1} / {provider.photos.length}
+			</div>
+		{/if}
+
+		<!-- Backdrop click to close -->
+		<button
+			type="button"
+			onclick={closeLightbox}
+			class="absolute inset-0 -z-10"
+			aria-label="Cerrar"
+		></button>
+	</div>
+{/if}

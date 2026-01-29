@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { APP_NAME } from '$lib/config';
+	import { APP_NAME, EMAIL_INFO } from '$lib/config';
 </script>
 
 <svelte:head>
@@ -229,7 +229,7 @@
 				<section>
 					<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">17. Contacto</h2>
 					<p class="text-gray-600 dark:text-gray-400">
-						Para consultas: info@mibarrio.com.uy
+						Para consultas: <a href={`mailto:${EMAIL_INFO}`} class="text-primary-600 hover:underline">{EMAIL_INFO}</a>
 					</p>
 				</section>
 			</div>
