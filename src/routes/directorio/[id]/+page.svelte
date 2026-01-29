@@ -25,7 +25,6 @@
 	import { DEFAULT_CATEGORIES } from '$lib/domain/types';
 
 	const providerId = $page.params.id;
-	const APPYUDA_URL = 'https://appyuda.com.uy';
 
 	// Types
 	interface ProviderDetail {
@@ -415,40 +414,7 @@
 						<p class="text-xs text-gray-400 dark:text-gray-500 text-center">
 							{provider.view_count} visitas
 						</p>
-
-						<!-- Appyuda Mini Banner -->
-						<div class="mt-6 p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border border-green-200 dark:border-green-800 rounded-lg">
-							<p class="text-xs text-green-800 dark:text-green-300 text-center">
-								¿Querés más clientes?
-								<a
-									href={APPYUDA_URL}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="font-bold text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 underline"
-								>
-									Probá Appyuda
-								</a>
-							</p>
-						</div>
 					</div>
-				</div>
-			</div>
-
-			<!-- Appyuda Full Banner -->
-			<div class="mt-8 p-4 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl text-white">
-				<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-					<div>
-						<p class="font-semibold text-lg">¿Querés captar más clientes y cerrar negocios de forma segura?</p>
-						<p class="text-green-100 text-sm">Ofrecé tus servicios en nuestra plataforma de confianza</p>
-					</div>
-					<a
-						href={APPYUDA_URL}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="inline-flex items-center justify-center px-6 py-2 bg-white text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-colors"
-					>
-						Probá Appyuda
-					</a>
 				</div>
 			</div>
 		{/if}

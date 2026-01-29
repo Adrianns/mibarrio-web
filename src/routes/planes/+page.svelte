@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { Check, ExternalLink } from 'lucide-svelte';
+	import { Check } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
 	import { APP_NAME, EMAIL_SUPPORT } from '$lib/config';
-
-	const APPYUDA_URL = 'https://appyuda.com.uy';
 
 	const features = [
 		'Perfil completo en el directorio',
@@ -101,39 +99,6 @@
 						Creá una cuenta, completá tu perfil con los datos de tu negocio y listo.
 						Tu negocio aparece inmediatamente en el directorio.
 					</p>
-				</div>
-			</div>
-		</div>
-
-		<!-- Appyuda Banner -->
-		<div class="mt-16 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-8 md:p-12 text-white">
-			<div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8">
-				<div class="flex-1 text-center md:text-left">
-					<h2 class="text-2xl md:text-3xl font-bold mb-3">
-						¿Querés captar más clientes y cerrar negocios de forma segura?
-					</h2>
-					<p class="text-green-100 text-lg">
-						Además de Mi Barrio, ofrecé tus servicios en{' '}
-						<a
-							href={APPYUDA_URL}
-							target="_blank"
-							rel="noopener noreferrer"
-							class="font-bold underline hover:text-white"
-						>
-							Appyuda
-						</a>, nuestra plataforma de servicios profesionales con pagos garantizados.
-					</p>
-				</div>
-				<div class="flex-shrink-0">
-					<a
-						href={APPYUDA_URL}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="inline-flex items-center gap-2 px-8 py-4 bg-white text-green-600 font-bold text-lg rounded-xl hover:bg-green-50 transition-colors shadow-lg"
-					>
-						Conocer Appyuda
-						<ExternalLink class="h-5 w-5" />
-					</a>
 				</div>
 			</div>
 		</div>

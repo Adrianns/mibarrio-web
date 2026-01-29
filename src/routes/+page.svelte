@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { Search, MapPin, ArrowRight, ExternalLink } from 'lucide-svelte';
+	import { Search, MapPin, ArrowRight } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 	import { DEFAULT_CATEGORIES, DEPARTMENTS, MONTEVIDEO_NEIGHBORHOODS, type Department } from '$lib/domain/types';
 	import { APP_NAME, APP_TAGLINE } from '$lib/config';
-
-	const APPYUDA_URL = 'https://appyuda.com.uy';
 
 	let searchQuery = $state('');
 	let selectedDepartment = $state<Department | ''>('');
@@ -114,34 +112,6 @@
 		</div>
 	</section>
 
-	<!-- Appyuda Banner -->
-	<section class="container py-8">
-		<div class="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-8 md:p-12 text-white">
-			<div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8">
-				<div class="flex-1 text-center md:text-left">
-					<h2 class="text-2xl md:text-3xl font-bold mb-3">
-						¿Querés captar más clientes y cerrar negocios de forma segura?
-					</h2>
-					<p class="text-green-100 text-lg">
-						Ofrecé tus servicios profesionales en nuestra plataforma de confianza.
-						Conectá con clientes que buscan exactamente lo que ofrecés.
-					</p>
-				</div>
-				<div class="flex-shrink-0">
-					<a
-						href={APPYUDA_URL}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="inline-flex items-center gap-2 px-8 py-4 bg-white text-green-600 font-bold text-lg rounded-xl hover:bg-green-50 transition-colors shadow-lg"
-					>
-						Probá Appyuda
-						<ExternalLink class="h-5 w-5" />
-					</a>
-				</div>
-			</div>
-		</div>
-	</section>
-
 	<!-- CTA for Providers -->
 	<section class="container py-16">
 		<div class="bg-primary-600 rounded-2xl p-8 md:p-12 text-center text-white">
@@ -163,13 +133,12 @@
 			<div class="grid md:grid-cols-4 gap-8">
 				<div>
 					<h3 class="flex items-center gap-2 text-white font-bold text-lg mb-4">
-						<span class="flex flex-col gap-0.5">
-							<span class="flex items-center gap-0.5">
-								<span class="w-1 h-1 rounded-full bg-yellow-400"></span>
-								<span class="w-4 h-0.5 rounded-sm bg-white"></span>
-							</span>
-							<span class="w-5 h-0.5 rounded-sm bg-white"></span>
-						</span>
+						<svg width="24" height="17" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<circle cx="5" cy="6.5" r="3" fill="#FACC15"/>
+							<rect x="11" y="2" width="15" height="3" rx="1.5" fill="currentColor"/>
+							<rect x="11" y="8" width="15" height="3" rx="1.5" fill="currentColor"/>
+							<rect x="0" y="14" width="26" height="3" rx="1.5" fill="currentColor"/>
+						</svg>
 						{APP_NAME}
 					</h3>
 					<p class="text-sm">El directorio de servicios locales de Uruguay.</p>

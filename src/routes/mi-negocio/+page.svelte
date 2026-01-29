@@ -65,6 +65,36 @@
 		return cat || { label: name, color: 'bg-gray-500' };
 	}
 
+	// Extract username from Instagram URL
+	function extractInstagramUsername(url: string | null): string {
+		if (!url) return '';
+		const match = url.match(/(?:instagram\.com\/|^@?)([^\/\?]+)/i);
+		return match ? match[1].replace(/^@/, '') : url;
+	}
+
+	// Extract page name from Facebook URL
+	function extractFacebookPage(url: string | null): string {
+		if (!url) return '';
+		const match = url.match(/(?:facebook\.com\/|^\/?)([^\/\?]+)/i);
+		return match ? match[1].replace(/^\//, '') : url;
+	}
+
+	// Format Instagram username to URL
+	function formatInstagram(username: string): string | null {
+		if (!username) return null;
+		const clean = username.replace(/^@/, '').trim();
+		if (!clean) return null;
+		return `https://instagram.com/${clean}`;
+	}
+
+	// Format Facebook page to URL
+	function formatFacebook(page: string): string | null {
+		if (!page) return null;
+		const clean = page.replace(/^\//, '').trim();
+		if (!clean) return null;
+		return `https://facebook.com/${clean}`;
+	}
+
 	async function loadProvider() {
 		const currentUser = get(user);
 		if (!currentUser) {
@@ -94,8 +124,8 @@
 		contactWhatsapp = data.contact_whatsapp || '';
 		contactEmail = data.contact_email || '';
 		website = data.website || '';
-		socialInstagram = data.social_instagram || '';
-		socialFacebook = data.social_facebook || '';
+		socialInstagram = extractInstagramUsername(data.social_instagram);
+		socialFacebook = extractFacebookPage(data.social_facebook);
 		logoUrl = data.logo_url;
 		photos = data.photos || [];
 
@@ -249,8 +279,8 @@
 				contact_whatsapp: contactWhatsapp.trim() || null,
 				contact_email: contactEmail.trim() || null,
 				website: website.trim() || null,
-				social_instagram: socialInstagram.trim() || null,
-				social_facebook: socialFacebook.trim() || null
+				social_instagram: formatInstagram(socialInstagram),
+				social_facebook: formatFacebook(socialFacebook)
 			})
 			.eq('id', providerId);
 
@@ -633,27 +663,29 @@
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div>
 							<label for="socialInstagram" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-								Instagram
+								Instagram (usuario)
 							</label>
 							<input
 								id="socialInstagram"
 								type="text"
 								bind:value={socialInstagram}
-								placeholder="@usuario"
+								placeholder="tu_usuario"
 								class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
 							/>
+							<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Solo el nombre de usuario</p>
 						</div>
 						<div>
 							<label for="socialFacebook" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-								Facebook
+								Facebook (página)
 							</label>
 							<input
 								id="socialFacebook"
 								type="text"
 								bind:value={socialFacebook}
-								placeholder="/pagina"
+								placeholder="tu_pagina"
 								class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
 							/>
+							<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Solo el nombre de la página</p>
 						</div>
 					</div>
 				</div>

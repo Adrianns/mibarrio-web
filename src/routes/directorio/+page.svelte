@@ -4,7 +4,9 @@
 	import {
 		Search,
 		MapPin,
-		Loader2
+		Loader2,
+		SlidersHorizontal,
+		X
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
@@ -46,8 +48,47 @@
 
 	let loading = $state(true);
 	let providers = $state<Provider[]>([]);
+	let filterDialogOpen = $state(false);
 
-	const APPYUDA_URL = 'https://appyuda.com.uy';
+	// Check if any filter is active
+	let hasActiveFilters = $derived(
+		selectedDepartment !== '' || selectedNeighborhood !== '' || selectedCategory !== '' || selectedType !== ''
+	);
+
+	// Get active filter count
+	let activeFilterCount = $derived(
+		[selectedDepartment, selectedNeighborhood, selectedCategory, selectedType].filter(Boolean).length
+	);
+
+	function openFilterDialog() {
+		filterDialogOpen = true;
+	}
+
+	function closeFilterDialog() {
+		filterDialogOpen = false;
+	}
+
+	function applyFilters() {
+		closeFilterDialog();
+		updateUrl();
+		fetchProviders();
+	}
+
+	function removeFilter(filter: 'department' | 'neighborhood' | 'category' | 'type') {
+		if (filter === 'department') {
+			selectedDepartment = '';
+			selectedNeighborhood = '';
+		} else if (filter === 'neighborhood') {
+			selectedNeighborhood = '';
+		} else if (filter === 'category') {
+			selectedCategory = '';
+		} else if (filter === 'type') {
+			selectedType = '';
+			selectedCategory = '';
+		}
+		updateUrl();
+		fetchProviders();
+	}
 
 	const categories = DEFAULT_CATEGORIES.filter((c) => c.is_active);
 	const serviceCategories = categories.filter(
@@ -188,13 +229,7 @@
 		}, 300);
 	}
 
-	$effect(() => {
-		// Re-fetch when filters change (except search which has debounce)
-		if (selectedDepartment !== undefined || selectedNeighborhood !== undefined || selectedCategory !== undefined || selectedType !== undefined) {
-			updateUrl();
-			fetchProviders();
-		}
-	});
+	// Filters are now applied manually via dialog
 
 	onMount(() => {
 		fetchProviders();
@@ -209,9 +244,9 @@
 	<Header />
 
 	<div class="container py-8">
-		<!-- Search and Filters -->
-		<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
-			<div class="flex flex-col md:flex-row gap-4">
+		<!-- Search and Filter Button -->
+		<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-4">
+			<div class="flex gap-3">
 				<div class="flex-1 relative">
 					<Search class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
 					<input
@@ -222,91 +257,67 @@
 						class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
 					/>
 				</div>
-				<div class="md:w-48 relative">
-					<MapPin class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-					<select
-						bind:value={selectedDepartment}
-						class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none appearance-none bg-white dark:bg-gray-700 dark:text-white"
-					>
-						<option value="">Todo Uruguay</option>
-						{#each DEPARTMENTS as dept}
-							<option value={dept}>{dept}</option>
-						{/each}
-					</select>
-				</div>
-				{#if selectedDepartment === 'Montevideo'}
-					<div class="md:w-48">
-						<select
-							bind:value={selectedNeighborhood}
-							class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none appearance-none bg-white dark:bg-gray-700 dark:text-white"
-						>
-							<option value="">Todos los barrios</option>
-							{#each MONTEVIDEO_NEIGHBORHOODS as barrio}
-								<option value={barrio}>{barrio}</option>
-							{/each}
-						</select>
-					</div>
+				<button
+					type="button"
+					onclick={openFilterDialog}
+					class="flex items-center gap-2 px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+				>
+					<SlidersHorizontal class="h-5 w-5" />
+					<span class="hidden sm:inline">Filtros</span>
+					{#if activeFilterCount > 0}
+						<span class="bg-primary-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+							{activeFilterCount}
+						</span>
+					{/if}
+				</button>
+			</div>
+		</div>
+
+		<!-- Active Filter Chips -->
+		{#if hasActiveFilters}
+			<div class="flex flex-wrap items-center gap-2 mb-4">
+				{#if selectedType}
+					<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-sm">
+						{selectedType === 'service' ? 'Profesionales' : 'Comercios'}
+						<button type="button" onclick={() => removeFilter('type')} class="hover:text-primary-900 dark:hover:text-primary-100">
+							<X class="h-4 w-4" />
+						</button>
+					</span>
 				{/if}
-				</div>
-
-			<!-- Type chips -->
-			<div class="flex gap-2 mt-4">
+				{#if selectedCategory}
+					{@const catInfo = getCategoryInfo(selectedCategory)}
+					<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-sm">
+						{catInfo.label}
+						<button type="button" onclick={() => removeFilter('category')} class="hover:text-primary-900 dark:hover:text-primary-100">
+							<X class="h-4 w-4" />
+						</button>
+					</span>
+				{/if}
+				{#if selectedDepartment}
+					<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-sm">
+						{selectedDepartment}
+						<button type="button" onclick={() => removeFilter('department')} class="hover:text-primary-900 dark:hover:text-primary-100">
+							<X class="h-4 w-4" />
+						</button>
+					</span>
+				{/if}
+				{#if selectedNeighborhood}
+					<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-sm">
+						{selectedNeighborhood}
+						<button type="button" onclick={() => removeFilter('neighborhood')} class="hover:text-primary-900 dark:hover:text-primary-100">
+							<X class="h-4 w-4" />
+						</button>
+					</span>
+				{/if}
 				<button
-					onclick={() => { selectedType = ''; selectedCategory = ''; }}
-					class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-colors {selectedType === '' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-300 hover:text-primary-600 dark:hover:text-primary-400'}"
+					type="button"
+					onclick={clearFilters}
+					class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline"
 				>
-					Todos
-				</button>
-				<button
-					onclick={() => { selectedType = 'service'; selectedCategory = ''; }}
-					class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-colors {selectedType === 'service' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-300 hover:text-primary-600 dark:hover:text-primary-400'}"
-				>
-					Profesionales
-				</button>
-				<button
-					onclick={() => { selectedType = 'business'; selectedCategory = ''; }}
-					class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-colors {selectedType === 'business' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-300 hover:text-primary-600 dark:hover:text-primary-400'}"
-				>
-					Comercios
+					Limpiar filtros
 				</button>
 			</div>
-
-			<!-- Category chips -->
-			<div class="flex gap-2 mt-3 overflow-x-auto pb-2" style="scrollbar-width: none;">
-				<button
-					onclick={() => { selectedCategory = ''; }}
-					class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-colors {selectedCategory === '' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-300 hover:text-primary-600 dark:hover:text-primary-400'}"
-				>
-					Todas
-				</button>
-				{#each filteredCategories as cat}
-					<button
-						onclick={() => { selectedCategory = cat.name; }}
-						class="px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0 transition-colors {selectedCategory === cat.name ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary-300 hover:text-primary-600 dark:hover:text-primary-400'}"
-					>
-						{cat.label}
-					</button>
-				{/each}
-			</div>
-		</div>
-
-		<!-- Appyuda Banner -->
-		<div class="mb-6 p-4 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl text-white">
-			<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-				<div>
-					<p class="font-semibold text-lg">¿Querés captar más clientes y cerrar negocios de forma segura?</p>
-					<p class="text-green-100 text-sm">Ofrecé tus servicios en nuestra plataforma de confianza</p>
-				</div>
-				<a
-					href={APPYUDA_URL}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="inline-flex items-center justify-center px-6 py-2 bg-white text-green-600 font-semibold rounded-lg hover:bg-green-50 transition-colors"
-				>
-					Probá Appyuda
-				</a>
-			</div>
-		</div>
+		{/if}
 
 		<!-- Loading state -->
 		{#if loading}
@@ -446,3 +457,114 @@
 		{/if}
 	</div>
 </div>
+
+<!-- Filter Dialog -->
+{#if filterDialogOpen}
+	<!-- Backdrop -->
+	<button type="button" class="fixed inset-0 bg-black/50 z-40 cursor-default" onclick={closeFilterDialog} aria-label="Cerrar filtros"></button>
+
+	<!-- Dialog -->
+	<div class="fixed inset-x-4 top-1/2 -translate-y-1/2 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl z-50 max-h-[85vh] flex flex-col">
+		<!-- Header -->
+		<div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+			<h2 class="text-lg font-semibold text-gray-900 dark:text-white">Filtros</h2>
+			<button type="button" onclick={closeFilterDialog} class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+				<X class="h-5 w-5" />
+			</button>
+		</div>
+
+		<!-- Content -->
+		<div class="flex-1 overflow-y-auto p-4 space-y-6">
+			<!-- Type -->
+			<div>
+				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo</label>
+				<div class="flex flex-wrap gap-2">
+					<button
+						type="button"
+						onclick={() => { selectedType = ''; }}
+						class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {selectedType === '' ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}"
+					>
+						Todos
+					</button>
+					<button
+						type="button"
+						onclick={() => { selectedType = 'service'; selectedCategory = ''; }}
+						class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {selectedType === 'service' ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}"
+					>
+						Profesionales
+					</button>
+					<button
+						type="button"
+						onclick={() => { selectedType = 'business'; selectedCategory = ''; }}
+						class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {selectedType === 'business' ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}"
+					>
+						Comercios
+					</button>
+				</div>
+			</div>
+
+			<!-- Category -->
+			<div>
+				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Categoría</label>
+				<div class="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
+					<button
+						type="button"
+						onclick={() => { selectedCategory = ''; }}
+						class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors {selectedCategory === '' ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}"
+					>
+						Todas
+					</button>
+					{#each filteredCategories as cat (cat.name)}
+						<button
+							type="button"
+							onclick={() => { selectedCategory = cat.name; }}
+							class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors {selectedCategory === cat.name ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}"
+						>
+							{cat.label}
+						</button>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Department -->
+			<div>
+				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
+				<select
+					bind:value={selectedDepartment}
+					class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none bg-white dark:bg-gray-700 dark:text-white"
+				>
+					<option value="">Todo Uruguay</option>
+					{#each DEPARTMENTS as dept (dept)}
+						<option value={dept}>{dept}</option>
+					{/each}
+				</select>
+			</div>
+
+			<!-- Neighborhood (only for Montevideo) -->
+			{#if selectedDepartment === 'Montevideo'}
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Barrio</label>
+					<select
+						bind:value={selectedNeighborhood}
+						class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none bg-white dark:bg-gray-700 dark:text-white"
+					>
+						<option value="">Todos los barrios</option>
+						{#each MONTEVIDEO_NEIGHBORHOODS as barrio (barrio)}
+							<option value={barrio}>{barrio}</option>
+						{/each}
+					</select>
+				</div>
+			{/if}
+		</div>
+
+		<!-- Footer -->
+		<div class="flex gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
+			<Button variant="outline" class="flex-1" onclick={clearFilters}>
+				Limpiar
+			</Button>
+			<Button class="flex-1" onclick={applyFilters}>
+				Aplicar filtros
+			</Button>
+		</div>
+	</div>
+{/if}

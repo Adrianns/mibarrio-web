@@ -64,8 +64,6 @@
 	// Step 5 (Plan) disabled: app is now 100% free
 	// let selectedPlan = $state(preselectedPlan || 'basico');
 
-	const APPYUDA_URL = 'https://appyuda.com.uy';
-
 	// Plan info disabled: app is now 100% free
 	// const plan = { ... };
 
@@ -574,7 +572,7 @@
 						<div class="grid grid-cols-2 gap-4">
 							<div>
 								<label for="instagramUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-									Instagram
+									Instagram (usuario)
 								</label>
 								<div class="relative">
 									<Instagram
@@ -584,14 +582,15 @@
 										id="instagramUrl"
 										type="text"
 										bind:value={instagramUrl}
-										placeholder="@usuario"
+										placeholder="tu_usuario"
 										class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
 									/>
 								</div>
+								<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Solo el nombre de usuario</p>
 							</div>
 							<div>
 								<label for="facebookUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-									Facebook
+									Facebook (página)
 								</label>
 								<div class="relative">
 									<Facebook
@@ -601,10 +600,11 @@
 										id="facebookUrl"
 										type="text"
 										bind:value={facebookUrl}
-										placeholder="/pagina"
+										placeholder="tu_pagina"
 										class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
 									/>
 								</div>
+								<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Solo el nombre de la página</p>
 							</div>
 						</div>
 					</div>
