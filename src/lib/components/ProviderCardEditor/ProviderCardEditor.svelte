@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CheckCircle, Loader2, Save, Camera, ImagePlus, Trash2, X, Pencil } from 'lucide-svelte';
+	import { CheckCircle, Loader2, Save, Camera, ImagePlus, Trash2, X } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import EditableText from './EditableText.svelte';
 	import EditableTextarea from './EditableTextarea.svelte';
@@ -14,6 +14,8 @@
 	interface ProviderData {
 		id?: string;
 		businessName: string;
+		businessType?: 'individual' | 'business';
+		rut?: string;
 		description: string;
 		department: Department | '';
 		neighborhood: string;
@@ -34,22 +36,22 @@
 		mode = 'create' as 'create' | 'edit',
 		editorMode = 'full' as 'quick' | 'full',
 		readOnly = false,
+		businessType = 'individual' as 'individual' | 'business',
 		userId,
 		userName = '',
 		initialData = null as ProviderData | null,
 		saving = false,
-		onSave,
-		onEditToggle
+		onSave
 	}: {
 		mode?: 'create' | 'edit';
 		editorMode?: 'quick' | 'full';
 		readOnly?: boolean;
+		businessType?: 'individual' | 'business';
 		userId: string;
 		userName?: string;
 		initialData?: ProviderData | null;
 		saving?: boolean;
 		onSave: (data: ProviderData) => void;
-		onEditToggle?: () => void;
 	} = $props();
 
 	// Track current editor mode (can be expanded from quick to full)
@@ -57,6 +59,7 @@
 
 	// Form state - Pre-fill name from userName if no initialData
 	let businessName = $state(initialData?.businessName ?? userName ?? '');
+	let rut = $state(initialData?.rut ?? '');
 	let description = $state(initialData?.description ?? '');
 	let department = $state<Department | ''>(initialData?.department ?? '');
 	let neighborhood = $state(initialData?.neighborhood ?? '');
@@ -127,6 +130,8 @@
 		const data: ProviderData = {
 			id: initialData?.id,
 			businessName,
+			businessType,
+			rut: businessType === 'business' ? rut : undefined,
 			description,
 			department,
 			neighborhood,
@@ -218,18 +223,7 @@
 <div class="grid lg:grid-cols-3 gap-8">
 	<!-- Main content - Card preview -->
 	<div class="lg:col-span-2">
-		<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden relative">
-			<!-- Edit toggle button for view mode -->
-			{#if readOnly && onEditToggle}
-				<button
-					type="button"
-					onclick={onEditToggle}
-					class="absolute top-4 right-4 z-10 p-2 bg-primary-600 text-white rounded-full hover:bg-primary-700 transition-colors shadow-lg"
-					aria-label="Editar"
-				>
-					<Pencil class="h-5 w-5" />
-				</button>
-			{/if}
+		<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
 			<div class="p-6">
 				<!-- Header with logo and info -->
 				<div class="flex items-start gap-4 mb-6">
@@ -296,6 +290,19 @@
 								<CheckCircle class="h-6 w-6 text-green-500 flex-shrink-0" />
 							{/if}
 						</div>
+
+						<!-- RUT (only for business type) -->
+						{#if businessType === 'business'}
+							<div class="mb-2" id="field-rut">
+								<EditableText
+									bind:value={rut}
+									placeholder="RUT de la empresa"
+									{readOnly}
+									displayClass="text-sm text-gray-600 dark:text-gray-400"
+									inputClass="text-sm text-gray-600 dark:text-gray-400"
+								/>
+							</div>
+						{/if}
 
 						<!-- Categories -->
 						<div class="mb-2" id="field-categories">

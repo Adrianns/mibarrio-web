@@ -6,7 +6,7 @@
 	import { toast } from '$lib/stores/toast';
 	import { auth, user } from '$lib/stores/auth';
 	import { supabase } from '$lib/supabase';
-	import { Loader2 } from 'lucide-svelte';
+	import { Loader2, Pencil } from 'lucide-svelte';
 	import { get } from 'svelte/store';
 	import { ProviderCardEditor, ProfileCompleteness } from '$lib/components/ProviderCardEditor';
 	import type { Department } from '$lib/domain/types';
@@ -219,6 +219,15 @@
 					>
 						Cancelar edición
 					</button>
+				{:else}
+					<button
+						type="button"
+						onclick={() => isEditing = true}
+						class="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+					>
+						<Pencil class="h-4 w-4" />
+						<span>Editar</span>
+					</button>
 				{/if}
 			</div>
 
@@ -230,7 +239,6 @@
 				{initialData}
 				{saving}
 				onSave={(data) => { handleSave(data); isEditing = false; }}
-				onEditToggle={() => isEditing = true}
 			/>
 
 			<ProfileCompleteness data={initialData} />
