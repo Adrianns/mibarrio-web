@@ -19,10 +19,8 @@
 	let email = $state('');
 
 	// Password form
-	let currentPassword = $state('');
 	let newPassword = $state('');
 	let confirmPassword = $state('');
-	let showCurrentPassword = $state(false);
 	let showNewPassword = $state(false);
 
 	// Password errors
@@ -54,11 +52,6 @@
 	async function handleChangePassword() {
 		passwordError = '';
 
-		if (!currentPassword) {
-			passwordError = 'Ingresá tu contraseña actual';
-			return;
-		}
-
 		if (!newPassword) {
 			passwordError = 'Ingresá la nueva contraseña';
 			return;
@@ -77,31 +70,18 @@
 		changingPassword = true;
 
 		try {
-			// Verify current password using RPC call (server-side verification)
-			const { data: isValid, error: verifyError } = await supabase.rpc('verify_user_password', {
-				password: currentPassword
-			});
-
-			if (verifyError || !isValid) {
-				passwordError = 'La contraseña actual es incorrecta';
-				changingPassword = false;
-				return;
-			}
-
-			// Update password
+			// Update password directly - user is already authenticated
 			const { error: updateError } = await supabase.auth.updateUser({
 				password: newPassword
 			});
 
 			if (updateError) {
 				passwordError = 'Error al cambiar la contraseña: ' + updateError.message;
-				changingPassword = false;
 				return;
 			}
 
 			toast.success('Contraseña actualizada');
 			showPasswordForm = false;
-			currentPassword = '';
 			newPassword = '';
 			confirmPassword = '';
 		} catch (err) {
@@ -208,33 +188,6 @@
 					</button>
 				{:else}
 					<div class="space-y-4">
-						<!-- Current password -->
-						<div>
-							<label for="currentPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-								Contraseña actual
-							</label>
-							<div class="relative">
-								<input
-									id="currentPassword"
-									type={showCurrentPassword ? 'text' : 'password'}
-									bind:value={currentPassword}
-									placeholder="••••••••"
-									class="w-full px-4 py-3 pr-12 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
-								/>
-								<button
-									type="button"
-									onclick={() => showCurrentPassword = !showCurrentPassword}
-									class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-								>
-									{#if showCurrentPassword}
-										<EyeOff class="h-5 w-5" />
-									{:else}
-										<Eye class="h-5 w-5" />
-									{/if}
-								</button>
-							</div>
-						</div>
-
 						<!-- New password -->
 						<div>
 							<label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -288,7 +241,7 @@
 						<div class="flex gap-3">
 							<button
 								type="button"
-								onclick={() => { showPasswordForm = false; passwordError = ''; currentPassword = ''; newPassword = ''; confirmPassword = ''; }}
+								onclick={() => { showPasswordForm = false; passwordError = ''; newPassword = ''; confirmPassword = ''; }}
 								class="flex-1 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-sm font-medium"
 							>
 								Cancelar
