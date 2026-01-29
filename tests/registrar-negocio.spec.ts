@@ -133,21 +133,38 @@ test.describe('Registrar Negocio - Validation Errors', () => {
 	});
 });
 
-test.describe('Registrar Negocio - Guided Description', () => {
+test.describe('Registrar Negocio - Description with Helper', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/registrar-negocio');
 	});
 
-	test('should show guided description questions', async ({ page }) => {
-		// Check questions are visible
+	test('should show textarea first with helper option below', async ({ page }) => {
+		// Textarea should be visible first
+		const textarea = page.locator('textarea[placeholder="Contá sobre tu negocio, servicios, horarios..."]');
+		await expect(textarea).toBeVisible();
+
+		// Helper link should be visible
+		await expect(page.getByText('¿Necesitás ayuda para escribir tu descripción?')).toBeVisible();
+
+		// Guided questions should NOT be visible initially
+		await expect(page.getByText('¿Qué servicios ofrecés?')).not.toBeVisible();
+	});
+
+	test('should show guided form when clicking helper link', async ({ page }) => {
+		// Click helper link
+		await page.getByText('¿Necesitás ayuda para escribir tu descripción?').click();
+
+		// Guided form should be visible
+		await expect(page.getByText('Generador de descripción')).toBeVisible();
 		await expect(page.getByText('¿Qué servicios ofrecés?')).toBeVisible();
 		await expect(page.getByText('¿Cuánto tiempo de experiencia tenés?')).toBeVisible();
 		await expect(page.getByText('¿Vas a domicilio?')).toBeVisible();
-		await expect(page.getByText('¿Hacés presupuestos sin cargo?')).toBeVisible();
-		await expect(page.getByText('¿Algo más que quieras agregar?')).toBeVisible();
 	});
 
-	test('should have experience dropdown with options', async ({ page }) => {
+	test('should have experience dropdown with options in helper', async ({ page }) => {
+		// Open helper
+		await page.getByText('¿Necesitás ayuda para escribir tu descripción?').click();
+
 		const experienceSelect = page.locator('#experience');
 		await expect(experienceSelect).toBeVisible();
 
@@ -158,53 +175,39 @@ test.describe('Registrar Negocio - Guided Description', () => {
 		await expect(experienceSelect.locator('option', { hasText: 'Más de 10 años' })).toBeAttached();
 	});
 
-	test('should have domicilio dropdown with options', async ({ page }) => {
-		const domicilioSelect = page.locator('#domicilio');
-		await expect(domicilioSelect).toBeVisible();
-
-		// Check options
-		await expect(domicilioSelect.locator('option', { hasText: 'Sí' })).toBeAttached();
-		await expect(domicilioSelect.locator('option', { hasText: 'No' })).toBeAttached();
-		await expect(domicilioSelect.locator('option', { hasText: 'A veces' })).toBeAttached();
-	});
-
-	test('should generate description from answers', async ({ page }) => {
-		// Wait for guided description form to be visible
-		await expect(page.locator('#services')).toBeVisible();
+	test('should generate description when clicking generate button', async ({ page }) => {
+		// Open helper
+		await page.getByText('¿Necesitás ayuda para escribir tu descripción?').click();
 
 		// Fill in the services field
 		await page.locator('#services').fill('Instalaciones eléctricas');
+		await page.locator('#experience').selectOption('5+');
 
-		// The description should now contain the text we typed
-		// Note: Once description is generated, the form switches to EditableTextarea view
-		// So we verify the generated description is visible
-		await expect(page.getByText(/Instalaciones eléctricas/)).toBeVisible();
-	});
+		// Click generate button
+		await page.getByRole('button', { name: /Generar descripción/i }).click();
 
-	test('should toggle to free edit mode', async ({ page }) => {
-		// Click toggle to free edit
-		await page.getByRole('button', { name: /Editar texto libremente/i }).click();
+		// Helper should close
+		await expect(page.getByText('Generador de descripción')).not.toBeVisible();
 
-		// Textarea should be visible
+		// Textarea should have the generated description
 		const textarea = page.locator('textarea[placeholder="Contá sobre tu negocio, servicios, horarios..."]');
-		await expect(textarea).toBeVisible();
-
-		// Questions should be hidden
-		await expect(page.getByText('¿Qué servicios ofrecés?')).not.toBeVisible();
-
-		// Back button should be visible
-		await expect(page.getByRole('button', { name: /Volver a las preguntas guiadas/i })).toBeVisible();
+		await expect(textarea).toHaveValue(/Instalaciones eléctricas/);
+		await expect(textarea).toHaveValue(/Más de 5 años de experiencia/);
 	});
 
-	test('should toggle back to guided mode', async ({ page }) => {
-		// Switch to free edit
-		await page.getByRole('button', { name: /Editar texto libremente/i }).click();
+	test('should close helper when clicking X', async ({ page }) => {
+		// Open helper
+		await page.getByText('¿Necesitás ayuda para escribir tu descripción?').click();
+		await expect(page.getByText('Generador de descripción')).toBeVisible();
 
-		// Switch back to guided
-		await page.getByRole('button', { name: /Volver a las preguntas guiadas/i }).click();
+		// Click X to close
+		await page.locator('.bg-primary-50 button').first().click();
 
-		// Questions should be visible again
-		await expect(page.getByText('¿Qué servicios ofrecés?')).toBeVisible();
+		// Helper should close
+		await expect(page.getByText('Generador de descripción')).not.toBeVisible();
+
+		// Helper link should be visible again
+		await expect(page.getByText('¿Necesitás ayuda para escribir tu descripción?')).toBeVisible();
 	});
 });
 

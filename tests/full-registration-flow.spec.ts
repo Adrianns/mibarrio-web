@@ -46,18 +46,19 @@ test.describe('Full Business Registration Form Flow', () => {
 		// Verify phone is displayed
 		await expect(page.getByText('099123456')).toBeVisible();
 
-		// Step 7: Verify guided description questions are visible (full mode shows all fields)
-		await expect(page.getByText('¿Qué servicios ofrecés?')).toBeVisible();
-		await expect(page.locator('#services')).toBeVisible();
-		await expect(page.locator('#experience')).toBeVisible();
-		await expect(page.locator('#domicilio')).toBeVisible();
+		// Step 7: Description section - textarea first with helper option
+		const descTextarea = page.locator('textarea[placeholder="Contá sobre tu negocio, servicios, horarios..."]');
+		await expect(descTextarea).toBeVisible();
+		await expect(page.getByText('¿Necesitás ayuda para escribir tu descripción?')).toBeVisible();
 
-		// Step 8: Fill guided description (one field at a time to see generation)
+		// Step 8: Use the description helper
+		await page.getByText('¿Necesitás ayuda para escribir tu descripción?').click();
 		await page.locator('#services').fill('Instalaciones y reparaciones eléctricas');
+		await page.locator('#experience').selectOption('5+');
+		await page.getByRole('button', { name: /Generar descripción/i }).click();
 
-		// Verify description is generated and displayed
-		// Note: Once description is generated, it switches to EditableTextarea display mode
-		await expect(page.getByText(/Instalaciones y reparaciones eléctricas/)).toBeVisible();
+		// Verify description was generated in textarea
+		await expect(descTextarea).toHaveValue(/Instalaciones y reparaciones eléctricas/);
 
 		// Step 9: Verify photo guidance is shown
 		await expect(page.getByText('Tu foto')).toBeVisible();

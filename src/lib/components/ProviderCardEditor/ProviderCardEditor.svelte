@@ -327,7 +327,7 @@
 								displayClass="text-gray-600 dark:text-gray-300"
 								textareaClass="text-gray-600 dark:text-gray-300 dark:bg-gray-700"
 							/>
-						{:else if mode === 'create' && !description}
+						{:else if mode === 'create'}
 							<GuidedDescription bind:value={description} />
 						{:else}
 							<EditableTextarea
