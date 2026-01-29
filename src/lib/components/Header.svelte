@@ -58,7 +58,16 @@
 <header class="{headerClass} relative z-50">
 	<div class="container py-4">
 		<nav class="flex items-center justify-between">
-			<a href="/" class="text-2xl font-bold text-primary-600">{APP_NAME}</a>
+			<a href="/" class="flex items-center gap-2 text-2xl font-bold text-primary-600">
+				<span class="flex flex-col gap-0.5">
+					<span class="flex items-center gap-0.5">
+						<span class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+						<span class="w-5 h-1 rounded-sm bg-primary-600"></span>
+					</span>
+					<span class="w-7 h-1 rounded-sm bg-primary-600"></span>
+				</span>
+				{APP_NAME}
+			</a>
 
 			<!-- Desktop Navigation -->
 			<div class="hidden md:flex items-center gap-4">
@@ -169,7 +178,16 @@
 		<div class="flex flex-col h-full">
 			<!-- Drawer Header -->
 			<div class="flex items-center justify-between p-4">
-				<span class="text-lg font-bold text-primary-600">{APP_NAME}</span>
+				<span class="flex items-center gap-2 text-lg font-bold text-primary-600">
+					<span class="flex flex-col gap-0.5">
+						<span class="flex items-center gap-0.5">
+							<span class="w-1 h-1 rounded-full bg-yellow-400"></span>
+							<span class="w-4 h-0.5 rounded-sm bg-primary-600"></span>
+						</span>
+						<span class="w-5 h-0.5 rounded-sm bg-primary-600"></span>
+					</span>
+					{APP_NAME}
+				</span>
 				<button
 					onclick={closeMenu}
 					class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"

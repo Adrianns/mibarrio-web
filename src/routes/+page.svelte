@@ -140,7 +140,16 @@
 		<div class="container">
 			<div class="grid md:grid-cols-4 gap-8">
 				<div>
-					<h3 class="text-white font-bold text-lg mb-4">{APP_NAME}</h3>
+					<h3 class="flex items-center gap-2 text-white font-bold text-lg mb-4">
+						<span class="flex flex-col gap-0.5">
+							<span class="flex items-center gap-0.5">
+								<span class="w-1 h-1 rounded-full bg-yellow-400"></span>
+								<span class="w-4 h-0.5 rounded-sm bg-white"></span>
+							</span>
+							<span class="w-5 h-0.5 rounded-sm bg-white"></span>
+						</span>
+						{APP_NAME}
+					</h3>
 					<p class="text-sm">El directorio de servicios locales de Uruguay.</p>
 				</div>
 				<div>
