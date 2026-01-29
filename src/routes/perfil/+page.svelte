@@ -76,35 +76,40 @@
 
 		changingPassword = true;
 
-		// First verify current password by re-authenticating
-		const { error: signInError } = await supabase.auth.signInWithPassword({
-			email: email,
-			password: currentPassword
-		});
+		try {
+			// Verify current password using RPC call (server-side verification)
+			const { data: isValid, error: verifyError } = await supabase.rpc('verify_user_password', {
+				password: currentPassword
+			});
 
-		if (signInError) {
-			passwordError = 'La contraseña actual es incorrecta';
-			changingPassword = false;
-			return;
-		}
+			if (verifyError || !isValid) {
+				passwordError = 'La contraseña actual es incorrecta';
+				changingPassword = false;
+				return;
+			}
 
-		// Update password
-		const { error: updateError } = await supabase.auth.updateUser({
-			password: newPassword
-		});
+			// Update password
+			const { error: updateError } = await supabase.auth.updateUser({
+				password: newPassword
+			});
 
-		if (updateError) {
+			if (updateError) {
+				passwordError = 'Error al cambiar la contraseña: ' + updateError.message;
+				changingPassword = false;
+				return;
+			}
+
+			toast.success('Contraseña actualizada');
+			showPasswordForm = false;
+			currentPassword = '';
+			newPassword = '';
+			confirmPassword = '';
+		} catch (err) {
+			console.error('Password change error:', err);
 			passwordError = 'Error al cambiar la contraseña';
+		} finally {
 			changingPassword = false;
-			return;
 		}
-
-		toast.success('Contraseña actualizada');
-		showPasswordForm = false;
-		currentPassword = '';
-		newPassword = '';
-		confirmPassword = '';
-		changingPassword = false;
 	}
 
 	onMount(async () => {
