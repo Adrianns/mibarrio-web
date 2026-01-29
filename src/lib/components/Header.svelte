@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Menu, X, ChevronDown, User, Store, LogOut } from 'lucide-svelte';
+	import { Menu, X, ChevronDown, Store, LogOut } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
-	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import { APP_NAME } from '$lib/config';
 	import { auth, isAuthenticated, user, hasMibarrioProvider, provider } from '$lib/stores/auth';
 
@@ -49,23 +48,25 @@
 		goto('/');
 	}
 
-	const headerClass =
+	const headerClass = $derived(
 		variant === 'transparent'
 			? 'bg-transparent'
-			: 'bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700';
+			: 'bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700'
+	);
 </script>
 
 <header class="{headerClass} relative z-50">
 	<div class="container py-4">
 		<nav class="flex items-center justify-between">
 			<a href="/" class="flex items-center gap-2 text-2xl font-bold text-primary-600">
-				<span class="flex flex-col gap-0.5">
-					<span class="flex items-center gap-0.5">
-						<span class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
-						<span class="w-5 h-1 rounded-sm bg-primary-600"></span>
-					</span>
-					<span class="w-7 h-1 rounded-sm bg-primary-600"></span>
-				</span>
+				<svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<!-- Sun -->
+					<circle cx="5" cy="6.5" r="3" fill="#FACC15"/>
+					<!-- Stripes -->
+					<rect x="11" y="2" width="15" height="3" rx="1.5" fill="currentColor"/>
+					<rect x="11" y="8" width="15" height="3" rx="1.5" fill="currentColor"/>
+					<rect x="0" y="14" width="26" height="3" rx="1.5" fill="currentColor"/>
+				</svg>
 				{APP_NAME}
 			</a>
 
@@ -124,7 +125,8 @@
 
 									<div class="border-t border-gray-100 dark:border-gray-700 py-1">
 										<button
-											onclick={handleLogout}
+											type="button"
+											onclick={() => handleLogout()}
 											class="flex items-center gap-3 w-full px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
 										>
 											<LogOut class="h-4 w-4" />
@@ -139,12 +141,10 @@
 						<Button href="/registrar-negocio">Ofrecer Servicios</Button>
 					{/if}
 				{/if}
-				<ThemeToggle />
 			</div>
 
-			<!-- Mobile: Theme Toggle + Hamburger -->
-			<div class="flex items-center gap-2 md:hidden">
-				<ThemeToggle />
+			<!-- Mobile: Hamburger -->
+			<div class="flex items-center md:hidden">
 				<button
 					onclick={toggleMenu}
 					class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-lg"
@@ -179,13 +179,14 @@
 			<!-- Drawer Header -->
 			<div class="flex items-center justify-between p-4">
 				<span class="flex items-center gap-2 text-lg font-bold text-primary-600">
-					<span class="flex flex-col gap-0.5">
-						<span class="flex items-center gap-0.5">
-							<span class="w-1 h-1 rounded-full bg-yellow-400"></span>
-							<span class="w-4 h-0.5 rounded-sm bg-primary-600"></span>
-						</span>
-						<span class="w-5 h-0.5 rounded-sm bg-primary-600"></span>
-					</span>
+					<svg width="22" height="16" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<!-- Sun -->
+						<circle cx="5" cy="6.5" r="3" fill="#FACC15"/>
+						<!-- Stripes -->
+						<rect x="11" y="2" width="15" height="3" rx="1.5" fill="currentColor"/>
+						<rect x="11" y="8" width="15" height="3" rx="1.5" fill="currentColor"/>
+						<rect x="0" y="14" width="26" height="3" rx="1.5" fill="currentColor"/>
+					</svg>
 					{APP_NAME}
 				</span>
 				<button
@@ -230,7 +231,8 @@
 								Mi negocio
 							</a>
 							<button
-								onclick={handleLogout}
+								type="button"
+								onclick={() => handleLogout()}
 								class="flex items-center gap-3 w-full px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
 							>
 								<LogOut class="h-5 w-5" />
@@ -248,8 +250,6 @@
 					{/if}
 				</nav>
 			</div>
-
-			<!-- Drawer footer removed: app is now 100% free -->
 		</div>
 	</div>
 </header>

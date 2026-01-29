@@ -60,9 +60,7 @@
 		}
 
 		toast.success('¡Cuenta creada exitosamente!');
-		const dest = redirectTo || '/registrar-negocio';
-		const params = tipo ? `?tipo=${tipo}` : '';
-		goto(`${dest}${params}`);
+		goto(redirectTo || '/');
 	}
 </script>
 
