@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Menu, X, ChevronDown, Store, LogOut } from 'lucide-svelte';
+	import { ChevronDown, Store, LogOut } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { APP_NAME } from '$lib/config';
 	import { auth, isAuthenticated, user, hasMibarrioProvider, provider } from '$lib/stores/auth';
@@ -22,16 +22,7 @@
 		variant = 'default' as 'default' | 'transparent'
 	} = $props();
 
-	let mobileMenuOpen = $state(false);
 	let dropdownOpen = $state(false);
-
-	function toggleMenu() {
-		mobileMenuOpen = !mobileMenuOpen;
-	}
-
-	function closeMenu() {
-		mobileMenuOpen = false;
-	}
 
 	function toggleDropdown() {
 		dropdownOpen = !dropdownOpen;
@@ -41,10 +32,15 @@
 		dropdownOpen = false;
 	}
 
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape' && dropdownOpen) {
+			closeDropdown();
+		}
+	}
+
 	async function handleLogout() {
 		await auth.logout();
 		closeDropdown();
-		closeMenu();
 		goto('/');
 	}
 
@@ -54,6 +50,8 @@
 			: 'bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700'
 	);
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 <header class="{headerClass} relative z-50">
 	<div class="container py-4">
@@ -142,121 +140,6 @@
 					{/if}
 				{/if}
 			</div>
-
-			<!-- Mobile: Hamburger -->
-			<div class="flex items-center md:hidden">
-				<button
-					onclick={toggleMenu}
-					class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-lg"
-					aria-label="Abrir menu"
-				>
-					{#if mobileMenuOpen}
-						<X class="h-6 w-6" />
-					{:else}
-						<Menu class="h-6 w-6" />
-					{/if}
-				</button>
-			</div>
 		</nav>
-	</div>
-
-	<!-- Mobile Menu Overlay -->
-	{#if mobileMenuOpen}
-		<button
-			class="fixed inset-0 bg-black/50 z-40 md:hidden"
-			onclick={closeMenu}
-			aria-label="Cerrar menu"
-		></button>
-	{/if}
-
-	<!-- Mobile Menu Drawer -->
-	<div
-		class="fixed top-0 right-0 h-full w-72 bg-white dark:bg-gray-900 shadow-xl z-50 transform transition-transform duration-300 ease-in-out md:hidden {mobileMenuOpen
-			? 'translate-x-0'
-			: 'translate-x-full'}"
-	>
-		<div class="flex flex-col h-full">
-			<!-- Drawer Header -->
-			<div class="flex items-center justify-between p-4">
-				<span class="flex items-center gap-2 text-lg font-bold text-primary-600">
-					<svg width="22" height="16" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<!-- Sun -->
-						<circle cx="5" cy="6.5" r="3" fill="#FACC15"/>
-						<!-- Stripes -->
-						<rect x="11" y="2" width="15" height="3" rx="1.5" fill="currentColor"/>
-						<rect x="11" y="8" width="15" height="3" rx="1.5" fill="currentColor"/>
-						<rect x="0" y="14" width="26" height="3" rx="1.5" fill="currentColor"/>
-					</svg>
-					{APP_NAME}
-				</span>
-				<button
-					onclick={closeMenu}
-					class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-					aria-label="Cerrar menu"
-				>
-					<X class="h-6 w-6" />
-				</button>
-			</div>
-
-			<!-- Drawer Content -->
-			<div class="flex-1 overflow-y-auto py-4">
-				{#if showAuthLinks && $isAuthenticated}
-					<div class="px-4 py-3 mb-2 bg-primary-50 dark:bg-primary-900/30">
-						<p class="text-sm text-gray-600 dark:text-gray-400">Hola,</p>
-						<p class="font-semibold text-gray-900 dark:text-white">{$user?.full_name}</p>
-					</div>
-				{/if}
-
-				<nav class="space-y-1 px-2">
-					{#each items as item}
-						<a
-							href={item.href}
-							onclick={closeMenu}
-							class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg {item.highlight
-								? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 font-medium'
-								: ''}"
-						>
-							{item.label}
-						</a>
-					{/each}
-
-					{#if showAuthLinks}
-						{#if $isAuthenticated}
-							<a
-								href={miNegocioHref}
-								onclick={closeMenu}
-								class="flex items-center gap-3 px-4 py-3 text-primary-600 dark:text-primary-400 font-medium hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg"
-							>
-								<Store class="h-5 w-5" />
-								Mi negocio
-							</a>
-							<button
-								type="button"
-								onclick={() => handleLogout()}
-								class="flex items-center gap-3 w-full px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
-							>
-								<LogOut class="h-5 w-5" />
-								Cerrar sesión
-							</button>
-						{:else}
-							<a
-								href="/auth/login?redirect=/registrar-negocio"
-								onclick={closeMenu}
-								class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-							>
-								Ingresar
-							</a>
-							<a
-								href="/auth/login?redirect=/registrar-negocio"
-								onclick={closeMenu}
-								class="flex items-center px-4 py-3 bg-primary-600 text-white font-medium hover:bg-primary-700 rounded-lg"
-							>
-								Ofrecer servicios
-							</a>
-						{/if}
-					{/if}
-				</nav>
-			</div>
-		</div>
 	</div>
 </header>

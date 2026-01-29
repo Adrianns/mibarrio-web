@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import Toast from '$lib/components/Toast.svelte';
+	import BottomNav from '$lib/components/BottomNav.svelte';
 	import { APP_NAME, APP_DESCRIPTION } from '$lib/config';
 	import { auth } from '$lib/stores/auth';
 	import { onMount } from 'svelte';
@@ -31,4 +32,7 @@
 </svelte:head>
 
 <Toast />
-{@render children()}
+<div class="pb-16 md:pb-0">
+	{@render children()}
+</div>
+<BottomNav />
