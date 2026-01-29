@@ -9,11 +9,15 @@ test.describe('Full Business Registration Form Flow', () => {
 		await page.goto('/registrar-negocio');
 		await expect(page).toHaveTitle(/Ofrecer Servicios - Mi Barrio/);
 
-		// Step 2: Verify full form is shown
-		await expect(page.getByRole('heading', { name: 'Registrá tu negocio' })).toBeVisible();
+		// Step 2: Select business type
+		await expect(page.getByRole('heading', { name: '¿Cómo querés registrarte?' })).toBeVisible();
+		await page.getByRole('heading', { name: 'Particular' }).click();
+
+		// Step 3: Verify full form is shown
+		await expect(page.getByText('Registrá tus servicios')).toBeVisible();
 		await expect(page.getByText('Completá tu perfil para que te encuentren en tu barrio')).toBeVisible();
 
-		// Step 3: Fill business name
+		// Step 4: Fill business name
 		await page.getByText('Nombre del negocio').click();
 		await page.locator('input[placeholder="Nombre del negocio"]').fill('Electricista Juan');
 		await page.keyboard.press('Enter');
@@ -86,6 +90,9 @@ test.describe('Full Business Registration Form Flow', () => {
 	test('should show validation errors for incomplete form', async ({ page }) => {
 		await page.goto('/registrar-negocio');
 
+		// Select business type first
+		await page.getByRole('heading', { name: 'Particular' }).click();
+
 		// Try to submit empty form
 		await page.getByRole('button', { name: 'Publicar mi negocio' }).click();
 
@@ -96,6 +103,9 @@ test.describe('Full Business Registration Form Flow', () => {
 
 	test('should preserve form data while filling', async ({ page }) => {
 		await page.goto('/registrar-negocio');
+
+		// Select business type first
+		await page.getByRole('heading', { name: 'Particular' }).click();
 
 		// Fill business name
 		await page.getByText('Nombre del negocio').click();

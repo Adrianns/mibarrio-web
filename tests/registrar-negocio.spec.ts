@@ -1,16 +1,20 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Registrar Negocio Page - Full Mode', () => {
+test.describe('Registrar Negocio Page - Type Selection', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/registrar-negocio');
 	});
 
-	test('should load registration page with full form', async ({ page }) => {
+	test('should show type selection first', async ({ page }) => {
 		await expect(page).toHaveTitle(/Ofrecer Servicios - Mi Barrio/);
 
-		// Check page title and subtitle
-		await expect(page.getByRole('heading', { name: 'Registrá tu negocio' })).toBeVisible();
-		await expect(page.getByText('Completá tu perfil para que te encuentren en tu barrio')).toBeVisible();
+		// Check type selection page
+		await expect(page.getByRole('heading', { name: '¿Cómo querés registrarte?' })).toBeVisible();
+		await expect(page.getByText('Elegí el tipo de perfil que mejor te representa')).toBeVisible();
+
+		// Check both options are visible
+		await expect(page.getByRole('heading', { name: 'Particular' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Empresa' })).toBeVisible();
 	});
 
 	test('should show auth notice when not logged in', async ({ page }) => {
@@ -18,6 +22,38 @@ test.describe('Registrar Negocio Page - Full Mode', () => {
 		await expect(page.getByText('Para registrar tu negocio necesitás una cuenta')).toBeVisible();
 		await expect(page.getByRole('link', { name: 'Registrate' })).toBeVisible();
 		await expect(page.getByRole('link', { name: 'ingresá' })).toBeVisible();
+	});
+
+	test('should navigate to form when selecting Particular', async ({ page }) => {
+		await page.getByRole('heading', { name: 'Particular' }).click();
+
+		// Should show form with back button
+		await expect(page.getByText('← Cambiar tipo')).toBeVisible();
+		await expect(page.getByText('Registrá tus servicios')).toBeVisible();
+	});
+
+	test('should navigate to form when selecting Empresa', async ({ page }) => {
+		await page.getByRole('heading', { name: 'Empresa' }).click();
+
+		// Should show form with back button
+		await expect(page.getByText('← Cambiar tipo')).toBeVisible();
+		await expect(page.getByText('Registrá tu empresa')).toBeVisible();
+	});
+});
+
+test.describe('Registrar Negocio Page - Full Mode', () => {
+	test.beforeEach(async ({ page }) => {
+		await page.goto('/registrar-negocio');
+		// Select Particular to access form
+		await page.getByRole('heading', { name: 'Particular' }).click();
+	});
+
+	test('should load registration page with full form', async ({ page }) => {
+		await expect(page).toHaveTitle(/Ofrecer Servicios - Mi Barrio/);
+
+		// Check page title and subtitle
+		await expect(page.getByText('Registrá tus servicios')).toBeVisible();
+		await expect(page.getByText('Completá tu perfil para que te encuentren en tu barrio')).toBeVisible();
 	});
 
 	test('should show all form fields', async ({ page }) => {
@@ -48,6 +84,8 @@ test.describe('Registrar Negocio Page - Full Mode', () => {
 test.describe('Registrar Negocio - Validation Errors', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/registrar-negocio');
+		// Select Particular to access form
+		await page.getByRole('heading', { name: 'Particular' }).click();
 	});
 
 	test('should show inline error for empty business name', async ({ page }) => {
@@ -136,6 +174,8 @@ test.describe('Registrar Negocio - Validation Errors', () => {
 test.describe('Registrar Negocio - Description with Helper', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/registrar-negocio');
+		// Select Particular to access form
+		await page.getByRole('heading', { name: 'Particular' }).click();
 	});
 
 	test('should show textarea first with helper option below', async ({ page }) => {
@@ -214,6 +254,8 @@ test.describe('Registrar Negocio - Description with Helper', () => {
 test.describe('Registrar Negocio - Photo Guidance', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/registrar-negocio');
+		// Select Particular to access form
+		await page.getByRole('heading', { name: 'Particular' }).click();
 	});
 
 	test('should show photo placeholders with guidance', async ({ page }) => {
@@ -244,6 +286,8 @@ test.describe('Registrar Negocio - Mobile Viewport', () => {
 
 	test.beforeEach(async ({ page }) => {
 		await page.goto('/registrar-negocio');
+		// Select Particular to access form
+		await page.getByRole('heading', { name: 'Particular' }).click();
 	});
 
 	test('should render properly on mobile', async ({ page }) => {
@@ -251,7 +295,7 @@ test.describe('Registrar Negocio - Mobile Viewport', () => {
 		await expect(page).toHaveTitle(/Ofrecer Servicios - Mi Barrio/);
 
 		// Main elements should be visible
-		await expect(page.getByRole('heading', { name: 'Registrá tu negocio' })).toBeVisible();
+		await expect(page.getByText('Registrá tus servicios')).toBeVisible();
 		await expect(page.getByText('Nombre del negocio')).toBeVisible();
 	});
 

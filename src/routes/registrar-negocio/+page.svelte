@@ -19,6 +19,8 @@
 	interface ProviderData {
 		id?: string;
 		businessName: string;
+		businessType?: 'individual' | 'business';
+		rut?: string;
 		description: string;
 		department: Department | '';
 		neighborhood: string;
@@ -128,6 +130,7 @@
 					user_id: currentUser.id,
 					business_name: data.businessName.trim(),
 					business_type: businessType || 'individual',
+					business_rut: data.rut?.trim() || null,
 					description: data.description.trim() || null,
 					department: data.department,
 					neighborhood: data.neighborhood || null,
@@ -304,6 +307,7 @@
 				<ProviderCardEditor
 					mode="create"
 					editorMode="full"
+					businessType={businessType ?? 'individual'}
 					userId={$user?.id ?? ''}
 					userName={$user?.full_name ?? ''}
 					initialData={emptyData}
