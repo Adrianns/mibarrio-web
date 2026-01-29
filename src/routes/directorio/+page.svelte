@@ -134,6 +134,15 @@
 				if (selectedCategory) {
 					providers = providers.filter((p) => p.categories.includes(selectedCategory));
 				}
+
+				// Filter by type (service/business) based on provider categories
+				if (selectedType) {
+					const typeCategoryNames = (selectedType === 'service' ? serviceCategories : businessCategories)
+						.map(c => c.name);
+					providers = providers.filter((p) =>
+						p.categories.some(cat => typeCategoryNames.includes(cat))
+					);
+				}
 			} else {
 				providers = [];
 			}
@@ -181,7 +190,7 @@
 
 	$effect(() => {
 		// Re-fetch when filters change (except search which has debounce)
-		if (selectedDepartment !== undefined || selectedNeighborhood !== undefined || selectedCategory !== undefined) {
+		if (selectedDepartment !== undefined || selectedNeighborhood !== undefined || selectedCategory !== undefined || selectedType !== undefined) {
 			updateUrl();
 			fetchProviders();
 		}
@@ -219,7 +228,7 @@
 						bind:value={selectedDepartment}
 						class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none appearance-none bg-white dark:bg-gray-700 dark:text-white"
 					>
-						<option value="">Departamento</option>
+						<option value="">Todo Uruguay</option>
 						{#each DEPARTMENTS as dept}
 							<option value={dept}>{dept}</option>
 						{/each}
@@ -231,7 +240,7 @@
 							bind:value={selectedNeighborhood}
 							class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none appearance-none bg-white dark:bg-gray-700 dark:text-white"
 						>
-							<option value="">Barrio</option>
+							<option value="">Todos los barrios</option>
 							{#each MONTEVIDEO_NEIGHBORHOODS as barrio}
 								<option value={barrio}>{barrio}</option>
 							{/each}

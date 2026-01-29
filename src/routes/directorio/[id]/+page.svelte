@@ -112,10 +112,10 @@
 			categories: categoriesData?.map((c) => c.category_name) || []
 		};
 
-		// Increment view count
-		await supabase.rpc('mb_increment_view_count', { provider_id: providerId });
-
 		loading = false;
+
+		// Increment view count (fire and forget - don't block page load)
+		supabase.rpc('mb_increment_provider_view', { p_provider_id: providerId });
 	}
 
 	async function handleContactClick(type: 'phone' | 'whatsapp' | 'email' | 'website' | 'social') {
@@ -143,14 +143,16 @@
 	function handleShare() {
 		if (!provider) return;
 
+		const shareText = `Mirá el perfil de ${provider.business_name} en mibarrio.com.uy`;
+
 		if (navigator.share) {
 			navigator.share({
 				title: provider.business_name,
-				text: provider.description || '',
+				text: shareText,
 				url: window.location.href
 			});
 		} else {
-			navigator.clipboard.writeText(window.location.href);
+			navigator.clipboard.writeText(`${shareText}\n${window.location.href}`);
 			toast.success('Enlace copiado al portapapeles');
 		}
 	}

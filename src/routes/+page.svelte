@@ -3,13 +3,21 @@
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
-	import { DEFAULT_CATEGORIES, DEPARTMENTS, type Department } from '$lib/domain/types';
+	import { DEFAULT_CATEGORIES, DEPARTMENTS, MONTEVIDEO_NEIGHBORHOODS, type Department } from '$lib/domain/types';
 	import { APP_NAME, APP_TAGLINE } from '$lib/config';
 
 	const APPYUDA_URL = 'https://appyuda.com.uy';
 
 	let searchQuery = $state('');
 	let selectedDepartment = $state<Department | ''>('');
+	let selectedNeighborhood = $state('');
+
+	// Reset neighborhood when department changes
+	$effect(() => {
+		if (selectedDepartment !== 'Montevideo') {
+			selectedNeighborhood = '';
+		}
+	});
 
 	const featuredCategories = DEFAULT_CATEGORIES.filter((c) => c.is_active).slice(0, 8);
 
@@ -19,6 +27,7 @@
 		const params = new URLSearchParams();
 		if (searchQuery) params.set('q', searchQuery);
 		if (selectedDepartment) params.set('departamento', selectedDepartment);
+		if (selectedNeighborhood) params.set('barrio', selectedNeighborhood);
 		window.location.href = `/directorio?${params.toString()}`;
 	}
 </script>
@@ -54,12 +63,25 @@
 							bind:value={selectedDepartment}
 							class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none appearance-none"
 						>
-							<option value="">Departamento</option>
+							<option value="">Todo Uruguay</option>
 							{#each DEPARTMENTS as dept}
 								<option value={dept}>{dept}</option>
 							{/each}
 						</select>
 					</div>
+					{#if selectedDepartment === 'Montevideo'}
+						<div class="md:w-48">
+							<select
+								bind:value={selectedNeighborhood}
+								class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none appearance-none"
+							>
+								<option value="">Todos los barrios</option>
+								{#each MONTEVIDEO_NEIGHBORHOODS as barrio}
+									<option value={barrio}>{barrio}</option>
+								{/each}
+							</select>
+						</div>
+					{/if}
 					<Button type="submit" size="lg" class="md:w-auto">
 						Buscar
 					</Button>
