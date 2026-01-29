@@ -127,7 +127,7 @@
 						</div>
 					{:else}
 						<a href="/auth/login" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Ingresar</a>
-						<Button href="/registrar-negocio">Registrar negocio</Button>
+						<Button href="/registrar-negocio">Ofrecer Servicios</Button>
 					{/if}
 				{/if}
 				<ThemeToggle />

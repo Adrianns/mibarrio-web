@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Search, MapPin, Building2, User, ArrowRight, ExternalLink } from 'lucide-svelte';
+	import { Search, MapPin, ArrowRight, ExternalLink } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
@@ -128,16 +128,10 @@
 				Registrate en Mi Barrio y que miles de personas te encuentren.
 				100% gratuito, sin compromisos.
 			</p>
-			<div class="flex flex-col sm:flex-row gap-4 justify-center">
-				<a href="/auth/login?redirect=/registrar-negocio&tipo=individual" class="inline-flex items-center justify-center gap-2 h-12 px-8 text-base rounded-lg bg-secondary-500 text-white hover:bg-secondary-600 font-medium transition-colors">
-					<User class="h-5 w-5" />
-					Soy particular
-				</a>
-				<a href="/auth/login?redirect=/registrar-negocio&tipo=business" class="inline-flex items-center justify-center gap-2 h-12 px-8 text-base rounded-lg border border-white text-white hover:bg-white/10 font-medium transition-colors">
-					<Building2 class="h-5 w-5" />
-					Tengo empresa
-				</a>
-			</div>
+			<a href="/auth/login?redirect=/registrar-negocio" class="inline-flex items-center justify-center gap-2 h-12 px-8 text-base rounded-lg bg-white text-primary-600 hover:bg-primary-50 font-medium transition-colors">
+				<ArrowRight class="h-5 w-5" />
+				Ofrecer servicios
+			</a>
 		</div>
 	</section>
 
@@ -158,10 +152,9 @@
 					</ul>
 				</div>
 				<div>
-					<h4 class="text-white font-medium mb-4">Para negocios</h4>
+					<h4 class="text-white font-medium mb-4">Para proveedores</h4>
 					<ul class="space-y-2 text-sm">
-						<li><a href="/auth/login?redirect=/registrar-negocio" class="hover:text-white">Registrar negocio</a></li>
-						<li><a href="/registrar-negocio" class="hover:text-white">Registrar gratis</a></li>
+						<li><a href="/auth/login?redirect=/registrar-negocio" class="hover:text-white">Ofrecer servicios</a></li>
 						<li><a href="/auth/login" class="hover:text-white">Ingresar</a></li>
 					</ul>
 				</div>

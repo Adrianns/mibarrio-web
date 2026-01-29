@@ -272,7 +272,7 @@
 </script>
 
 <svelte:head>
-	<title>Registrar negocio - {APP_NAME}</title>
+	<title>Ofrecer Servicios - {APP_NAME}</title>
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
