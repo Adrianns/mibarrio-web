@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { Search, MapPin, ArrowRight } from 'lucide-svelte';
+	import { Search, MapPin, ArrowRight, Briefcase, X } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 	import { DEFAULT_CATEGORIES, DEPARTMENTS, MONTEVIDEO_NEIGHBORHOODS, type Department } from '$lib/domain/types';
 	import { APP_NAME, APP_TAGLINE } from '$lib/config';
+	import { isAuthenticated, hasMibarrioProvider, isInitialized } from '$lib/stores/auth';
 
 	let searchQuery = $state('');
 	let selectedDepartment = $state<Department | ''>('');
 	let selectedNeighborhood = $state('');
+	let bannerDismissed = $state(false);
 
 	// Reset neighborhood when department changes
 	$effect(() => {
@@ -32,6 +34,38 @@
 
 <div class="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors">
 	<Header items={navItems} variant="transparent" />
+
+	<!-- Banner for logged-in users without a business -->
+	{#if $isInitialized && $isAuthenticated && !$hasMibarrioProvider && !bannerDismissed}
+		<div class="bg-primary-600 text-white">
+			<div class="container py-3 flex items-center justify-between gap-4">
+				<div class="flex items-center gap-3 flex-1 min-w-0">
+					<Briefcase class="h-5 w-5 flex-shrink-0" />
+					<p class="text-sm md:text-base truncate">
+						<span class="font-medium">¡Ya tenés cuenta!</span>
+						<span class="hidden sm:inline"> Ahora ofrecé tus servicios.</span>
+						<span> Registrá tu negocio y llegá a más clientes.</span>
+					</p>
+				</div>
+				<div class="flex items-center gap-2 flex-shrink-0">
+					<a
+						href="/registrar-negocio"
+						class="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium bg-white text-primary-600 rounded-lg hover:bg-primary-50 transition-colors"
+					>
+						Registrar
+						<ArrowRight class="h-4 w-4" />
+					</a>
+					<button
+						onclick={() => bannerDismissed = true}
+						class="p-1.5 hover:bg-primary-700 rounded-lg transition-colors"
+						aria-label="Cerrar banner"
+					>
+						<X class="h-4 w-4" />
+					</button>
+				</div>
+			</div>
+		</div>
+	{/if}
 
 	<!-- Hero -->
 	<section class="container py-16 md:py-24">

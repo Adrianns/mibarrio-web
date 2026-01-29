@@ -18,7 +18,7 @@
 	let confirmPassword = $state('');
 	let showPassword = $state(false);
 	let loading = $state(false);
-	let acceptTerms = $state(false);
+	let acceptTerms = $state(true);
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();

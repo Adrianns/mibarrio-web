@@ -76,9 +76,10 @@ test.describe('Register Page', () => {
 		await expect(page.getByRole('link', { name: /Ingresá/i })).toBeVisible();
 	});
 
-	test('should have terms checkbox', async ({ page }) => {
+	test('should have terms checkbox checked by default', async ({ page }) => {
 		const termsCheckbox = page.getByRole('checkbox');
 		await expect(termsCheckbox).toBeVisible();
+		await expect(termsCheckbox).toBeChecked();
 	});
 
 	test('should have links to terms and privacy', async ({ page }) => {
