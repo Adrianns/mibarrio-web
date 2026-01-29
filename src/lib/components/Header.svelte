@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { ChevronDown, Store, LogOut } from 'lucide-svelte';
+	import { ChevronDown, Store, LogOut, User } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { APP_NAME } from '$lib/config';
 	import { auth, isAuthenticated, user, hasMibarrioProvider, provider } from '$lib/stores/auth';
@@ -111,6 +111,14 @@
 									</div>
 
 									<div class="py-1">
+										<a
+											href="/perfil"
+											onclick={closeDropdown}
+											class="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+										>
+											<User class="h-4 w-4" />
+											Mi perfil
+										</a>
 										<a
 											href={miNegocioHref}
 											onclick={closeDropdown}
