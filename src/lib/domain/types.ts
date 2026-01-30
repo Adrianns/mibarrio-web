@@ -38,10 +38,16 @@ export interface UserProfile {
 	updated_at?: string;
 }
 
+// Claim request status
+export type ClaimStatus = 'pending' | 'approved' | 'rejected';
+
+// Provider data source
+export type ProviderSource = 'manual' | '1122' | 'guiacomercial' | 'google_places';
+
 // Provider profile
 export interface Provider {
 	id: string;
-	user_id: string;
+	user_id: string | null; // Nullable for unclaimed profiles
 	provider_type: ProviderType;
 	display_name: string;
 	business_name?: string | null;
@@ -72,6 +78,13 @@ export interface Provider {
 	is_verified: boolean;
 	is_active: boolean;
 	is_featured: boolean;
+
+	// Claim status (for imported profiles)
+	is_claimed: boolean;
+	claimed_at?: string | null;
+	source: ProviderSource;
+	source_url?: string | null;
+	external_id?: string | null;
 
 	// Stats
 	view_count: number;
@@ -262,6 +275,24 @@ export const DEFAULT_CATEGORIES: Omit<Category, 'id' | 'created_at' | 'updated_a
 	{ name: 'ingenieria', label: 'Ingeniería', icon: 'HardHat', color: 'bg-stone-500', category_type: 'service', is_active: true, display_order: 35 },
 	{ name: 'otro', label: 'Otros', icon: 'MoreHorizontal', color: 'bg-gray-500', category_type: 'both', is_active: true, display_order: 99 }
 ];
+
+// Claim request for unclaimed profiles
+export interface ClaimRequest {
+	id: string;
+	provider_id: string;
+	user_id: string;
+	status: ClaimStatus;
+	message?: string | null;
+	admin_notes?: string | null;
+	reviewed_by?: string | null;
+	reviewed_at?: string | null;
+	created_at: string;
+	updated_at?: string;
+	// Joined data
+	provider?: Provider;
+	user?: Partial<UserProfile>;
+	reviewer?: Partial<UserProfile>;
+}
 
 // Generic result type for service methods
 export interface Result<T> {

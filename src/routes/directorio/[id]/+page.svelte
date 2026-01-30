@@ -20,6 +20,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
 	import SEO from '$lib/components/SEO.svelte';
+	import ClaimProfileButton from '$lib/components/ClaimProfileButton.svelte';
 	import { APP_NAME } from '$lib/config';
 	import { toast } from '$lib/stores/toast';
 	import { supabase } from '$lib/supabase';
@@ -48,6 +49,7 @@
 		photos: string[];
 		is_verified: boolean;
 		is_featured: boolean;
+		is_claimed: boolean;
 		view_count: number;
 		categories: string[];
 	}
@@ -124,6 +126,7 @@
 				photos,
 				is_verified,
 				is_featured,
+				is_claimed,
 				is_active,
 				view_count
 			`
@@ -318,6 +321,11 @@
 												Destacado
 											</span>
 										{/if}
+										{#if !provider.is_claimed}
+											<span class="text-sm bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 px-3 py-1 rounded-full">
+												Perfil no reclamado
+											</span>
+										{/if}
 									</div>
 								</div>
 								</div>
@@ -446,6 +454,13 @@
 							</div>
 						{/if}
 
+						{#if !provider.is_claimed}
+							<hr class="my-6 dark:border-gray-700" />
+							<ClaimProfileButton
+								providerId={provider.id}
+								providerName={provider.business_name}
+							/>
+						{/if}
 					</div>
 				</div>
 			</div>

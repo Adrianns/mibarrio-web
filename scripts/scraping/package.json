@@ -1,0 +1,21 @@
+{
+  "name": "mibarrio-scraping",
+  "version": "1.0.0",
+  "description": "Scraping scripts for MiBarrio",
+  "type": "module",
+  "scripts": {
+    "scrape:1122": "npx tsx src/scraper-1122.ts",
+    "scrape:multi": "npx tsx src/scraper-1122-multi.ts",
+    "scrape:guia": "npx tsx src/scraper-guia.ts",
+    "import": "npx tsx src/import.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "playwright": "^1.50.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.7.0"
+  }
+}
