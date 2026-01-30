@@ -56,14 +56,14 @@
 			<button
 				type="button"
 				onclick={startEditing}
-				class="w-full text-left cursor-text hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg p-2 -m-2 transition-colors min-h-[60px] {displayClass}"
+				class="w-full text-left cursor-text active:bg-gray-100 dark:active:bg-gray-700/50 lg:hover:bg-gray-100 lg:dark:hover:bg-gray-700/50 rounded-lg p-2 -m-2 transition-colors min-h-[60px] {displayClass}"
 			>
 				{#if value}
 					<span class="whitespace-pre-line">{value}</span>
 				{:else}
 					<span class="text-gray-400 italic">{placeholder}</span>
 				{/if}
-				<Pencil class="inline-block h-3 w-3 ml-2 opacity-0 group-hover:opacity-50 transition-opacity" />
+				<Pencil class="inline-block h-3 w-3 ml-2 opacity-30 lg:opacity-0 lg:group-hover:opacity-50 transition-opacity" />
 			</button>
 		{/if}
 	{/if}

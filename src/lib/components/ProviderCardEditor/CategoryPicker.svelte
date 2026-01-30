@@ -56,7 +56,7 @@
 		<button
 			type="button"
 			onclick={() => (open = !open)}
-			class="group flex flex-wrap gap-2 items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg p-2 -m-2 transition-colors min-h-[40px] w-full {error ? 'ring-2 ring-red-500 ring-offset-2' : ''}"
+			class="group flex flex-wrap gap-2 items-center cursor-pointer active:bg-gray-100 dark:active:bg-gray-700/50 lg:hover:bg-gray-100 lg:dark:hover:bg-gray-700/50 rounded-lg p-2 -m-2 transition-colors min-h-[40px] w-full {error ? 'ring-2 ring-red-500 ring-offset-2' : ''}"
 		>
 			{#if selected.length > 0}
 				{#each selected as categoryName (categoryName)}
@@ -68,7 +68,7 @@
 			{:else}
 				<span class="text-gray-400 italic">Seleccionar categorías</span>
 			{/if}
-			<Pencil class="h-3 w-3 ml-2 opacity-0 group-hover:opacity-50 transition-opacity" />
+			<Pencil class="h-3 w-3 ml-2 opacity-30 lg:opacity-0 lg:group-hover:opacity-50 transition-opacity" />
 		</button>
 	{/if}
 

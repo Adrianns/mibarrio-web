@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Phone, MessageCircle, Mail, Globe, Instagram, Facebook, Pencil } from 'lucide-svelte';
+	import { Phone, MessageCircle, Mail, Globe, Instagram, Facebook, ChevronRight } from 'lucide-svelte';
 
 	let {
 		phone = $bindable(''),
@@ -62,16 +62,17 @@
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
 	<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contacto</h2>
 
-	<div class="space-y-3">
+	<div class="space-y-1 lg:space-y-3">
 		<!-- Phone -->
-		<div class="group">
-			<div class="flex items-center gap-3">
-				<Phone class="h-5 w-5 text-gray-400 flex-shrink-0" />
-				{#if readOnly}
-					<span class="flex-1 text-gray-600 dark:text-gray-400">
-						{phone || '-'}
-					</span>
-				{:else if editingField === 'phone'}
+		<div>
+			{#if readOnly}
+				<div class="flex items-center gap-3 py-3 lg:py-0">
+					<Phone class="h-5 w-5 text-gray-400 flex-shrink-0" />
+					<span class="flex-1 text-gray-600 dark:text-gray-400">{phone || '-'}</span>
+				</div>
+			{:else if editingField === 'phone'}
+				<div class="flex items-center gap-3 py-3 lg:py-0 bg-gray-50 dark:bg-gray-700/50 -mx-6 px-6 lg:mx-0 lg:px-0 lg:bg-transparent">
+					<Phone class="h-5 w-5 text-primary-500 flex-shrink-0" />
 					<input
 						id="contact-phone"
 						type="tel"
@@ -79,183 +80,204 @@
 						placeholder="099 123 456"
 						onblur={stopEditing}
 						onkeydown={handleKeydown}
-						class="flex-1 bg-transparent border-b-2 outline-none text-gray-600 dark:text-gray-300 {phoneError ? 'border-red-500' : 'border-primary-500'}"
+						class="flex-1 bg-transparent outline-none text-gray-900 dark:text-white lg:border-b-2 lg:border-primary-500"
 					/>
-				{:else}
-					<button
-						type="button"
-						onclick={() => startEditing('phone')}
-						class="flex-1 text-left text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded px-1 -mx-1 transition-colors {phoneError ? 'ring-2 ring-red-500 ring-offset-2' : ''}"
-					>
+				</div>
+			{:else}
+				<button
+					type="button"
+					onclick={() => startEditing('phone')}
+					class="w-full flex items-center gap-3 py-3 lg:py-1 -mx-6 px-6 lg:mx-0 lg:px-1 lg:-ml-1 active:bg-gray-100 dark:active:bg-gray-700/50 lg:hover:bg-gray-100 lg:dark:hover:bg-gray-700/50 lg:rounded transition-colors {phoneError ? 'bg-red-50 dark:bg-red-900/20' : ''}"
+				>
+					<Phone class="h-5 w-5 text-gray-400 flex-shrink-0" />
+					<span class="flex-1 text-left {phone ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400'}">
 						{phone || 'Agregar teléfono'}
-						<Pencil class="inline-block h-3 w-3 ml-2 opacity-0 group-hover:opacity-50" />
-					</button>
-				{/if}
-			</div>
+					</span>
+					<ChevronRight class="h-5 w-5 text-gray-300 dark:text-gray-600 lg:hidden" />
+				</button>
+			{/if}
 			{#if phoneError && !readOnly}
 				<p class="text-red-500 text-sm mt-1 ml-8">{phoneError}</p>
 			{/if}
 		</div>
 
 		<!-- WhatsApp -->
-		<div class="group flex items-center gap-3">
-			<MessageCircle class="h-5 w-5 text-gray-400 flex-shrink-0" />
+		<div>
 			{#if readOnly}
-				<span class="flex-1 text-gray-600 dark:text-gray-400">
-					{whatsapp || '-'}
-				</span>
+				<div class="flex items-center gap-3 py-3 lg:py-0">
+					<MessageCircle class="h-5 w-5 text-gray-400 flex-shrink-0" />
+					<span class="flex-1 text-gray-600 dark:text-gray-400">{whatsapp || '-'}</span>
+				</div>
 			{:else if editingField === 'whatsapp'}
-				<input
-					id="contact-whatsapp"
-					type="tel"
-					bind:value={whatsapp}
-					placeholder="598 99 123 456"
-					onblur={stopEditing}
-					onkeydown={handleKeydown}
-					class="flex-1 bg-transparent border-b-2 border-primary-500 outline-none text-gray-600 dark:text-gray-300"
-				/>
+				<div class="flex items-center gap-3 py-3 lg:py-0 bg-gray-50 dark:bg-gray-700/50 -mx-6 px-6 lg:mx-0 lg:px-0 lg:bg-transparent">
+					<MessageCircle class="h-5 w-5 text-primary-500 flex-shrink-0" />
+					<input
+						id="contact-whatsapp"
+						type="tel"
+						bind:value={whatsapp}
+						placeholder="598 99 123 456"
+						onblur={stopEditing}
+						onkeydown={handleKeydown}
+						class="flex-1 bg-transparent outline-none text-gray-900 dark:text-white lg:border-b-2 lg:border-primary-500"
+					/>
+				</div>
 			{:else}
 				<button
 					type="button"
 					onclick={() => startEditing('whatsapp')}
-					class="flex-1 text-left text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded px-1 -mx-1 transition-colors"
+					class="w-full flex items-center gap-3 py-3 lg:py-1 -mx-6 px-6 lg:mx-0 lg:px-1 lg:-ml-1 active:bg-gray-100 dark:active:bg-gray-700/50 lg:hover:bg-gray-100 lg:dark:hover:bg-gray-700/50 lg:rounded transition-colors"
 				>
-					{whatsapp || 'Agregar WhatsApp'}
-					<Pencil class="inline-block h-3 w-3 ml-2 opacity-0 group-hover:opacity-50" />
+					<MessageCircle class="h-5 w-5 text-gray-400 flex-shrink-0" />
+					<span class="flex-1 text-left {whatsapp ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400'}">
+						{whatsapp || 'Agregar WhatsApp'}
+					</span>
+					<ChevronRight class="h-5 w-5 text-gray-300 dark:text-gray-600 lg:hidden" />
 				</button>
 			{/if}
 		</div>
 
 		<!-- Email -->
-		<div class="group flex items-center gap-3">
-			<Mail class="h-5 w-5 text-gray-400 flex-shrink-0" />
+		<div>
 			{#if readOnly}
-				<span class="flex-1 text-gray-600 dark:text-gray-400">
-					{email || '-'}
-				</span>
+				<div class="flex items-center gap-3 py-3 lg:py-0">
+					<Mail class="h-5 w-5 text-gray-400 flex-shrink-0" />
+					<span class="flex-1 text-gray-600 dark:text-gray-400">{email || '-'}</span>
+				</div>
 			{:else if editingField === 'email'}
-				<input
-					id="contact-email"
-					type="email"
-					bind:value={email}
-					placeholder="correo@ejemplo.com"
-					onblur={stopEditing}
-					onkeydown={handleKeydown}
-					class="flex-1 bg-transparent border-b-2 border-primary-500 outline-none text-gray-600 dark:text-gray-300"
-				/>
+				<div class="flex items-center gap-3 py-3 lg:py-0 bg-gray-50 dark:bg-gray-700/50 -mx-6 px-6 lg:mx-0 lg:px-0 lg:bg-transparent">
+					<Mail class="h-5 w-5 text-primary-500 flex-shrink-0" />
+					<input
+						id="contact-email"
+						type="email"
+						bind:value={email}
+						placeholder="correo@ejemplo.com"
+						onblur={stopEditing}
+						onkeydown={handleKeydown}
+						class="flex-1 bg-transparent outline-none text-gray-900 dark:text-white lg:border-b-2 lg:border-primary-500"
+					/>
+				</div>
 			{:else}
 				<button
 					type="button"
 					onclick={() => startEditing('email')}
-					class="flex-1 text-left text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded px-1 -mx-1 transition-colors"
+					class="w-full flex items-center gap-3 py-3 lg:py-1 -mx-6 px-6 lg:mx-0 lg:px-1 lg:-ml-1 active:bg-gray-100 dark:active:bg-gray-700/50 lg:hover:bg-gray-100 lg:dark:hover:bg-gray-700/50 lg:rounded transition-colors"
 				>
-					{email || 'Agregar email'}
-					<Pencil class="inline-block h-3 w-3 ml-2 opacity-0 group-hover:opacity-50" />
+					<Mail class="h-5 w-5 text-gray-400 flex-shrink-0" />
+					<span class="flex-1 text-left {email ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400'}">
+						{email || 'Agregar email'}
+					</span>
+					<ChevronRight class="h-5 w-5 text-gray-300 dark:text-gray-600 lg:hidden" />
 				</button>
 			{/if}
 		</div>
 
-		<hr class="my-3 dark:border-gray-700" />
+		<hr class="my-2 lg:my-3 dark:border-gray-700" />
 
 		<!-- Website -->
-		<div class="group flex items-center gap-3">
-			<Globe class="h-5 w-5 text-gray-400 flex-shrink-0" />
+		<div>
 			{#if readOnly}
-				<span class="flex-1 text-gray-600 dark:text-gray-400 truncate">
-					{website || '-'}
-				</span>
+				<div class="flex items-center gap-3 py-3 lg:py-0">
+					<Globe class="h-5 w-5 text-gray-400 flex-shrink-0" />
+					<span class="flex-1 text-gray-600 dark:text-gray-400 truncate">{website || '-'}</span>
+				</div>
 			{:else if editingField === 'website'}
-				<input
-					id="contact-website"
-					type="url"
-					bind:value={website}
-					placeholder="https://..."
-					onblur={stopEditing}
-					onkeydown={handleKeydown}
-					class="flex-1 bg-transparent border-b-2 border-primary-500 outline-none text-gray-600 dark:text-gray-300"
-				/>
+				<div class="flex items-center gap-3 py-3 lg:py-0 bg-gray-50 dark:bg-gray-700/50 -mx-6 px-6 lg:mx-0 lg:px-0 lg:bg-transparent">
+					<Globe class="h-5 w-5 text-primary-500 flex-shrink-0" />
+					<input
+						id="contact-website"
+						type="url"
+						bind:value={website}
+						placeholder="https://..."
+						onblur={stopEditing}
+						onkeydown={handleKeydown}
+						class="flex-1 bg-transparent outline-none text-gray-900 dark:text-white lg:border-b-2 lg:border-primary-500"
+					/>
+				</div>
 			{:else}
 				<button
 					type="button"
 					onclick={() => startEditing('website')}
-					class="flex-1 text-left text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded px-1 -mx-1 transition-colors truncate"
+					class="w-full flex items-center gap-3 py-3 lg:py-1 -mx-6 px-6 lg:mx-0 lg:px-1 lg:-ml-1 active:bg-gray-100 dark:active:bg-gray-700/50 lg:hover:bg-gray-100 lg:dark:hover:bg-gray-700/50 lg:rounded transition-colors"
 				>
-					{website || 'Agregar sitio web'}
-					<Pencil class="inline-block h-3 w-3 ml-2 opacity-0 group-hover:opacity-50" />
+					<Globe class="h-5 w-5 text-gray-400 flex-shrink-0" />
+					<span class="flex-1 text-left truncate {website ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400'}">
+						{website || 'Agregar sitio web'}
+					</span>
+					<ChevronRight class="h-5 w-5 text-gray-300 dark:text-gray-600 flex-shrink-0 lg:hidden" />
 				</button>
 			{/if}
 		</div>
 
 		<!-- Instagram -->
-		<div class="group flex items-center gap-3">
-			<Instagram class="h-5 w-5 text-gray-400 flex-shrink-0" />
+		<div>
 			{#if readOnly}
-				<span class="flex-1 text-gray-600 dark:text-gray-400">
-					{#if instagram && getInstagramDisplay(instagram)}
-						@{getInstagramDisplay(instagram)}
-					{:else}
-						-
-					{/if}
-				</span>
+				<div class="flex items-center gap-3 py-3 lg:py-0">
+					<Instagram class="h-5 w-5 text-gray-400 flex-shrink-0" />
+					<span class="flex-1 text-gray-600 dark:text-gray-400">
+						{#if instagram && getInstagramDisplay(instagram)}@{getInstagramDisplay(instagram)}{:else}-{/if}
+					</span>
+				</div>
 			{:else if editingField === 'instagram'}
-				<input
-					id="contact-instagram"
-					type="text"
-					bind:value={instagram}
-					placeholder="usuario"
-					onblur={stopEditing}
-					onkeydown={handleKeydown}
-					class="flex-1 bg-transparent border-b-2 border-primary-500 outline-none text-gray-600 dark:text-gray-300"
-				/>
+				<div class="flex items-center gap-3 py-3 lg:py-0 bg-gray-50 dark:bg-gray-700/50 -mx-6 px-6 lg:mx-0 lg:px-0 lg:bg-transparent">
+					<Instagram class="h-5 w-5 text-primary-500 flex-shrink-0" />
+					<input
+						id="contact-instagram"
+						type="text"
+						bind:value={instagram}
+						placeholder="usuario"
+						onblur={stopEditing}
+						onkeydown={handleKeydown}
+						class="flex-1 bg-transparent outline-none text-gray-900 dark:text-white lg:border-b-2 lg:border-primary-500"
+					/>
+				</div>
 			{:else}
 				<button
 					type="button"
 					onclick={() => startEditing('instagram')}
-					class="flex-1 text-left text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded px-1 -mx-1 transition-colors"
+					class="w-full flex items-center gap-3 py-3 lg:py-1 -mx-6 px-6 lg:mx-0 lg:px-1 lg:-ml-1 active:bg-gray-100 dark:active:bg-gray-700/50 lg:hover:bg-gray-100 lg:dark:hover:bg-gray-700/50 lg:rounded transition-colors"
 				>
-					{#if instagram && getInstagramDisplay(instagram)}
-						@{getInstagramDisplay(instagram)}
-					{:else}
-						Agregar Instagram
-					{/if}
-					<Pencil class="inline-block h-3 w-3 ml-2 opacity-0 group-hover:opacity-50" />
+					<Instagram class="h-5 w-5 text-gray-400 flex-shrink-0" />
+					<span class="flex-1 text-left {instagram && getInstagramDisplay(instagram) ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400'}">
+						{#if instagram && getInstagramDisplay(instagram)}@{getInstagramDisplay(instagram)}{:else}Agregar Instagram{/if}
+					</span>
+					<ChevronRight class="h-5 w-5 text-gray-300 dark:text-gray-600 lg:hidden" />
 				</button>
 			{/if}
 		</div>
 
 		<!-- Facebook -->
-		<div class="group flex items-center gap-3">
-			<Facebook class="h-5 w-5 text-gray-400 flex-shrink-0" />
+		<div>
 			{#if readOnly}
-				<span class="flex-1 text-gray-600 dark:text-gray-400">
-					{#if facebook && getFacebookDisplay(facebook)}
-						{getFacebookDisplay(facebook)}
-					{:else}
-						-
-					{/if}
-				</span>
+				<div class="flex items-center gap-3 py-3 lg:py-0">
+					<Facebook class="h-5 w-5 text-gray-400 flex-shrink-0" />
+					<span class="flex-1 text-gray-600 dark:text-gray-400">
+						{#if facebook && getFacebookDisplay(facebook)}{getFacebookDisplay(facebook)}{:else}-{/if}
+					</span>
+				</div>
 			{:else if editingField === 'facebook'}
-				<input
-					id="contact-facebook"
-					type="text"
-					bind:value={facebook}
-					placeholder="pagina"
-					onblur={stopEditing}
-					onkeydown={handleKeydown}
-					class="flex-1 bg-transparent border-b-2 border-primary-500 outline-none text-gray-600 dark:text-gray-300"
-				/>
+				<div class="flex items-center gap-3 py-3 lg:py-0 bg-gray-50 dark:bg-gray-700/50 -mx-6 px-6 lg:mx-0 lg:px-0 lg:bg-transparent">
+					<Facebook class="h-5 w-5 text-primary-500 flex-shrink-0" />
+					<input
+						id="contact-facebook"
+						type="text"
+						bind:value={facebook}
+						placeholder="pagina"
+						onblur={stopEditing}
+						onkeydown={handleKeydown}
+						class="flex-1 bg-transparent outline-none text-gray-900 dark:text-white lg:border-b-2 lg:border-primary-500"
+					/>
+				</div>
 			{:else}
 				<button
 					type="button"
 					onclick={() => startEditing('facebook')}
-					class="flex-1 text-left text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded px-1 -mx-1 transition-colors"
+					class="w-full flex items-center gap-3 py-3 lg:py-1 -mx-6 px-6 lg:mx-0 lg:px-1 lg:-ml-1 active:bg-gray-100 dark:active:bg-gray-700/50 lg:hover:bg-gray-100 lg:dark:hover:bg-gray-700/50 lg:rounded transition-colors"
 				>
-					{#if facebook && getFacebookDisplay(facebook)}
-						{getFacebookDisplay(facebook)}
-					{:else}
-						Agregar Facebook
-					{/if}
-					<Pencil class="inline-block h-3 w-3 ml-2 opacity-0 group-hover:opacity-50" />
+					<Facebook class="h-5 w-5 text-gray-400 flex-shrink-0" />
+					<span class="flex-1 text-left {facebook && getFacebookDisplay(facebook) ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400'}">
+						{#if facebook && getFacebookDisplay(facebook)}{getFacebookDisplay(facebook)}{:else}Agregar Facebook{/if}
+					</span>
+					<ChevronRight class="h-5 w-5 text-gray-300 dark:text-gray-600 lg:hidden" />
 				</button>
 			{/if}
 		</div>

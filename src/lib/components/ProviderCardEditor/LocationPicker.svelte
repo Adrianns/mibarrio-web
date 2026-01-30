@@ -51,7 +51,7 @@
 		<button
 			type="button"
 			onclick={() => (open = !open)}
-			class="group flex items-center gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg p-2 -m-2 transition-colors w-full text-left {error ? 'ring-2 ring-red-500 ring-offset-2' : ''}"
+			class="group flex items-center gap-2 cursor-pointer active:bg-gray-100 dark:active:bg-gray-700/50 lg:hover:bg-gray-100 lg:dark:hover:bg-gray-700/50 rounded-lg p-2 -m-2 transition-colors w-full text-left {error ? 'ring-2 ring-red-500 ring-offset-2' : ''}"
 		>
 			<MapPin class="h-5 w-5 text-gray-400 flex-shrink-0" />
 			{#if getDisplayText()}
@@ -59,7 +59,7 @@
 			{:else}
 				<span class="text-gray-400 italic">Agregar ubicación</span>
 			{/if}
-			<Pencil class="h-3 w-3 ml-auto opacity-0 group-hover:opacity-50 transition-opacity" />
+			<Pencil class="h-3 w-3 ml-auto opacity-30 lg:opacity-0 lg:group-hover:opacity-50 transition-opacity" />
 		</button>
 	{/if}
 
