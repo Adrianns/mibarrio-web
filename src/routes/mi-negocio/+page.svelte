@@ -6,7 +6,7 @@
 	import { toast } from '$lib/stores/toast';
 	import { auth, user } from '$lib/stores/auth';
 	import { supabase } from '$lib/supabase';
-	import { Loader2, Pencil } from 'lucide-svelte';
+	import { Loader2, Pencil, Save } from 'lucide-svelte';
 	import { get } from 'svelte/store';
 	import { ProviderCardEditor, ProfileCompleteness } from '$lib/components/ProviderCardEditor';
 	import type { Department } from '$lib/domain/types';
@@ -15,6 +15,7 @@
 	let saving = $state(false);
 	let providerId = $state('');
 	let isEditing = $state(false);
+	let editorSave = $state<(() => void) | null>(null);
 
 	interface ProviderData {
 		id?: string;
@@ -212,13 +213,28 @@
 			<div class="flex items-center justify-between mb-6">
 				<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Mi negocio</h1>
 				{#if isEditing}
-					<button
-						type="button"
-						onclick={() => isEditing = false}
-						class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-					>
-						Cancelar edición
-					</button>
+					<div class="flex items-center gap-4">
+						<button
+							type="button"
+							onclick={() => isEditing = false}
+							class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+						>
+							Cancelar
+						</button>
+						<button
+							type="button"
+							onclick={() => editorSave?.()}
+							disabled={saving}
+							class="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+						>
+							{#if saving}
+								<Loader2 class="h-4 w-4 animate-spin" />
+							{:else}
+								<Save class="h-4 w-4" />
+							{/if}
+							<span>Guardar</span>
+						</button>
+					</div>
 				{:else}
 					<button
 						type="button"
@@ -239,6 +255,7 @@
 				{initialData}
 				{saving}
 				onSave={(data) => { handleSave(data); isEditing = false; }}
+				onReady={(fns) => { editorSave = fns.save; }}
 			/>
 
 			<ProfileCompleteness data={initialData} />

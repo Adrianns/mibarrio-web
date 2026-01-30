@@ -41,7 +41,8 @@
 		userName = '',
 		initialData = null as ProviderData | null,
 		saving = false,
-		onSave
+		onSave,
+		onReady = () => {}
 	}: {
 		mode?: 'create' | 'edit';
 		editorMode?: 'quick' | 'full';
@@ -52,6 +53,7 @@
 		initialData?: ProviderData | null;
 		saving?: boolean;
 		onSave: (data: ProviderData) => void;
+		onReady?: (fns: { save: () => void }) => void;
 	} = $props();
 
 	// Track current editor mode (can be expanded from quick to full)
@@ -123,9 +125,7 @@
 			newErrors.department = 'Elegí dónde trabajás';
 		}
 
-		if (!phone.trim() && !whatsapp.trim() && !email.trim()) {
-			newErrors.phone = 'Ingresá al menos un contacto (teléfono, WhatsApp o email)';
-		}
+		// All contact fields are optional
 
 		errors = newErrors;
 
@@ -169,6 +169,11 @@
 		};
 		onSave(data);
 	}
+
+	// Expose save function to parent
+	$effect(() => {
+		onReady({ save: handleSave });
+	});
 
 	async function handleLogoUpload(e: Event) {
 		const input = e.target as HTMLInputElement;

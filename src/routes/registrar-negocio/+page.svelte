@@ -101,10 +101,7 @@
 			return;
 		}
 
-		if (!data.phone && !data.whatsapp && !data.email) {
-			toast.error('Ingresá al menos un método de contacto');
-			return;
-		}
+		// All contact fields are optional
 
 		saving = true;
 

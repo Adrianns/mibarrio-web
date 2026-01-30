@@ -200,8 +200,11 @@
 					</ul>
 				</div>
 			</div>
-			<div class="border-t border-gray-800 mt-8 pt-8 text-sm text-center">
-				© {new Date().getFullYear()} {APP_NAME}. Todos los derechos reservados.
+			<div class="border-t border-gray-800 mt-8 pt-8 text-sm text-center space-y-2">
+				<p>
+					<a href="mailto:contacto@mibarrio.com.uy" class="hover:text-white">contacto@mibarrio.com.uy</a>
+				</p>
+				<p>© {new Date().getFullYear()} {APP_NAME}. Todos los derechos reservados.</p>
 			</div>
 		</div>
 	</footer>

@@ -23,8 +23,9 @@
 	let confirmPassword = $state('');
 	let showNewPassword = $state(false);
 
-	// Password errors
+	// Password errors and success
 	let passwordError = $state('');
+	let passwordSuccess = $state(false);
 
 	async function handleSaveProfile() {
 		if (!fullName.trim()) {
@@ -77,19 +78,20 @@
 
 			if (updateError) {
 				passwordError = 'Error al cambiar la contraseña: ' + updateError.message;
+				changingPassword = false;
 				return;
 			}
 
-			toast.success('Contraseña actualizada');
+			passwordSuccess = true;
 			showPasswordForm = false;
 			newPassword = '';
 			confirmPassword = '';
 		} catch (err) {
 			console.error('Password change error:', err);
 			passwordError = 'Error al cambiar la contraseña';
-		} finally {
-			changingPassword = false;
 		}
+
+		changingPassword = false;
 	}
 
 	onMount(async () => {
@@ -178,10 +180,18 @@
 					Contraseña
 				</h2>
 
+				{#if passwordSuccess}
+					<div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
+						<p class="text-green-700 dark:text-green-300 text-sm font-medium">
+							✓ La contraseña se ha cambiado correctamente
+						</p>
+					</div>
+				{/if}
+
 				{#if !showPasswordForm}
 					<button
 						type="button"
-						onclick={() => showPasswordForm = true}
+						onclick={() => { showPasswordForm = true; passwordSuccess = false; }}
 						class="text-primary-600 hover:text-primary-700 text-sm font-medium"
 					>
 						Cambiar contraseña

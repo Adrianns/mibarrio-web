@@ -39,9 +39,13 @@
 	}
 
 	async function handleLogout() {
-		await auth.logout();
-		closeDropdown();
-		goto('/');
+		try {
+			await auth.logout();
+			closeDropdown();
+			goto('/');
+		} catch (err) {
+			console.error('Logout error:', err);
+		}
 	}
 
 	const headerClass = $derived(
@@ -132,7 +136,7 @@
 									<div class="border-t border-gray-100 dark:border-gray-700 py-1">
 										<button
 											type="button"
-											onclick={() => handleLogout()}
+											onclick={handleLogout}
 											class="flex items-center gap-3 w-full px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
 										>
 											<LogOut class="h-4 w-4" />
