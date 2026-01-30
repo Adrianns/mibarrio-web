@@ -1,0 +1,29 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f0f9ff"/>
+      <stop offset="100%" style="stop-color:#ffffff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Logo - scaled up -->
+  <g transform="translate(480, 200)">
+    <!-- Sun -->
+    <circle cx="40" cy="52" r="24" fill="#FACC15"/>
+    <!-- Stripes -->
+    <rect x="88" y="16" width="120" height="24" rx="12" fill="#2563eb"/>
+    <rect x="88" y="64" width="120" height="24" rx="12" fill="#2563eb"/>
+    <rect x="0" y="112" width="208" height="24" rx="12" fill="#2563eb"/>
+  </g>
+
+  <!-- App name -->
+  <text x="600" y="420" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" fill="#2563eb" text-anchor="middle">Mi Barrio</text>
+
+  <!-- Tagline -->
+  <text x="600" y="480" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#64748b" text-anchor="middle">Descubrí los servicios de tu barrio</text>
+
+  <!-- URL -->
+  <text x="600" y="580" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#94a3b8" text-anchor="middle">mibarrio.app</text>
+</svg>
