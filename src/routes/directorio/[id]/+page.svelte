@@ -410,10 +410,6 @@
 							</div>
 						{/if}
 
-						<hr class="my-6 dark:border-gray-700" />
-						<p class="text-xs text-gray-400 dark:text-gray-500 text-center">
-							{provider.view_count} visitas
-						</p>
 					</div>
 				</div>
 			</div>
