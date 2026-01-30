@@ -10,6 +10,7 @@
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 	import {
 		DEFAULT_CATEGORIES,
 		DEPARTMENTS,
@@ -19,6 +20,7 @@
 	import { APP_NAME } from '$lib/config';
 	import { supabase } from '$lib/supabase';
 	import { getThumbUrl } from '$lib/utils/upload';
+	import { buildItemListSchema } from '$lib/seo/schemas';
 
 	// Types
 	interface Provider {
@@ -231,14 +233,24 @@
 
 	// Filters are now applied manually via dialog
 
+	// Build ItemList schema from providers
+	const itemListSchema = $derived(
+		providers.length > 0
+			? buildItemListSchema(providers.map((p) => ({ id: p.id, name: p.business_name })))
+			: null
+	);
+
 	onMount(() => {
 		fetchProviders();
 	});
 </script>
 
-<svelte:head>
-	<title>Directorio - {APP_NAME}</title>
-</svelte:head>
+<SEO
+	title="Directorio"
+	description="Encuentra servicios y negocios locales en Uruguay. Electricistas, plomeros, restaurantes, farmacias y más profesionales cerca tuyo."
+	url="/directorio"
+	jsonLd={itemListSchema}
+/>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
 	<Header />

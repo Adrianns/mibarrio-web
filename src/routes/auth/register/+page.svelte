@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 	import { APP_NAME } from '$lib/config';
 	import { auth } from '$lib/stores/auth';
 	import { toast } from '$lib/stores/toast';
@@ -64,9 +65,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Registrarse - {APP_NAME}</title>
-</svelte:head>
+<SEO title="Registrarse" url="/auth/register" noindex />
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
 	<Header showAuthLinks={false} />

@@ -1,11 +1,14 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 	import { APP_NAME, EMAIL_INFO } from '$lib/config';
 </script>
 
-<svelte:head>
-	<title>Términos y Condiciones - {APP_NAME}</title>
-</svelte:head>
+<SEO
+	title="Términos y Condiciones"
+	description="Términos y condiciones de uso de Mi Barrio. Lee nuestros términos de servicio antes de usar la plataforma."
+	url="/terms"
+/>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
 	<Header />

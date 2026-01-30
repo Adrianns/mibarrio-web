@@ -1,11 +1,14 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 	import { APP_NAME, EMAIL_INFO } from '$lib/config';
 </script>
 
-<svelte:head>
-	<title>Política de Privacidad - {APP_NAME}</title>
-</svelte:head>
+<SEO
+	title="Política de Privacidad"
+	description="Política de privacidad de Mi Barrio. Información sobre cómo recopilamos, usamos y protegemos tus datos personales."
+	url="/privacy"
+/>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
 	<Header />

@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 	import { APP_NAME } from '$lib/config';
 	import { supabase } from '$lib/supabase';
 	import { toast } from '$lib/stores/toast';
@@ -58,9 +59,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Restablecer contraseña - {APP_NAME}</title>
-</svelte:head>
+<SEO title="Restablecer contraseña" url="/auth/reset-password" noindex />
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
 	<Header showAuthLinks={false} />

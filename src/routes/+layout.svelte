@@ -21,8 +21,6 @@
 </script>
 
 <svelte:head>
-	<title>{APP_NAME}</title>
-	<meta name="description" content={APP_DESCRIPTION} />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
 	<link

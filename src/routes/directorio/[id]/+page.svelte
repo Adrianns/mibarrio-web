@@ -19,10 +19,13 @@
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 	import { APP_NAME } from '$lib/config';
 	import { toast } from '$lib/stores/toast';
 	import { supabase } from '$lib/supabase';
 	import { DEFAULT_CATEGORIES } from '$lib/domain/types';
+	import { buildLocalBusinessSchema, buildBreadcrumbSchema } from '$lib/seo/schemas';
+	import { SITE_DESCRIPTION } from '$lib/seo/constants';
 
 	const providerId = $page.params.id;
 
@@ -191,6 +194,36 @@
 		}
 	}
 
+	// Build SEO schemas
+	const localBusinessSchema = $derived(
+		provider
+			? buildLocalBusinessSchema({
+					id: provider.id,
+					name: provider.business_name,
+					description: provider.description || '',
+					phone: provider.contact_phone || undefined,
+					city: provider.neighborhood || undefined,
+					department: provider.department,
+					logo_url: provider.logo_url || undefined,
+					category: provider.categories[0] || undefined
+				})
+			: null
+	);
+
+	const breadcrumbSchema = $derived(
+		provider
+			? buildBreadcrumbSchema([
+					{ name: 'Inicio', url: '/' },
+					{ name: 'Directorio', url: '/directorio' },
+					{ name: provider.business_name, url: `/directorio/${provider.id}` }
+				])
+			: null
+	);
+
+	const jsonLdSchemas = $derived(
+		localBusinessSchema && breadcrumbSchema ? [localBusinessSchema, breadcrumbSchema] : null
+	);
+
 	onMount(() => {
 		fetchProvider();
 	});
@@ -198,14 +231,17 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<svelte:head>
-	{#if provider}
-		<title>{provider.business_name} - {APP_NAME}</title>
-		<meta name="description" content={provider.description || ''} />
-	{:else}
-		<title>Cargando... - {APP_NAME}</title>
-	{/if}
-</svelte:head>
+{#if provider}
+	<SEO
+		title={provider.business_name}
+		description={provider.description || `${provider.business_name} en Mi Barrio - Servicios locales en ${provider.department}`}
+		url="/directorio/{provider.id}"
+		image={provider.logo_url || provider.photos?.[0]}
+		jsonLd={jsonLdSchemas}
+	/>
+{:else}
+	<SEO title="Cargando..." description={SITE_DESCRIPTION} noindex />
+{/if}
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
 	<Header items={[{ label: 'Directorio', href: '/directorio' }]} />

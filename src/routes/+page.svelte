@@ -3,9 +3,14 @@
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 	import { DEFAULT_CATEGORIES, DEPARTMENTS, MONTEVIDEO_NEIGHBORHOODS, type Department } from '$lib/domain/types';
 	import { APP_NAME, APP_TAGLINE } from '$lib/config';
 	import { isAuthenticated, hasMibarrioProvider, isInitialized } from '$lib/stores/auth';
+	import { buildOrganizationSchema } from '$lib/seo/schemas';
+	import { SITE_DESCRIPTION } from '$lib/seo/constants';
+
+	const organizationSchema = buildOrganizationSchema(SITE_DESCRIPTION);
 
 	let searchQuery = $state('');
 	let selectedDepartment = $state<Department | ''>('');
@@ -31,6 +36,8 @@
 		window.location.href = `/directorio?${params.toString()}`;
 	}
 </script>
+
+<SEO url="/" jsonLd={organizationSchema} />
 
 <div class="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors">
 	<Header items={navItems} variant="transparent" />

@@ -2,6 +2,7 @@
 	import { Check } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
+	import SEO from '$lib/components/SEO.svelte';
 	import { APP_NAME, EMAIL_SUPPORT } from '$lib/config';
 
 	const features = [
@@ -24,9 +25,11 @@
 	// };
 </script>
 
-<svelte:head>
-	<title>Planes - {APP_NAME}</title>
-</svelte:head>
+<SEO
+	title="Planes"
+	description="Registrá tu negocio en Mi Barrio gratis. Sin tarjeta de crédito, sin compromisos. 100% gratuito para siempre."
+	url="/planes"
+/>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
 	<Header items={[{ label: 'Directorio', href: '/directorio' }]} />
