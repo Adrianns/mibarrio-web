@@ -8,24 +8,43 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Categories with their PRD codes from 1122.com.uy
 const CATEGORIES = [
-  { name: 'electricista', prd: 'PRD1000390', label: 'Electricistas' },
+  // Hogar
   { name: 'plomero', prd: 'PRD1000922', label: 'Sanitarios' },
   { name: 'albanil', prd: 'PRD1002184', label: 'Albañiles' },
   { name: 'cerrajero', prd: 'PRD1000247', label: 'Cerrajerías' },
   { name: 'pintor', prd: 'PRD1000808', label: 'Pintores' },
   { name: 'carpintero', prd: 'PRD1000223', label: 'Carpinterías' },
   { name: 'jardinero', prd: 'PRD1000622', label: 'Jardinería' },
+  { name: 'vidrieria', prd: 'PRD1001040', label: 'Vidrierías' },
+  { name: 'herreria', prd: 'PRD1000538', label: 'Herrerías' },
+  { name: 'tecnico-aire', prd: 'PRD1000025', label: 'Aire Acondicionado' },
+  // Autos
   { name: 'mecanico', prd: 'PRD1000959', label: 'Talleres Mecánicos' },
+  { name: 'gomeria', prd: 'PRD1000502', label: 'Gomerías' },
+  { name: 'lavadero', prd: 'PRD1000653', label: 'Lavaderos' },
+  // Servicios
   { name: 'mudanzas', prd: 'PRD1000757', label: 'Mudanzas' },
   { name: 'limpieza', prd: 'PRD1000680', label: 'Limpieza' },
+  { name: 'fletes', prd: 'PRD1000472', label: 'Fletes' },
+  // Salud y Belleza
   { name: 'veterinario', prd: 'PRD1001033', label: 'Veterinarias' },
   { name: 'peluqueria', prd: 'PRD1000800', label: 'Peluquerías' },
-  { name: 'restaurante', prd: 'PRD1000890', label: 'Restaurantes' },
-  { name: 'ferreteria', prd: 'PRD1000466', label: 'Ferreterías' },
   { name: 'farmacia', prd: 'PRD1000460', label: 'Farmacias' },
+  { name: 'optica', prd: 'PRD1000772', label: 'Ópticas' },
+  // Comida
+  { name: 'restaurante', prd: 'PRD1000890', label: 'Restaurantes' },
+  { name: 'panaderia', prd: 'PRD1000779', label: 'Panaderías' },
+  { name: 'carniceria', prd: 'PRD1000219', label: 'Carnicerías' },
+  // Comercios
+  { name: 'ferreteria', prd: 'PRD1000466', label: 'Ferreterías' },
+  { name: 'libreria', prd: 'PRD1000676', label: 'Librerías' },
+  // Profesionales
+  { name: 'abogado', prd: 'PRD1000005', label: 'Abogados' },
+  { name: 'contador', prd: 'PRD1000290', label: 'Contadores' },
+  { name: 'arquitecto', prd: 'PRD1000060', label: 'Arquitectos' },
 ];
 
-const LIMIT_PER_CATEGORY = 5;
+const LIMIT_PER_CATEGORY = 10;
 
 // Get business URLs from listing page
 async function getBusinessUrls(page: Page, category: typeof CATEGORIES[0], limit: number): Promise<string[]> {

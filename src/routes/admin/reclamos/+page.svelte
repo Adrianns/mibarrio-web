@@ -13,7 +13,9 @@
 		Store,
 		Calendar,
 		MessageSquare,
-		RefreshCw
+		RefreshCw,
+		Phone,
+		Mail
 	} from 'lucide-svelte';
 
 	interface ClaimRequest {
@@ -22,6 +24,8 @@
 		user_id: string;
 		status: 'pending' | 'approved' | 'rejected';
 		message: string | null;
+		contact_phone: string | null;
+		contact_email: string | null;
 		created_at: string;
 		provider: {
 			id: string;
@@ -53,6 +57,8 @@
 				user_id,
 				status,
 				message,
+				contact_phone,
+				contact_email,
 				created_at,
 				provider:mb_providers!provider_id (
 					id,
@@ -254,6 +260,21 @@
 								<span class="font-medium">Solicitante:</span>
 								{claim.requester?.full_name || 'Usuario desconocido'}
 								<span class="text-gray-400">({claim.requester?.email})</span>
+							</div>
+
+							<div class="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mb-2">
+								{#if claim.contact_phone}
+									<div class="flex items-center gap-2">
+										<Phone class="h-4 w-4" />
+										<a href="tel:{claim.contact_phone}" class="hover:text-primary-600">{claim.contact_phone}</a>
+									</div>
+								{/if}
+								{#if claim.contact_email}
+									<div class="flex items-center gap-2">
+										<Mail class="h-4 w-4" />
+										<a href="mailto:{claim.contact_email}" class="hover:text-primary-600">{claim.contact_email}</a>
+									</div>
+								{/if}
 							</div>
 
 							<div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-500">

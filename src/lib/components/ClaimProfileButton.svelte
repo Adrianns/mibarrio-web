@@ -17,6 +17,8 @@
 
 	let showModal = $state(false);
 	let message = $state('');
+	let phone = $state('');
+	let email = $state('');
 	let submitting = $state(false);
 	let existingClaim = $state<{ status: string } | null>(null);
 	let checkingClaim = $state(true);
@@ -59,17 +61,31 @@
 	function closeModal() {
 		showModal = false;
 		message = '';
+		phone = '';
+		email = '';
 	}
 
 	async function submitClaim() {
 		if (!$user) return;
+
+		// Validate required fields
+		if (!phone.trim()) {
+			toast.error('Por favor ingresá tu teléfono');
+			return;
+		}
+		if (!email.trim()) {
+			toast.error('Por favor ingresá tu email');
+			return;
+		}
 
 		submitting = true;
 
 		const { error } = await supabase.from('mb_claim_requests').insert({
 			provider_id: providerId,
 			user_id: $user.id,
-			message: message.trim() || null
+			message: message.trim() || null,
+			contact_phone: phone.trim(),
+			contact_email: email.trim()
 		});
 
 		submitting = false;
@@ -155,6 +171,32 @@
 				Estás solicitando el control de <strong>{providerName}</strong>.
 				Un administrador revisará tu solicitud.
 			</p>
+
+			<div class="mb-4">
+				<label for="claim-phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+					Teléfono de contacto *
+				</label>
+				<input
+					id="claim-phone"
+					type="tel"
+					bind:value={phone}
+					placeholder="099 123 456"
+					class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+				/>
+			</div>
+
+			<div class="mb-4">
+				<label for="claim-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+					Email de contacto *
+				</label>
+				<input
+					id="claim-email"
+					type="email"
+					bind:value={email}
+					placeholder="tu@email.com"
+					class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+				/>
+			</div>
 
 			<div class="mb-4">
 				<label for="claim-message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
