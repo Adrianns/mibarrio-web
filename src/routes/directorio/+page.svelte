@@ -37,6 +37,9 @@
 		categories: string[];
 	}
 
+	// Pagination constants
+	const PAGE_SIZE = 20;
+
 	// Get query params
 	let searchQuery = $state($page.url.searchParams.get('q') || '');
 	let selectedDepartment = $state<Department | ''>(
@@ -49,8 +52,15 @@
 	);
 
 	let loading = $state(true);
+	let loadingMore = $state(false);
 	let providers = $state<Provider[]>([]);
+	let hasMore = $state(true);
+	let currentOffset = $state(0);
 	let filterDialogOpen = $state(false);
+	let loadMoreTrigger = $state<HTMLDivElement | null>(null);
+
+	// Cached provider IDs for category/type filter (to avoid re-querying on load more)
+	let cachedFilteredProviderIds: string[] | null = null;
 
 	// Check if any filter is active
 	let hasActiveFilters = $derived(
@@ -107,8 +117,46 @@
 		categories
 	);
 
-	async function fetchProviders() {
-		loading = true;
+	async function fetchProviders(loadMore = false) {
+		if (loadMore) {
+			loadingMore = true;
+		} else {
+			loading = true;
+			providers = [];
+			currentOffset = 0;
+			hasMore = true;
+			cachedFilteredProviderIds = null;
+		}
+
+		// If filtering by category or type, get provider IDs that match (only on initial load)
+		let filteredProviderIds: string[] | null = cachedFilteredProviderIds;
+
+		if ((selectedCategory || selectedType) && !loadMore) {
+			let categoryNames: string[] = [];
+
+			if (selectedCategory) {
+				categoryNames = [selectedCategory];
+			} else if (selectedType) {
+				categoryNames = (selectedType === 'service' ? serviceCategories : businessCategories)
+					.map(c => c.name);
+			}
+
+			const { data: catData } = await supabase
+				.from('mb_provider_categories')
+				.select('provider_id')
+				.in('category_name', categoryNames);
+
+			filteredProviderIds = catData?.map(c => c.provider_id) || [];
+			cachedFilteredProviderIds = filteredProviderIds;
+
+			// If no providers match the category, return empty
+			if (filteredProviderIds.length === 0) {
+				providers = [];
+				hasMore = false;
+				loading = false;
+				return;
+			}
+		}
 
 		// Build query
 		let query = supabase
@@ -131,7 +179,12 @@
 			.order('is_featured', { ascending: false })
 			.order('created_at', { ascending: false });
 
-		// Apply filters
+		// Filter by provider IDs that match category/type
+		if (filteredProviderIds) {
+			query = query.in('id', filteredProviderIds);
+		}
+
+		// Apply other filters
 		if (selectedDepartment) {
 			query = query.eq('department', selectedDepartment);
 		}
@@ -146,11 +199,12 @@
 			);
 		}
 
-		const { data, error } = await query.limit(50);
+		// Apply pagination
+		const { data, error } = await query.range(currentOffset, currentOffset + PAGE_SIZE - 1);
 
 		if (error) {
 			console.error('Error fetching providers:', error);
-			providers = [];
+			if (!loadMore) providers = [];
 		} else {
 			// Fetch categories for each provider
 			const providerIds = data?.map((p) => p.id) || [];
@@ -168,30 +222,34 @@
 					categoryMap.set(c.provider_id, existing);
 				});
 
-				providers = (data || []).map((p) => ({
+				const newProviders = (data || []).map((p) => ({
 					...p,
 					categories: categoryMap.get(p.id) || []
 				}));
 
-				// Filter by category if selected
-				if (selectedCategory) {
-					providers = providers.filter((p) => p.categories.includes(selectedCategory));
+				if (loadMore) {
+					providers = [...providers, ...newProviders];
+				} else {
+					providers = newProviders;
 				}
 
-				// Filter by type (service/business) based on provider categories
-				if (selectedType) {
-					const typeCategoryNames = (selectedType === 'service' ? serviceCategories : businessCategories)
-						.map(c => c.name);
-					providers = providers.filter((p) =>
-						p.categories.some(cat => typeCategoryNames.includes(cat))
-					);
-				}
+				// Check if there are more results
+				hasMore = data.length === PAGE_SIZE;
+				currentOffset += data.length;
 			} else {
-				providers = [];
+				if (!loadMore) providers = [];
+				hasMore = false;
 			}
 		}
 
 		loading = false;
+		loadingMore = false;
+	}
+
+	function loadMoreProviders() {
+		if (!loadingMore && hasMore) {
+			fetchProviders(true);
+		}
 	}
 
 	function updateUrl() {
@@ -242,6 +300,25 @@
 
 	onMount(() => {
 		fetchProviders();
+
+		// Set up intersection observer for infinite scroll
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
+					loadMoreProviders();
+				}
+			},
+			{ rootMargin: '200px' }
+		);
+
+		// Watch for loadMoreTrigger element
+		$effect(() => {
+			if (loadMoreTrigger) {
+				observer.observe(loadMoreTrigger);
+			}
+		});
+
+		return () => observer.disconnect();
 	});
 </script>
 
@@ -369,7 +446,7 @@
 			</div>
 
 			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-				{#each providers as provider}
+				{#each providers as provider (provider.id)}
 					<a
 						href="/directorio/{provider.id}"
 						class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
@@ -466,6 +543,23 @@
 					</a>
 				{/each}
 			</div>
+
+			<!-- Load more trigger and indicator -->
+			{#if hasMore}
+				<div
+					bind:this={loadMoreTrigger}
+					class="flex items-center justify-center py-8"
+				>
+					{#if loadingMore}
+						<Loader2 class="h-6 w-6 animate-spin text-primary-600" />
+						<span class="ml-2 text-gray-600 dark:text-gray-400">Cargando más...</span>
+					{/if}
+				</div>
+			{:else if providers.length > PAGE_SIZE}
+				<div class="text-center py-8 text-gray-500 dark:text-gray-400">
+					No hay más resultados
+				</div>
+			{/if}
 		{/if}
 	</div>
 </div>
