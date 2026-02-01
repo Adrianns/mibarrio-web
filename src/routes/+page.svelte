@@ -129,6 +129,21 @@
 		</div>
 	</section>
 
+	<!-- CTA for Providers -->
+	<section class="container py-16">
+		<div class="bg-primary-600 rounded-2xl p-8 md:p-12 text-center text-white">
+			<h2 class="text-3xl font-bold mb-4">¿Tenés un negocio o servicio?</h2>
+			<p class="text-primary-100 mb-8 max-w-2xl mx-auto">
+				Registrate en Mi Barrio y que miles de personas te encuentren.
+				100% gratuito, sin compromisos.
+			</p>
+			<a href="/auth/login?redirect=/registrar-negocio" class="inline-flex items-center justify-center gap-2 h-12 px-8 text-base rounded-lg bg-white text-primary-600 hover:bg-primary-50 font-medium transition-colors">
+				<ArrowRight class="h-5 w-5" />
+				Ofrecer servicios
+			</a>
+		</div>
+	</section>
+
 	<!-- Categories -->
 	<section class="container py-16">
 		<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Categorías populares</h2>
@@ -149,21 +164,6 @@
 			<a href="/directorio" class="text-primary-600 hover:text-primary-700 font-medium inline-flex items-center gap-2">
 				Ver todas las categorías
 				<ArrowRight class="h-4 w-4" />
-			</a>
-		</div>
-	</section>
-
-	<!-- CTA for Providers -->
-	<section class="container py-16">
-		<div class="bg-primary-600 rounded-2xl p-8 md:p-12 text-center text-white">
-			<h2 class="text-3xl font-bold mb-4">¿Tenés un negocio o servicio?</h2>
-			<p class="text-primary-100 mb-8 max-w-2xl mx-auto">
-				Registrate en Mi Barrio y que miles de personas te encuentren.
-				100% gratuito, sin compromisos.
-			</p>
-			<a href="/auth/login?redirect=/registrar-negocio" class="inline-flex items-center justify-center gap-2 h-12 px-8 text-base rounded-lg bg-white text-primary-600 hover:bg-primary-50 font-medium transition-colors">
-				<ArrowRight class="h-5 w-5" />
-				Ofrecer servicios
 			</a>
 		</div>
 	</section>

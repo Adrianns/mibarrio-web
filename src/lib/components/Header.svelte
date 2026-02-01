@@ -72,6 +72,26 @@
 				{APP_NAME}
 			</a>
 
+			<!-- Mobile Auth -->
+			{#if showAuthLinks}
+				{#if $isAuthenticated}
+					<button
+						class="md:hidden p-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+						onclick={handleLogout}
+						aria-label="Cerrar sesión"
+					>
+						<LogOut class="h-6 w-6" />
+					</button>
+				{:else}
+					<a
+						href="/auth/login"
+						class="md:hidden text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+					>
+						Iniciar sesión
+					</a>
+				{/if}
+			{/if}
+
 			<!-- Desktop Navigation -->
 			<div class="hidden md:flex items-center gap-4">
 				{#each items as item}
