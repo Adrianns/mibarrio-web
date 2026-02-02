@@ -76,11 +76,13 @@
 			{#if showAuthLinks}
 				{#if $isAuthenticated}
 					<button
-						class="md:hidden p-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+						type="button"
+						class="md:hidden flex items-center gap-2 px-3 py-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
 						onclick={handleLogout}
 						aria-label="Cerrar sesión"
 					>
-						<LogOut class="h-6 w-6" />
+						<LogOut class="h-5 w-5" />
+						<span class="text-sm font-medium">Salir</span>
 					</button>
 				{:else}
 					<a
