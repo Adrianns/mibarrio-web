@@ -392,34 +392,34 @@
 		{#if hasActiveFilters}
 			<div class="flex flex-wrap items-center gap-2 mb-4">
 				{#if selectedType}
-					<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-sm">
+					<span class="inline-flex items-center gap-1 pl-3 pr-1 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-sm">
 						{selectedType === 'service' ? 'Profesionales' : 'Comercios'}
-						<button type="button" onclick={() => removeFilter('type')} class="hover:text-primary-900 dark:hover:text-primary-100">
+						<button type="button" onclick={() => removeFilter('type')} class="p-1.5 hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full" aria-label="Quitar filtro">
 							<X class="h-4 w-4" />
 						</button>
 					</span>
 				{/if}
 				{#if selectedCategory}
 					{@const catInfo = getCategoryInfo(selectedCategory)}
-					<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-sm">
+					<span class="inline-flex items-center gap-1 pl-3 pr-1 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-sm">
 						{catInfo.label}
-						<button type="button" onclick={() => removeFilter('category')} class="hover:text-primary-900 dark:hover:text-primary-100">
+						<button type="button" onclick={() => removeFilter('category')} class="p-1.5 hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full" aria-label="Quitar filtro">
 							<X class="h-4 w-4" />
 						</button>
 					</span>
 				{/if}
 				{#if selectedDepartment}
-					<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-sm">
+					<span class="inline-flex items-center gap-1 pl-3 pr-1 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-sm">
 						{selectedDepartment}
-						<button type="button" onclick={() => removeFilter('department')} class="hover:text-primary-900 dark:hover:text-primary-100">
+						<button type="button" onclick={() => removeFilter('department')} class="p-1.5 hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full" aria-label="Quitar filtro">
 							<X class="h-4 w-4" />
 						</button>
 					</span>
 				{/if}
 				{#if selectedNeighborhood}
-					<span class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-sm">
+					<span class="inline-flex items-center gap-1 pl-3 pr-1 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-sm">
 						{selectedNeighborhood}
-						<button type="button" onclick={() => removeFilter('neighborhood')} class="hover:text-primary-900 dark:hover:text-primary-100">
+						<button type="button" onclick={() => removeFilter('neighborhood')} class="p-1.5 hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full" aria-label="Quitar filtro">
 							<X class="h-4 w-4" />
 						</button>
 					</span>
@@ -707,11 +707,11 @@
 			<!-- Category -->
 			<div>
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Categoría</label>
-				<div class="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
+				<div class="flex flex-wrap gap-2 max-h-56 overflow-y-auto">
 					<button
 						type="button"
 						onclick={() => { selectedCategory = ''; }}
-						class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors {selectedCategory === '' ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}"
+						class="px-4 py-2.5 rounded-lg text-sm font-medium transition-colors {selectedCategory === '' ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}"
 					>
 						Todas
 					</button>
@@ -719,7 +719,7 @@
 						<button
 							type="button"
 							onclick={() => { selectedCategory = cat.name; }}
-							class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors {selectedCategory === cat.name ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}"
+							class="px-4 py-2.5 rounded-lg text-sm font-medium transition-colors {selectedCategory === cat.name ? 'bg-primary-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}"
 						>
 							{cat.label}
 						</button>

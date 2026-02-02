@@ -171,7 +171,7 @@
 	</section>
 
 	<!-- Footer -->
-	<footer class="bg-gray-900 text-gray-400 py-12">
+	<footer class="bg-gray-900 text-gray-400 py-12 pb-24 md:pb-12">
 		<div class="container">
 			<div class="grid md:grid-cols-4 gap-8">
 				<div>

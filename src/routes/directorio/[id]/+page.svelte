@@ -474,21 +474,21 @@
 
 						<hr class="my-6 dark:border-gray-700" />
 						<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Redes y web</h3>
-						<div class="space-y-2">
+						<div class="space-y-1">
 							{#if provider.website}
 								<a
 									href={ensureProtocol(provider.website)}
 									target="_blank"
 									rel="noopener noreferrer"
 									onclick={() => handleContactClick('website')}
-									class="flex items-center text-gray-600 dark:text-gray-400 hover:text-primary-600"
+									class="flex items-center gap-3 py-3 px-2 -mx-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors"
 								>
-									<Globe class="h-5 w-5 mr-2" />
-									Sitio web
+									<Globe class="h-5 w-5 flex-shrink-0" />
+									<span class="truncate">Sitio web</span>
 								</a>
 							{:else}
-								<div class="flex items-center text-gray-300 dark:text-gray-600">
-									<Globe class="h-5 w-5 mr-2" />
+								<div class="flex items-center gap-3 py-3 px-2 text-gray-300 dark:text-gray-600">
+									<Globe class="h-5 w-5 flex-shrink-0" />
 									<span class="text-sm">Sin sitio web</span>
 								</div>
 							{/if}
@@ -498,14 +498,14 @@
 									target="_blank"
 									rel="noopener noreferrer"
 									onclick={() => handleContactClick('social')}
-									class="flex items-center text-gray-600 dark:text-gray-400 hover:text-pink-600"
+									class="flex items-center gap-3 py-3 px-2 -mx-2 text-gray-600 dark:text-gray-400 hover:text-pink-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors"
 								>
-									<Instagram class="h-5 w-5 mr-2" />
-									Instagram
+									<Instagram class="h-5 w-5 flex-shrink-0" />
+									<span class="truncate">Instagram</span>
 								</a>
 							{:else}
-								<div class="flex items-center text-gray-300 dark:text-gray-600">
-									<Instagram class="h-5 w-5 mr-2" />
+								<div class="flex items-center gap-3 py-3 px-2 text-gray-300 dark:text-gray-600">
+									<Instagram class="h-5 w-5 flex-shrink-0" />
 									<span class="text-sm">Sin Instagram</span>
 								</div>
 							{/if}
@@ -515,14 +515,14 @@
 									target="_blank"
 									rel="noopener noreferrer"
 									onclick={() => handleContactClick('social')}
-									class="flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600"
+									class="flex items-center gap-3 py-3 px-2 -mx-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors"
 								>
-									<Facebook class="h-5 w-5 mr-2" />
-									Facebook
+									<Facebook class="h-5 w-5 flex-shrink-0" />
+									<span class="truncate">Facebook</span>
 								</a>
 							{:else}
-								<div class="flex items-center text-gray-300 dark:text-gray-600">
-									<Facebook class="h-5 w-5 mr-2" />
+								<div class="flex items-center gap-3 py-3 px-2 text-gray-300 dark:text-gray-600">
+									<Facebook class="h-5 w-5 flex-shrink-0" />
 									<span class="text-sm">Sin Facebook</span>
 								</div>
 							{/if}
@@ -549,7 +549,7 @@
 		<button
 			type="button"
 			onclick={closeLightbox}
-			class="absolute top-4 right-4 p-2 text-white/70 hover:text-white transition-colors z-10"
+			class="absolute top-4 right-4 p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10"
 			aria-label="Cerrar"
 		>
 			<X class="h-8 w-8" />
@@ -560,7 +560,7 @@
 			<button
 				type="button"
 				onclick={prevImage}
-				class="absolute left-4 p-2 text-white/70 hover:text-white transition-colors z-10"
+				class="absolute left-2 p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10"
 				aria-label="Anterior"
 			>
 				<ChevronLeft class="h-10 w-10" />
@@ -581,7 +581,7 @@
 			<button
 				type="button"
 				onclick={nextImage}
-				class="absolute right-4 p-2 text-white/70 hover:text-white transition-colors z-10"
+				class="absolute right-2 p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10"
 				aria-label="Siguiente"
 			>
 				<ChevronRight class="h-10 w-10" />

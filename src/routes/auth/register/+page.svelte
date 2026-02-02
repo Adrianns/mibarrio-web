@@ -129,7 +129,8 @@
 							<button
 								type="button"
 								onclick={() => (showPassword = !showPassword)}
-								class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+								class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+								aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
 							>
 								{#if showPassword}
 									<EyeOff class="h-5 w-5" />

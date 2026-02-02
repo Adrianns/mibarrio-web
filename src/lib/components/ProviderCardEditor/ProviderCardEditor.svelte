@@ -309,8 +309,8 @@
 							<div class="relative">
 								{#if logoUrl}
 									<img src={logoUrl} alt="Logo" class="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600" />
-									<button type="button" onclick={removeLogo} class="absolute -top-1 -right-1 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center">
-										<X class="h-4 w-4" />
+									<button type="button" onclick={removeLogo} class="absolute -top-2 -right-2 w-9 h-9 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md" aria-label="Eliminar foto">
+										<X class="h-5 w-5" />
 									</button>
 								{:else}
 									<button type="button" onclick={() => logoInput?.click()} disabled={uploadingLogo} class="w-24 h-24 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
@@ -322,8 +322,8 @@
 									</button>
 								{/if}
 								{#if logoUrl}
-									<button type="button" onclick={() => logoInput?.click()} disabled={uploadingLogo} class="absolute -bottom-1 -right-1 w-7 h-7 bg-primary-600 text-white rounded-full flex items-center justify-center">
-										<Camera class="h-4 w-4" />
+									<button type="button" onclick={() => logoInput?.click()} disabled={uploadingLogo} class="absolute -bottom-2 -right-2 w-9 h-9 bg-primary-600 text-white rounded-full flex items-center justify-center shadow-md" aria-label="Cambiar foto">
+										<Camera class="h-5 w-5" />
 									</button>
 								{/if}
 							</div>
@@ -536,8 +536,8 @@
 								<div class="relative">
 									{#if logoUrl}
 										<img src={logoUrl} alt="Logo" class="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600" />
-										<button type="button" onclick={removeLogo} class="absolute -top-1 -right-1 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600">
-											<X class="h-4 w-4" />
+										<button type="button" onclick={removeLogo} class="absolute -top-2 -right-2 w-9 h-9 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-md" aria-label="Eliminar foto">
+											<X class="h-5 w-5" />
 										</button>
 									{:else}
 										<button type="button" onclick={() => logoInput?.click()} disabled={uploadingLogo} class="w-24 h-24 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-400 transition-colors cursor-pointer">
@@ -549,8 +549,8 @@
 										</button>
 									{/if}
 									{#if logoUrl}
-										<button type="button" onclick={() => logoInput?.click()} disabled={uploadingLogo} class="absolute -bottom-1 -right-1 w-7 h-7 bg-primary-600 text-white rounded-full flex items-center justify-center hover:bg-primary-700">
-											<Camera class="h-4 w-4" />
+										<button type="button" onclick={() => logoInput?.click()} disabled={uploadingLogo} class="absolute -bottom-2 -right-2 w-9 h-9 bg-primary-600 text-white rounded-full flex items-center justify-center hover:bg-primary-700 shadow-md" aria-label="Cambiar foto">
+											<Camera class="h-5 w-5" />
 										</button>
 									{/if}
 								</div>

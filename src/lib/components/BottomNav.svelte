@@ -16,7 +16,7 @@
 	}
 </script>
 
-<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 md:hidden pb-[env(safe-area-inset-bottom)]">
+<nav class="fixed bottom-0 left-0 right-0 z-[1100] bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 md:hidden pb-[env(safe-area-inset-bottom)]">
 	<div class="flex items-center justify-around h-16">
 		{#each navItems as item (item.href)}
 			{@const href = item.authHref && $isAuthenticated ? item.authHref : item.href}
@@ -28,7 +28,7 @@
 					: 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}"
 			>
 				<item.icon class="h-6 w-6" />
-				<span class="text-xs mt-1 font-medium">{item.label}</span>
+				<span class="text-sm mt-0.5 font-medium">{item.label}</span>
 			</a>
 		{/each}
 	</div>
