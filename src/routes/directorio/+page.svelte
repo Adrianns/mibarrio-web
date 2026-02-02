@@ -7,7 +7,8 @@
 		Loader2,
 		SlidersHorizontal,
 		X,
-		Map as MapIcon
+		Map as MapIcon,
+		Eye
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
@@ -22,6 +23,12 @@
 	import { supabase } from '$lib/supabase';
 	import { getThumbUrl } from '$lib/utils/upload';
 	import { buildItemListSchema } from '$lib/seo/schemas';
+	import {
+		addRecentSearch,
+		subscribeToActivity,
+		clearRecentlyViewed,
+		type RecentlyViewedProvider
+	} from '$lib/stores/activity';
 
 	// Types
 	interface Provider {
@@ -59,6 +66,8 @@
 	let currentOffset = $state(0);
 	let filterDialogOpen = $state(false);
 	let loadMoreTrigger = $state<HTMLDivElement | null>(null);
+	let showRecentlyViewed = $state(false);
+	let recentlyViewed = $state<RecentlyViewedProvider[]>([]);
 
 	// Cached provider IDs for category/type filter (to avoid re-querying on load more)
 	let cachedFilteredProviderIds: string[] | null = null;
@@ -232,6 +241,18 @@
 					providers = [...providers, ...newProviders];
 				} else {
 					providers = newProviders;
+
+					// Track this search (only on initial load, not pagination)
+					addRecentSearch({
+						query: searchQuery,
+						filters: {
+							departamento: selectedDepartment || undefined,
+							barrio: selectedNeighborhood || undefined,
+							categoria: selectedCategory || undefined,
+							tipo: selectedType || undefined
+						},
+						resultCount: newProviders.length
+					});
 				}
 
 				// Check if there are more results
@@ -301,8 +322,21 @@
 
 	let observer: IntersectionObserver | null = null;
 
+	function toggleRecentlyViewed() {
+		showRecentlyViewed = !showRecentlyViewed;
+	}
+
+	function exitRecentlyViewed() {
+		showRecentlyViewed = false;
+	}
+
 	onMount(() => {
 		fetchProviders();
+
+		// Subscribe to activity store for recently viewed
+		const unsubscribe = subscribeToActivity((data) => {
+			recentlyViewed = data.recentlyViewed;
+		});
 
 		// Set up intersection observer for infinite scroll
 		observer = new IntersectionObserver(
@@ -314,7 +348,10 @@
 			{ rootMargin: '200px' }
 		);
 
-		return () => observer?.disconnect();
+		return () => {
+			observer?.disconnect();
+			unsubscribe();
+		};
 	});
 
 	// Watch for loadMoreTrigger element
@@ -369,6 +406,21 @@
 					<MapIcon class="h-5 w-5" />
 					<span class="hidden sm:inline">Mapa</span>
 				</a>
+				{#if recentlyViewed.length > 0}
+					<button
+						type="button"
+						onclick={toggleRecentlyViewed}
+						class="flex items-center gap-2 px-4 py-3 rounded-lg border transition-colors {showRecentlyViewed
+							? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+							: 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400'}"
+					>
+						<Eye class="h-5 w-5" />
+						<span class="hidden sm:inline">Recientes</span>
+						<span class="bg-primary-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+							{recentlyViewed.length}
+						</span>
+					</button>
+				{/if}
 			</div>
 		</div>
 
@@ -418,8 +470,77 @@
 			</div>
 		{/if}
 
-		<!-- Loading state -->
-		{#if loading}
+		<!-- Recently Viewed Section -->
+		{#if showRecentlyViewed}
+			<div class="mb-4">
+				<div class="flex items-center justify-between mb-4">
+					<div class="flex items-center gap-2">
+						<Eye class="h-5 w-5 text-primary-600" />
+						<h2 class="text-lg font-semibold text-gray-900 dark:text-white">Visitados recientemente</h2>
+						<span class="text-sm text-gray-500">({recentlyViewed.length})</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<button
+							type="button"
+							onclick={() => { clearRecentlyViewed(); showRecentlyViewed = false; }}
+							class="text-sm text-gray-500 hover:text-red-600"
+						>
+							Limpiar historial
+						</button>
+						<button
+							type="button"
+							onclick={exitRecentlyViewed}
+							class="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700"
+						>
+							<X class="h-4 w-4" />
+							Cerrar
+						</button>
+					</div>
+				</div>
+
+				<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+					{#each recentlyViewed as item (item.id)}
+						{@const catInfo = getCategoryInfo(item.category)}
+						<a
+							href="/directorio/{item.id}"
+							class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+						>
+							<div class="p-4">
+								<div class="flex items-start gap-3 mb-3">
+									{#if item.logoUrl}
+										<img
+											src={item.logoUrl}
+											alt={item.name}
+											loading="lazy"
+											class="w-12 h-12 rounded-full object-cover flex-shrink-0"
+										/>
+									{:else}
+										<div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center flex-shrink-0">
+											<span class="text-lg font-bold text-primary-400">
+												{item.name.charAt(0)}
+											</span>
+										</div>
+									{/if}
+									<div class="flex-1 min-w-0">
+										<h3 class="font-semibold text-gray-900 dark:text-white truncate">{item.name}</h3>
+										<div class="flex items-center gap-2 mt-1">
+											<span class="text-xs {catInfo.color} text-white px-2 py-0.5 rounded-full">
+												{catInfo.label}
+											</span>
+										</div>
+									</div>
+								</div>
+								<div class="flex items-center text-gray-500 dark:text-gray-400 text-sm">
+									<MapPin class="h-4 w-4 mr-1" />
+									{item.department}
+								</div>
+							</div>
+						</a>
+					{/each}
+				</div>
+			</div>
+		{:else if loading}
+			<!-- Loading state -->
 			<div class="flex items-center justify-center py-12">
 				<Loader2 class="h-8 w-8 animate-spin text-primary-600" />
 				<span class="ml-2 text-gray-600">Cargando...</span>

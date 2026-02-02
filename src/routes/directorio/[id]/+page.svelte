@@ -30,6 +30,7 @@
 	import { DEFAULT_CATEGORIES } from '$lib/domain/types';
 	import { buildLocalBusinessSchema, buildBreadcrumbSchema } from '$lib/seo/schemas';
 	import { SITE_DESCRIPTION } from '$lib/seo/constants';
+	import { addRecentlyViewed } from '$lib/stores/activity';
 
 	const providerId = $page.params.id;
 
@@ -156,6 +157,15 @@
 		};
 
 		loading = false;
+
+		// Track this view in user activity
+		addRecentlyViewed({
+			id: provider.id,
+			name: provider.business_name,
+			category: provider.categories[0] || 'otro',
+			department: provider.department,
+			logoUrl: provider.logo_url || provider.photos?.[0]
+		});
 
 		// Increment view count (fire and forget - don't block page load)
 		supabase.rpc('mb_increment_provider_view', { provider_uuid: providerId });

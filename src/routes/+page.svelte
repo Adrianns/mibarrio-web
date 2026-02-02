@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Search, MapPin, ArrowRight, Briefcase, X } from 'lucide-svelte';
+	import { Search, MapPin, ArrowRight, Briefcase, X, History } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
@@ -9,6 +9,12 @@
 	import { isAuthenticated, hasMibarrioProvider, isInitialized } from '$lib/stores/auth';
 	import { buildOrganizationSchema } from '$lib/seo/schemas';
 	import { SITE_DESCRIPTION } from '$lib/seo/constants';
+	import { onMount } from 'svelte';
+	import {
+		subscribeToActivity,
+		clearRecentSearches,
+		type RecentSearch
+	} from '$lib/stores/activity';
 
 	const organizationSchema = buildOrganizationSchema(SITE_DESCRIPTION);
 
@@ -16,6 +22,16 @@
 	let selectedDepartment = $state<Department | ''>('');
 	let selectedNeighborhood = $state('');
 	let bannerDismissed = $state(false);
+
+	// Activity state
+	let recentSearches = $state<RecentSearch[]>([]);
+
+	onMount(() => {
+		const unsubscribe = subscribeToActivity((data) => {
+			recentSearches = data.recentSearches;
+		});
+		return unsubscribe;
+	});
 
 	// Reset neighborhood when department changes
 	$effect(() => {
@@ -35,6 +51,32 @@
 		if (selectedNeighborhood) params.set('barrio', selectedNeighborhood);
 		window.location.href = `/directorio?${params.toString()}`;
 	}
+
+	function formatSearch(search: RecentSearch): string {
+		const parts: string[] = [];
+		if (search.query) parts.push(`"${search.query}"`);
+		if (search.filters.categoria) {
+			const cat = DEFAULT_CATEGORIES.find((c) => c.name === search.filters.categoria);
+			parts.push(cat?.label || search.filters.categoria);
+		}
+		if (search.filters.tipo) {
+			parts.push(search.filters.tipo === 'service' ? 'Servicios' : 'Comercios');
+		}
+		if (search.filters.barrio) parts.push(`en ${search.filters.barrio}`);
+		else if (search.filters.departamento) parts.push(`en ${search.filters.departamento}`);
+		return parts.join(' ') || 'Todo Uruguay';
+	}
+
+	function applySearch(search: RecentSearch) {
+		const params = new URLSearchParams();
+		if (search.query) params.set('q', search.query);
+		if (search.filters.departamento) params.set('departamento', search.filters.departamento);
+		if (search.filters.barrio) params.set('barrio', search.filters.barrio);
+		if (search.filters.categoria) params.set('categoria', search.filters.categoria);
+		if (search.filters.tipo) params.set('tipo', search.filters.tipo);
+		window.location.href = `/directorio?${params.toString()}`;
+	}
+
 </script>
 
 <SEO url="/" jsonLd={organizationSchema} />
@@ -130,6 +172,36 @@
 		</div>
 		</div>
 	</section>
+
+	<!-- Recent Searches -->
+	{#if recentSearches.length > 0}
+		<section class="container py-8">
+			<div class="flex items-center justify-between mb-4">
+				<h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+					<History class="h-5 w-5" />
+					Búsquedas recientes
+				</h2>
+				<button
+					type="button"
+					onclick={clearRecentSearches}
+					class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+				>
+					Limpiar
+				</button>
+			</div>
+			<div class="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+				{#each recentSearches.slice(0, 5) as search (search.id)}
+					<button
+						type="button"
+						onclick={() => applySearch(search)}
+						class="flex-shrink-0 px-4 py-2 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 hover:border-primary-400 hover:text-primary-600 transition-colors"
+					>
+						{formatSearch(search)}
+					</button>
+				{/each}
+			</div>
+		</section>
+	{/if}
 
 	<!-- CTA for Providers -->
 	<section class="container py-16">

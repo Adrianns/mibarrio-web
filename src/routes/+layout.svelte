@@ -4,6 +4,7 @@
 	import BottomNav from '$lib/components/BottomNav.svelte';
 	import { APP_NAME, APP_DESCRIPTION } from '$lib/config';
 	import { auth } from '$lib/stores/auth';
+	import { initializeActivity } from '$lib/stores/activity';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 
@@ -17,6 +18,7 @@
 
 	onMount(() => {
 		auth.initialize();
+		initializeActivity();
 	});
 </script>
 
