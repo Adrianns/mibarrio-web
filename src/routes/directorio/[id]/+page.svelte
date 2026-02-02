@@ -15,7 +15,10 @@
 		Loader2,
 		X,
 		ChevronLeft,
-		ChevronRight
+		ChevronRight,
+		Camera,
+		FileText,
+		Plus
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
@@ -341,16 +344,25 @@
 									: ''}{provider.department}
 							</div>
 
-							{#if provider.description}
-								<div class="prose max-w-none">
-									<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Descripción</h2>
+							<!-- Description section -->
+							<div class="prose max-w-none">
+								<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Descripción</h2>
+								{#if provider.description}
 									<p class="text-gray-600 dark:text-gray-300 whitespace-pre-line">{provider.description}</p>
-								</div>
-							{/if}
+								{:else}
+									<div class="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-6 text-center">
+										<FileText class="h-8 w-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+										<p class="text-gray-400 dark:text-gray-500 text-sm">
+											Este negocio aún no tiene descripción
+										</p>
+									</div>
+								{/if}
+							</div>
 
-							{#if provider.photos && provider.photos.length > 0}
-								<div class="mt-8">
-									<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Fotos</h2>
+							<!-- Photos section -->
+							<div class="mt-8">
+								<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Fotos</h2>
+								{#if provider.photos && provider.photos.length > 0}
 									<div class="grid grid-cols-3 gap-4">
 										{#each provider.photos as photo, i (photo)}
 											<button
@@ -362,8 +374,15 @@
 											</button>
 										{/each}
 									</div>
-								</div>
-							{/if}
+								{:else}
+									<div class="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
+										<Camera class="h-10 w-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+										<p class="text-gray-400 dark:text-gray-500 text-sm">
+											Este negocio aún no tiene fotos
+										</p>
+									</div>
+								{/if}
+							</div>
 						</div>
 					</div>
 				</div>
@@ -384,6 +403,11 @@
 									<Phone class="h-5 w-5 mr-3" />
 									Llamar: {provider.contact_phone}
 								</Button>
+							{:else}
+								<div class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 dark:text-gray-500">
+									<Phone class="h-5 w-5" />
+									<span class="text-sm">Sin teléfono</span>
+								</div>
 							{/if}
 
 							{#if provider.contact_whatsapp}
@@ -396,6 +420,11 @@
 									<MessageCircle class="h-5 w-5 mr-3" />
 									WhatsApp
 								</Button>
+							{:else}
+								<div class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 dark:text-gray-500">
+									<MessageCircle class="h-5 w-5" />
+									<span class="text-sm">Sin WhatsApp</span>
+								</div>
 							{/if}
 
 							{#if provider.contact_email}
@@ -408,51 +437,69 @@
 									<Mail class="h-5 w-5 mr-3" />
 									Email
 								</Button>
+							{:else}
+								<div class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 dark:text-gray-500">
+									<Mail class="h-5 w-5" />
+									<span class="text-sm">Sin email</span>
+								</div>
 							{/if}
 						</div>
 
-						{#if provider.website || provider.social_instagram || provider.social_facebook}
-							<hr class="my-6 dark:border-gray-700" />
-							<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Redes y web</h3>
-							<div class="space-y-2">
-								{#if provider.website}
-									<a
-										href={ensureProtocol(provider.website)}
-										target="_blank"
-										rel="noopener noreferrer"
-										onclick={() => handleContactClick('website')}
-										class="flex items-center text-gray-600 dark:text-gray-400 hover:text-primary-600"
-									>
-										<Globe class="h-5 w-5 mr-2" />
-										Sitio web
-									</a>
-								{/if}
-								{#if provider.social_instagram}
-									<a
-										href={ensureProtocol(provider.social_instagram)}
-										target="_blank"
-										rel="noopener noreferrer"
-										onclick={() => handleContactClick('social')}
-										class="flex items-center text-gray-600 dark:text-gray-400 hover:text-pink-600"
-									>
-										<Instagram class="h-5 w-5 mr-2" />
-										Instagram
-									</a>
-								{/if}
-								{#if provider.social_facebook}
-									<a
-										href={ensureProtocol(provider.social_facebook)}
-										target="_blank"
-										rel="noopener noreferrer"
-										onclick={() => handleContactClick('social')}
-										class="flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600"
-									>
-										<Facebook class="h-5 w-5 mr-2" />
-										Facebook
-									</a>
-								{/if}
-							</div>
-						{/if}
+						<hr class="my-6 dark:border-gray-700" />
+						<h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Redes y web</h3>
+						<div class="space-y-2">
+							{#if provider.website}
+								<a
+									href={ensureProtocol(provider.website)}
+									target="_blank"
+									rel="noopener noreferrer"
+									onclick={() => handleContactClick('website')}
+									class="flex items-center text-gray-600 dark:text-gray-400 hover:text-primary-600"
+								>
+									<Globe class="h-5 w-5 mr-2" />
+									Sitio web
+								</a>
+							{:else}
+								<div class="flex items-center text-gray-300 dark:text-gray-600">
+									<Globe class="h-5 w-5 mr-2" />
+									<span class="text-sm">Sin sitio web</span>
+								</div>
+							{/if}
+							{#if provider.social_instagram}
+								<a
+									href={ensureProtocol(provider.social_instagram)}
+									target="_blank"
+									rel="noopener noreferrer"
+									onclick={() => handleContactClick('social')}
+									class="flex items-center text-gray-600 dark:text-gray-400 hover:text-pink-600"
+								>
+									<Instagram class="h-5 w-5 mr-2" />
+									Instagram
+								</a>
+							{:else}
+								<div class="flex items-center text-gray-300 dark:text-gray-600">
+									<Instagram class="h-5 w-5 mr-2" />
+									<span class="text-sm">Sin Instagram</span>
+								</div>
+							{/if}
+							{#if provider.social_facebook}
+								<a
+									href={ensureProtocol(provider.social_facebook)}
+									target="_blank"
+									rel="noopener noreferrer"
+									onclick={() => handleContactClick('social')}
+									class="flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600"
+								>
+									<Facebook class="h-5 w-5 mr-2" />
+									Facebook
+								</a>
+							{:else}
+								<div class="flex items-center text-gray-300 dark:text-gray-600">
+									<Facebook class="h-5 w-5 mr-2" />
+									<span class="text-sm">Sin Facebook</span>
+								</div>
+							{/if}
+						</div>
 
 						{#if !provider.is_claimed}
 							<hr class="my-6 dark:border-gray-700" />
