@@ -75,7 +75,8 @@
 	{/if}
 
 	<!-- Hero -->
-	<section class="container py-16 md:py-24">
+	<section class="relative">
+		<div class="container py-16 md:py-24">
 		<div class="max-w-3xl mx-auto text-center">
 			<h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
 				{APP_TAGLINE}
@@ -126,6 +127,7 @@
 					</Button>
 				</form>
 			</div>
+		</div>
 		</div>
 	</section>
 
