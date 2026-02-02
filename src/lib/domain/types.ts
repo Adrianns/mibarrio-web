@@ -47,6 +47,7 @@ export type ProviderSource = 'manual' | '1122' | 'guiacomercial' | 'google_place
 // Provider profile
 export interface Provider {
 	id: string;
+	slug?: string | null; // Custom URL slug (@username)
 	user_id: string | null; // Nullable for unclaimed profiles
 	provider_type: ProviderType;
 	display_name: string;

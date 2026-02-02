@@ -33,6 +33,7 @@
 	// Types
 	interface Provider {
 		id: string;
+		slug: string | null;
 		business_name: string;
 		description: string | null;
 		department: string;
@@ -146,8 +147,8 @@
 		// Build optimized query with embedded categories (single query instead of N+1)
 		// Use !inner join when filtering by category to ensure only matching providers are returned
 		const selectQuery = categoryNames
-			? `id, business_name, description, department, neighborhood, logo_url, photos, is_verified, is_featured, is_active, mb_provider_categories!inner(category_name)`
-			: `id, business_name, description, department, neighborhood, logo_url, photos, is_verified, is_featured, is_active, mb_provider_categories(category_name)`;
+			? `id, slug, business_name, description, department, neighborhood, logo_url, photos, is_verified, is_featured, is_active, mb_provider_categories!inner(category_name)`
+			: `id, slug, business_name, description, department, neighborhood, logo_url, photos, is_verified, is_featured, is_active, mb_provider_categories(category_name)`;
 
 		let query = supabase
 			.from('mb_providers')
@@ -187,6 +188,7 @@
 			// Transform embedded categories to flat array
 			const newProviders = data.map((p: Record<string, unknown>) => ({
 				id: p.id as string,
+				slug: p.slug as string | null,
 				business_name: p.business_name as string,
 				description: p.description as string | null,
 				department: p.department as string,
@@ -541,7 +543,7 @@
 			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{#each providers as provider (provider.id)}
 					<a
-						href="/directorio/{provider.id}"
+						href="/directorio/{provider.slug ? `@${provider.slug}` : provider.id}"
 						class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
 					>
 						<div class="p-4">

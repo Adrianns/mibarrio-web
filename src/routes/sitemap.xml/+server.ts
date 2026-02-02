@@ -39,15 +39,17 @@ export const GET: RequestHandler = async () => {
 	try {
 		const supabase = getServiceSupabase();
 		const { data: providers, error } = await supabase
-			.from('providers')
-			.select('id, updated_at')
+			.from('mb_providers')
+			.select('id, slug, updated_at')
 			.eq('is_active', true)
 			.order('updated_at', { ascending: false });
 
 		if (!error && providers) {
 			for (const provider of providers) {
+				// Prefer slug URL when available
+				const urlPath = provider.slug ? `@${provider.slug}` : provider.id;
 				urls.push({
-					loc: `/directorio/${provider.id}`,
+					loc: `/directorio/${urlPath}`,
 					lastmod: formatDate(provider.updated_at),
 					changefreq: 'weekly',
 					priority: '0.8'

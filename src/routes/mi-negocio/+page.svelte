@@ -9,6 +9,7 @@
 	import { Loader2, Pencil, Save } from 'lucide-svelte';
 	import { get } from 'svelte/store';
 	import { ProviderCardEditor, ProfileCompleteness } from '$lib/components/ProviderCardEditor';
+	import SlugEditor from '$lib/components/SlugEditor.svelte';
 	import type { Department } from '$lib/domain/types';
 
 	let loading = $state(true);
@@ -19,6 +20,7 @@
 
 	interface ProviderData {
 		id?: string;
+		slug?: string | null;
 		businessName: string;
 		description: string;
 		department: Department | '';
@@ -97,6 +99,7 @@
 
 		initialData = {
 			id: data.id,
+			slug: data.slug || null,
 			businessName: data.business_name || '',
 			description: data.description || '',
 			department: data.department || '',
@@ -259,6 +262,19 @@
 			/>
 
 			<ProfileCompleteness data={initialData} />
+
+			<!-- Slug Editor Section -->
+			<div class="mt-8">
+				<SlugEditor
+					providerId={providerId}
+					currentSlug={initialData.slug}
+					onSave={(newSlug) => {
+						if (initialData) {
+							initialData.slug = newSlug;
+						}
+					}}
+				/>
+			</div>
 		</div>
 	{/if}
 </div>

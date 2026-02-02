@@ -32,11 +32,16 @@
 	import { SITE_DESCRIPTION } from '$lib/seo/constants';
 	import { addRecentlyViewed } from '$lib/stores/activity';
 
-	const providerId = $page.params.id;
+	const routeParam = $page.params.id;
+
+	// Detect if the route param is a UUID or slug
+	const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(routeParam);
+	const slugParam = routeParam.startsWith('@') ? routeParam.slice(1) : routeParam;
 
 	// Types
 	interface ProviderDetail {
 		id: string;
+		slug: string | null;
 		business_name: string;
 		business_type: string;
 		description: string | null;
@@ -108,12 +113,13 @@
 		loading = true;
 		error = null;
 
-		// Fetch provider
-		const { data, error: fetchError } = await supabase
+		// Build query based on identifier type (UUID or slug)
+		let query = supabase
 			.from('mb_providers')
 			.select(
 				`
 				id,
+				slug,
 				business_name,
 				business_type,
 				description,
@@ -135,9 +141,16 @@
 				view_count
 			`
 			)
-			.eq('id', providerId)
-			.eq('is_active', true)
-			.single();
+			.eq('is_active', true);
+
+		// Filter by UUID or slug
+		if (isUUID) {
+			query = query.eq('id', routeParam);
+		} else {
+			query = query.eq('slug', slugParam.toLowerCase());
+		}
+
+		const { data, error: fetchError } = await query.single();
 
 		if (fetchError || !data) {
 			error = 'No se encontró el negocio';
@@ -145,11 +158,11 @@
 			return;
 		}
 
-		// Fetch categories
+		// Fetch categories using the actual provider ID
 		const { data: categoriesData } = await supabase
 			.from('mb_provider_categories')
 			.select('category_name')
-			.eq('provider_id', providerId);
+			.eq('provider_id', data.id);
 
 		provider = {
 			...data,
@@ -168,7 +181,7 @@
 		});
 
 		// Increment view count (fire and forget - don't block page load)
-		supabase.rpc('mb_increment_provider_view', { provider_uuid: providerId });
+		supabase.rpc('mb_increment_provider_view', { provider_uuid: provider.id });
 	}
 
 	async function handleContactClick(type: 'phone' | 'whatsapp' | 'email' | 'website' | 'social') {
@@ -176,7 +189,7 @@
 
 		// Log contact click and increment counter
 		await supabase.rpc('mb_log_contact_click', {
-			p_provider_id: providerId,
+			p_provider_id: provider.id,
 			p_contact_type: type
 		});
 
@@ -196,16 +209,20 @@
 	function handleShare() {
 		if (!provider) return;
 
+		// Prefer slug URL for sharing
+		const shareUrl = provider.slug
+			? `${window.location.origin}/directorio/@${provider.slug}`
+			: window.location.href;
 		const shareText = `Mirá el perfil de ${provider.business_name} en mibarrio.com.uy`;
 
 		if (navigator.share) {
 			navigator.share({
 				title: provider.business_name,
 				text: shareText,
-				url: window.location.href
+				url: shareUrl
 			});
 		} else {
-			navigator.clipboard.writeText(`${shareText}\n${window.location.href}`);
+			navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
 			toast.success('Enlace copiado al portapapeles');
 		}
 	}
