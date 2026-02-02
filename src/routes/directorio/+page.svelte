@@ -69,9 +69,6 @@
 	let showRecentlyViewed = $state(false);
 	let recentlyViewed = $state<RecentlyViewedProvider[]>([]);
 
-	// Cached provider IDs for category/type filter (to avoid re-querying on load more)
-	let cachedFilteredProviderIds: string[] | null = null;
-
 	// Check if any filter is active
 	let hasActiveFilters = $derived(
 		selectedDepartment !== '' || selectedNeighborhood !== '' || selectedCategory !== '' || selectedType !== ''
@@ -135,66 +132,36 @@
 			providers = [];
 			currentOffset = 0;
 			hasMore = true;
-			cachedFilteredProviderIds = null;
 		}
 
-		// If filtering by category or type, get provider IDs that match (only on initial load)
-		let filteredProviderIds: string[] | null = cachedFilteredProviderIds;
-
-		if ((selectedCategory || selectedType) && !loadMore) {
-			let categoryNames: string[] = [];
-
-			if (selectedCategory) {
-				categoryNames = [selectedCategory];
-			} else if (selectedType) {
-				categoryNames = (selectedType === 'service' ? serviceCategories : businessCategories)
-					.map(c => c.name);
-			}
-
-			const { data: catData } = await supabase
-				.from('mb_provider_categories')
-				.select('provider_id')
-				.in('category_name', categoryNames);
-
-			filteredProviderIds = catData?.map(c => c.provider_id) || [];
-			cachedFilteredProviderIds = filteredProviderIds;
-
-			// If no providers match the category, return empty
-			if (filteredProviderIds.length === 0) {
-				providers = [];
-				hasMore = false;
-				loading = false;
-				return;
-			}
+		// Determine category names for filtering
+		let categoryNames: string[] | null = null;
+		if (selectedCategory) {
+			categoryNames = [selectedCategory];
+		} else if (selectedType) {
+			categoryNames = (selectedType === 'service' ? serviceCategories : businessCategories)
+				.map(c => c.name);
 		}
 
-		// Build query
+		// Build optimized query with embedded categories (single query instead of N+1)
+		// Use !inner join when filtering by category to ensure only matching providers are returned
+		const selectQuery = categoryNames
+			? `id, business_name, description, department, neighborhood, logo_url, photos, is_verified, is_featured, is_active, mb_provider_categories!inner(category_name)`
+			: `id, business_name, description, department, neighborhood, logo_url, photos, is_verified, is_featured, is_active, mb_provider_categories(category_name)`;
+
 		let query = supabase
 			.from('mb_providers')
-			.select(
-				`
-				id,
-				business_name,
-				description,
-				department,
-				neighborhood,
-				logo_url,
-				photos,
-				is_verified,
-				is_featured,
-				is_active
-			`
-			)
+			.select(selectQuery)
 			.eq('is_active', true)
 			.order('is_featured', { ascending: false })
 			.order('created_at', { ascending: false });
 
-		// Filter by provider IDs that match category/type
-		if (filteredProviderIds) {
-			query = query.in('id', filteredProviderIds);
+		// Filter by category/type using the joined table
+		if (categoryNames) {
+			query = query.in('mb_provider_categories.category_name', categoryNames);
 		}
 
-		// Apply other filters
+		// Apply location filters
 		if (selectedDepartment) {
 			query = query.eq('department', selectedDepartment);
 		}
@@ -203,6 +170,7 @@
 			query = query.eq('neighborhood', selectedNeighborhood);
 		}
 
+		// Apply search filter
 		if (searchQuery) {
 			query = query.or(
 				`business_name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`
@@ -215,53 +183,47 @@
 		if (error) {
 			console.error('Error fetching providers:', error);
 			if (!loadMore) providers = [];
-		} else {
-			// Fetch categories for each provider
-			const providerIds = data?.map((p) => p.id) || [];
+		} else if (data && data.length > 0) {
+			// Transform embedded categories to flat array
+			const newProviders = data.map((p: Record<string, unknown>) => ({
+				id: p.id as string,
+				business_name: p.business_name as string,
+				description: p.description as string | null,
+				department: p.department as string,
+				neighborhood: p.neighborhood as string | null,
+				logo_url: p.logo_url as string | null,
+				photos: p.photos as string[],
+				is_verified: p.is_verified as boolean,
+				is_featured: p.is_featured as boolean,
+				is_active: p.is_active as boolean,
+				categories: (p.mb_provider_categories as Array<{category_name: string}> || [])
+					.map(c => c.category_name)
+			}));
 
-			if (providerIds.length > 0) {
-				const { data: categoriesData } = await supabase
-					.from('mb_provider_categories')
-					.select('provider_id, category_name')
-					.in('provider_id', providerIds);
-
-				const categoryMap = new Map<string, string[]>();
-				categoriesData?.forEach((c) => {
-					const existing = categoryMap.get(c.provider_id) || [];
-					existing.push(c.category_name);
-					categoryMap.set(c.provider_id, existing);
-				});
-
-				const newProviders = (data || []).map((p) => ({
-					...p,
-					categories: categoryMap.get(p.id) || []
-				}));
-
-				if (loadMore) {
-					providers = [...providers, ...newProviders];
-				} else {
-					providers = newProviders;
-
-					// Track this search (only on initial load, not pagination)
-					addRecentSearch({
-						query: searchQuery,
-						filters: {
-							departamento: selectedDepartment || undefined,
-							barrio: selectedNeighborhood || undefined,
-							categoria: selectedCategory || undefined,
-							tipo: selectedType || undefined
-						},
-						resultCount: newProviders.length
-					});
-				}
-
-				// Check if there are more results
-				hasMore = data.length === PAGE_SIZE;
-				currentOffset += data.length;
+			if (loadMore) {
+				providers = [...providers, ...newProviders];
 			} else {
-				if (!loadMore) providers = [];
-				hasMore = false;
+				providers = newProviders;
+
+				// Track this search (only on initial load, not pagination)
+				addRecentSearch({
+					query: searchQuery,
+					filters: {
+						departamento: selectedDepartment || undefined,
+						barrio: selectedNeighborhood || undefined,
+						categoria: selectedCategory || undefined,
+						tipo: selectedType || undefined
+					},
+					resultCount: newProviders.length
+				});
 			}
+
+			// Check if there are more results
+			hasMore = data.length === PAGE_SIZE;
+			currentOffset += data.length;
+		} else {
+			if (!loadMore) providers = [];
+			hasMore = false;
 		}
 
 		loading = false;
