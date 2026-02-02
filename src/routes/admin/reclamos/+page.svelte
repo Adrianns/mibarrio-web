@@ -15,7 +15,9 @@
 		MessageSquare,
 		RefreshCw,
 		Phone,
-		Mail
+		Mail,
+		Shield,
+		Clock
 	} from 'lucide-svelte';
 
 	interface ClaimRequest {
@@ -26,6 +28,9 @@
 		message: string | null;
 		contact_phone: string | null;
 		contact_email: string | null;
+		admin_notes: string | null;
+		reviewed_by: string | null;
+		reviewed_at: string | null;
 		created_at: string;
 		provider: {
 			id: string;
@@ -39,12 +44,48 @@
 			email: string;
 			full_name: string;
 		};
+		reviewer: {
+			id: string;
+			email: string;
+			full_name: string;
+		} | null;
 	}
+
+	type TabStatus = 'pending' | 'approved' | 'rejected' | 'all';
+
+	const tabs: { value: TabStatus; label: string; count?: number }[] = [
+		{ value: 'pending', label: 'Pendientes' },
+		{ value: 'approved', label: 'Aprobados' },
+		{ value: 'rejected', label: 'Rechazados' },
+		{ value: 'all', label: 'Todos' }
+	];
 
 	let claims = $state<ClaimRequest[]>([]);
 	let loading = $state(true);
-	let filter = $state<'pending' | 'all'>('pending');
+	let activeTab = $state<TabStatus>('pending');
 	let processing = $state<string | null>(null);
+	let counts = $state<Record<TabStatus, number>>({ pending: 0, approved: 0, rejected: 0, all: 0 });
+
+	// Modal for rejection notes
+	let showRejectModal = $state(false);
+	let rejectingClaimId = $state<string | null>(null);
+	let rejectNotes = $state('');
+
+	async function fetchCounts() {
+		const [pendingRes, approvedRes, rejectedRes, allRes] = await Promise.all([
+			supabase.from('mb_claim_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+			supabase.from('mb_claim_requests').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
+			supabase.from('mb_claim_requests').select('id', { count: 'exact', head: true }).eq('status', 'rejected'),
+			supabase.from('mb_claim_requests').select('id', { count: 'exact', head: true })
+		]);
+
+		counts = {
+			pending: pendingRes.count || 0,
+			approved: approvedRes.count || 0,
+			rejected: rejectedRes.count || 0,
+			all: allRes.count || 0
+		};
+	}
 
 	async function fetchClaims() {
 		loading = true;
@@ -59,6 +100,9 @@
 				message,
 				contact_phone,
 				contact_email,
+				admin_notes,
+				reviewed_by,
+				reviewed_at,
 				created_at,
 				provider:mb_providers!provider_id (
 					id,
@@ -71,12 +115,17 @@
 					id,
 					email,
 					full_name
+				),
+				reviewer:profiles!reviewed_by (
+					id,
+					email,
+					full_name
 				)
 			`)
 			.order('created_at', { ascending: false });
 
-		if (filter === 'pending') {
-			query = query.eq('status', 'pending');
+		if (activeTab !== 'all') {
+			query = query.eq('status', activeTab);
 		}
 
 		const { data, error } = await query;
@@ -111,20 +160,29 @@
 
 		toast.success('Reclamo aprobado');
 		fetchClaims();
+		fetchCounts();
 	}
 
-	async function rejectClaim(claimId: string, notes?: string) {
-		if (!$user) return;
+	function openRejectModal(claimId: string) {
+		rejectingClaimId = claimId;
+		rejectNotes = '';
+		showRejectModal = true;
+	}
 
-		processing = claimId;
+	async function confirmReject() {
+		if (!$user || !rejectingClaimId) return;
+
+		processing = rejectingClaimId;
+		showRejectModal = false;
 
 		const { error } = await supabase.rpc('reject_claim_request', {
-			p_claim_id: claimId,
+			p_claim_id: rejectingClaimId,
 			p_admin_id: $user.id,
-			p_notes: notes || null
+			p_notes: rejectNotes || null
 		});
 
 		processing = null;
+		rejectingClaimId = null;
 
 		if (error) {
 			console.error('Error rejecting claim:', error);
@@ -134,6 +192,7 @@
 
 		toast.success('Reclamo rechazado');
 		fetchClaims();
+		fetchCounts();
 	}
 
 	function formatDate(dateStr: string): string {
@@ -149,14 +208,20 @@
 	function getSourceLabel(source: string): string {
 		const labels: Record<string, string> = {
 			'1122': '1122.com.uy',
-			guiacomercial: 'Guía Comercial',
+			guiacomercial: 'Guia Comercial',
 			google_places: 'Google Places',
 			manual: 'Manual'
 		};
 		return labels[source] || source;
 	}
 
+	function handleTabChange(tab: TabStatus) {
+		activeTab = tab;
+		fetchClaims();
+	}
+
 	onMount(() => {
+		fetchCounts();
 		fetchClaims();
 	});
 </script>
@@ -164,24 +229,34 @@
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
 		<h2 class="text-xl font-semibold text-gray-900 dark:text-white">Solicitudes de Reclamo</h2>
+		<Button variant="outline" onclick={() => { fetchClaims(); fetchCounts(); }}>
+			<RefreshCw class="h-4 w-4 mr-2" />
+			Actualizar
+		</Button>
+	</div>
 
-		<div class="flex items-center gap-4">
-			<!-- Filter -->
-			<select
-				bind:value={filter}
-				onchange={() => fetchClaims()}
-				class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-			>
-				<option value="pending">Pendientes</option>
-				<option value="all">Todos</option>
-			</select>
-
-			<!-- Refresh -->
-			<Button variant="outline" onclick={() => fetchClaims()}>
-				<RefreshCw class="h-4 w-4 mr-2" />
-				Actualizar
-			</Button>
-		</div>
+	<!-- Tabs -->
+	<div class="border-b border-gray-200 dark:border-gray-700">
+		<nav class="flex gap-4">
+			{#each tabs as tab (tab.value)}
+				<button
+					onclick={() => handleTabChange(tab.value)}
+					class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors"
+					class:border-primary-600={activeTab === tab.value}
+					class:text-primary-600={activeTab === tab.value}
+					class:border-transparent={activeTab !== tab.value}
+					class:text-gray-500={activeTab !== tab.value}
+					class:hover:text-gray-700={activeTab !== tab.value}
+					class:dark:text-gray-400={activeTab !== tab.value}
+					class:dark:hover:text-gray-300={activeTab !== tab.value}
+				>
+					{tab.label}
+					<span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+						{counts[tab.value]}
+					</span>
+				</button>
+			{/each}
+		</nav>
 	</div>
 
 	{#if loading}
@@ -192,13 +267,16 @@
 		<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8 text-center">
 			<CheckCircle class="h-12 w-12 text-green-500 mx-auto mb-4" />
 			<h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-				{filter === 'pending' ? 'No hay reclamos pendientes' : 'No hay reclamos'}
+				{#if activeTab === 'pending'}
+					No hay reclamos pendientes
+				{:else if activeTab === 'approved'}
+					No hay reclamos aprobados
+				{:else if activeTab === 'rejected'}
+					No hay reclamos rechazados
+				{:else}
+					No hay reclamos
+				{/if}
 			</h3>
-			<p class="text-gray-500 dark:text-gray-400">
-				{filter === 'pending'
-					? 'Todas las solicitudes han sido procesadas.'
-					: 'Aún no se han recibido solicitudes de reclamo.'}
-			</p>
 		</div>
 	{:else}
 		<div class="space-y-4">
@@ -290,6 +368,33 @@
 							{/if}
 						</div>
 
+						<!-- Review info (for approved/rejected) -->
+						{#if claim.status !== 'pending' && (claim.reviewer || claim.reviewed_at)}
+							<div class="mt-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border-l-4"
+								class:border-green-500={claim.status === 'approved'}
+								class:border-red-500={claim.status === 'rejected'}>
+								<div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
+									<Shield class="h-4 w-4" />
+									<span class="font-medium">Revisado por:</span>
+									{claim.reviewer?.full_name || 'Admin'}
+									{#if claim.reviewer?.email}
+										<span class="text-gray-400">({claim.reviewer.email})</span>
+									{/if}
+								</div>
+								{#if claim.reviewed_at}
+									<div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-500">
+										<Clock class="h-4 w-4" />
+										{formatDate(claim.reviewed_at)}
+									</div>
+								{/if}
+								{#if claim.admin_notes}
+									<div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+										<span class="font-medium">Notas:</span> {claim.admin_notes}
+									</div>
+								{/if}
+							</div>
+						{/if}
+
 						<!-- Actions for pending claims -->
 						{#if claim.status === 'pending'}
 							<div class="mt-4 flex gap-3">
@@ -307,7 +412,7 @@
 								</Button>
 								<Button
 									variant="outline"
-									onclick={() => rejectClaim(claim.id)}
+									onclick={() => openRejectModal(claim.id)}
 									disabled={processing === claim.id}
 								>
 									<XCircle class="h-4 w-4 mr-2" />
@@ -321,3 +426,32 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Reject Modal -->
+{#if showRejectModal}
+	<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+		<div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
+			<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+				Rechazar reclamo
+			</h3>
+			<p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+				Opcionalmente, agrega una nota explicando el motivo del rechazo.
+			</p>
+			<textarea
+				bind:value={rejectNotes}
+				placeholder="Notas (opcional)..."
+				rows="3"
+				class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white mb-4"
+			></textarea>
+			<div class="flex justify-end gap-3">
+				<Button variant="outline" onclick={() => showRejectModal = false}>
+					Cancelar
+				</Button>
+				<Button variant="destructive" onclick={confirmReject}>
+					<XCircle class="h-4 w-4 mr-2" />
+					Rechazar
+				</Button>
+			</div>
+		</div>
+	</div>
+{/if}

@@ -6,7 +6,8 @@
 		MapPin,
 		Loader2,
 		SlidersHorizontal,
-		X
+		X,
+		Map as MapIcon
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
@@ -298,11 +299,13 @@
 			: null
 	);
 
+	let observer: IntersectionObserver | null = null;
+
 	onMount(() => {
 		fetchProviders();
 
 		// Set up intersection observer for infinite scroll
-		const observer = new IntersectionObserver(
+		observer = new IntersectionObserver(
 			(entries) => {
 				if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
 					loadMoreProviders();
@@ -311,14 +314,14 @@
 			{ rootMargin: '200px' }
 		);
 
-		// Watch for loadMoreTrigger element
-		$effect(() => {
-			if (loadMoreTrigger) {
-				observer.observe(loadMoreTrigger);
-			}
-		});
+		return () => observer?.disconnect();
+	});
 
-		return () => observer.disconnect();
+	// Watch for loadMoreTrigger element
+	$effect(() => {
+		if (loadMoreTrigger && observer) {
+			observer.observe(loadMoreTrigger);
+		}
 	});
 </script>
 
@@ -359,6 +362,13 @@
 						</span>
 					{/if}
 				</button>
+				<a
+					href="/directorio/mapa"
+					class="flex items-center gap-2 px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+				>
+					<MapIcon class="h-5 w-5" />
+					<span class="hidden sm:inline">Mapa</span>
+				</a>
 			</div>
 		</div>
 

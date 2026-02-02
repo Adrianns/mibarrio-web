@@ -2,7 +2,7 @@
 	import { auth, user, isLoading, isInitialized } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { Loader2, Shield, LayoutDashboard, ClipboardList } from 'lucide-svelte';
+	import { Loader2, Shield, LayoutDashboard, ClipboardList, Store, Users } from 'lucide-svelte';
 	import Header from '$lib/components/Header.svelte';
 
 	let { children } = $props();
@@ -29,6 +29,8 @@
 
 	const navItems = [
 		{ label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+		{ label: 'Proveedores', href: '/admin/proveedores', icon: Store },
+		{ label: 'Usuarios', href: '/admin/usuarios', icon: Users },
 		{ label: 'Reclamos', href: '/admin/reclamos', icon: ClipboardList }
 	];
 </script>

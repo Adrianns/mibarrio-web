@@ -155,16 +155,16 @@
 		loading = false;
 
 		// Increment view count (fire and forget - don't block page load)
-		supabase.rpc('mb_increment_provider_view', { p_provider_id: providerId });
+		supabase.rpc('mb_increment_provider_view', { provider_uuid: providerId });
 	}
 
 	async function handleContactClick(type: 'phone' | 'whatsapp' | 'email' | 'website' | 'social') {
 		if (!provider) return;
 
-		// Log contact click
-		await supabase.from('mb_contact_clicks').insert({
-			provider_id: providerId,
-			contact_type: type
+		// Log contact click and increment counter
+		await supabase.rpc('mb_log_contact_click', {
+			p_provider_id: providerId,
+			p_contact_type: type
 		});
 
 		if (type === 'phone' && provider.contact_phone) {
