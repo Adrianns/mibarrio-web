@@ -501,14 +501,18 @@
 										{#if uploadingGallery}
 											<Loader2 class="h-8 w-8 animate-spin text-primary-600 mx-auto" />
 										{:else}
-											<div class="grid grid-cols-2 gap-2 mb-3">
-												<div class="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center justify-center p-2">
-													<span class="text-xl mb-1">👤</span>
-													<span class="text-xs text-gray-500">Tu foto</span>
-												</div>
+											<div class="grid grid-cols-3 gap-2 mb-3">
 												<div class="aspect-square bg-primary-50 dark:bg-primary-900/30 rounded-lg flex flex-col items-center justify-center p-2 ring-2 ring-primary-500">
 													<span class="text-xl mb-1">🔧</span>
 													<span class="text-xs text-gray-500">Tu trabajo</span>
+												</div>
+												<div class="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center justify-center p-2">
+													<span class="text-xl mb-1">⭐</span>
+													<span class="text-xs text-gray-500">Resultados</span>
+												</div>
+												<div class="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center justify-center p-2">
+													<span class="text-xl mb-1">📍</span>
+													<span class="text-xs text-gray-500">Tu local</span>
 												</div>
 											</div>
 											<p class="text-gray-500 text-sm text-center">Tocar para agregar fotos</p>
@@ -523,90 +527,180 @@
 						{/if}
 					</div>
 
-					<!-- DESKTOP: Card preview with inline editing -->
-					<div class="hidden lg:block">
-						<div class="flex items-start gap-4 mb-6">
-							<!-- Logo -->
-							<div class="relative flex-shrink-0">
-								{#if logoUrl}
-									<img src={logoUrl} alt="Logo" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600" />
-									<button type="button" onclick={removeLogo} class="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600">
-										<X class="h-3 w-3" />
-									</button>
-								{:else}
-									<button type="button" onclick={() => logoInput?.click()} disabled={uploadingLogo} class="w-20 h-20 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-400 transition-colors cursor-pointer">
-										{#if uploadingLogo}
-											<Loader2 class="h-8 w-8 animate-spin text-primary-600" />
-										{:else}
-											<Camera class="h-8 w-8 text-gray-400" />
-										{/if}
-									</button>
-								{/if}
-								{#if logoUrl}
-									<button type="button" onclick={() => logoInput?.click()} disabled={uploadingLogo} class="absolute -bottom-1 -right-1 w-6 h-6 bg-primary-600 text-white rounded-full flex items-center justify-center hover:bg-primary-700">
-										<Camera class="h-3 w-3" />
-									</button>
-								{/if}
-							</div>
-
-							<!-- Name and info -->
-							<div class="flex-1 min-w-0">
-								<div class="flex items-center gap-2 mb-2" id="field-businessName">
-									<EditableText
-										bind:value={businessName}
-										placeholder="Nombre del negocio"
-										error={errors.businessName ?? ''}
-										{readOnly}
-										displayClass="text-2xl font-bold text-gray-900 dark:text-white"
-										inputClass="text-2xl font-bold text-gray-900 dark:text-white"
-									/>
-									{#if initialData?.isVerified}
-										<CheckCircle class="h-6 w-6 text-green-500 flex-shrink-0" />
+					<!-- DESKTOP: Form layout -->
+					<div class="hidden lg:block space-y-6">
+						<!-- Logo and name row -->
+						<div class="flex items-start gap-6">
+							<!-- Logo upload -->
+							<div class="flex flex-col items-center">
+								<div class="relative">
+									{#if logoUrl}
+										<img src={logoUrl} alt="Logo" class="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600" />
+										<button type="button" onclick={removeLogo} class="absolute -top-1 -right-1 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600">
+											<X class="h-4 w-4" />
+										</button>
+									{:else}
+										<button type="button" onclick={() => logoInput?.click()} disabled={uploadingLogo} class="w-24 h-24 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-400 transition-colors cursor-pointer">
+											{#if uploadingLogo}
+												<Loader2 class="h-8 w-8 animate-spin text-primary-600" />
+											{:else}
+												<Camera class="h-8 w-8 text-gray-400" />
+											{/if}
+										</button>
+									{/if}
+									{#if logoUrl}
+										<button type="button" onclick={() => logoInput?.click()} disabled={uploadingLogo} class="absolute -bottom-1 -right-1 w-7 h-7 bg-primary-600 text-white rounded-full flex items-center justify-center hover:bg-primary-700">
+											<Camera class="h-4 w-4" />
+										</button>
 									{/if}
 								</div>
+								<p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Foto de perfil</p>
+							</div>
 
-								{#if businessType === 'business'}
-									<div class="mb-2" id="field-rut">
-										<EditableText
-											bind:value={rut}
-											placeholder="RUT de la empresa"
-											{readOnly}
-											displayClass="text-sm text-gray-600 dark:text-gray-400"
-											inputClass="text-sm text-gray-600 dark:text-gray-400"
-										/>
-									</div>
+							<!-- Business name input -->
+							<div class="flex-1" id="field-businessName">
+								<label for="desktop-businessName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+									Nombre del negocio *
+									{#if initialData?.isVerified}
+										<CheckCircle class="h-4 w-4 text-green-500 inline ml-1" />
+									{/if}
+								</label>
+								<div class="relative">
+									<Building2 class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+									<input
+										id="desktop-businessName"
+										type="text"
+										bind:value={businessName}
+										placeholder="Ej: Juan Electricista"
+										class="w-full pl-10 pr-4 py-3 rounded-lg border {errors.businessName ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'} bg-white dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
+									/>
+								</div>
+								{#if errors.businessName}
+									<p class="text-red-500 text-sm mt-1">{errors.businessName}</p>
 								{/if}
-
-								<div class="mb-2" id="field-categories">
-									<CategoryPicker bind:selected={categories} error={errors.categories ?? ''} {readOnly} />
-								</div>
-
-								<div id="field-department">
-									<LocationPicker bind:department bind:neighborhood bind:address error={errors.department ?? ''} {readOnly} />
-								</div>
 							</div>
 						</div>
 
-						{#if currentEditorMode === 'full'}
-							<div class="mb-6">
-								<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Descripción</h2>
-								{#if mode === 'create'}
-									<GuidedDescription bind:value={description} />
-								{:else}
-									<EditableTextarea
-										bind:value={description}
-										placeholder="Contá sobre tu negocio, servicios, horarios..."
-										displayClass="text-gray-600 dark:text-gray-300"
-										textareaClass="text-gray-600 dark:text-gray-300 dark:bg-gray-700"
-									/>
+						<!-- RUT (only for business type) -->
+						{#if businessType === 'business'}
+							<div id="field-rut">
+								<label for="desktop-rut" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+									RUT de la empresa
+								</label>
+								<input
+									id="desktop-rut"
+									type="text"
+									bind:value={rut}
+									placeholder="Ej: 123456789012"
+									class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
+								/>
+							</div>
+						{/if}
+
+						<!-- Categories -->
+						<div id="field-categories">
+							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+								Categorías * <span class="font-normal text-gray-500">({categories.length}/3)</span>
+							</label>
+							<div class="grid grid-cols-4 gap-2">
+								{#each categoryOptions as cat (cat.name)}
+									<button
+										type="button"
+										onclick={() => toggleCategory(cat.name)}
+										class="p-3 rounded-lg border-2 text-left text-sm transition-colors {categories.includes(cat.name) ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'}"
+									>
+										<span class="inline-block w-2 h-2 rounded-full {cat.color} mr-2"></span>
+										{cat.label}
+									</button>
+								{/each}
+							</div>
+							{#if errors.categories}
+								<p class="text-red-500 text-sm mt-1">{errors.categories}</p>
+							{/if}
+						</div>
+
+						<!-- Location row -->
+						<div class="grid grid-cols-2 gap-4" id="field-department">
+							<div>
+								<label for="desktop-department" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+									Departamento *
+								</label>
+								<div class="relative">
+									<MapPin class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+									<select
+										id="desktop-department"
+										bind:value={department}
+										class="w-full pl-10 pr-4 py-3 rounded-lg border {errors.department ? 'border-red-500' : 'border-gray-200 dark:border-gray-600'} bg-white dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none appearance-none"
+									>
+										<option value="">Seleccionar</option>
+										{#each DEPARTMENTS as dept}
+											<option value={dept}>{dept}</option>
+										{/each}
+									</select>
+								</div>
+								{#if errors.department}
+									<p class="text-red-500 text-sm mt-1">{errors.department}</p>
 								{/if}
 							</div>
 
+							{#if department === 'Montevideo'}
+								<div>
+									<label for="desktop-neighborhood" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+										Barrio
+									</label>
+									<select
+										id="desktop-neighborhood"
+										bind:value={neighborhood}
+										class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none appearance-none"
+									>
+										<option value="">Seleccionar</option>
+										{#each MONTEVIDEO_NEIGHBORHOODS as barrio}
+											<option value={barrio}>{barrio}</option>
+										{/each}
+									</select>
+								</div>
+							{/if}
+						</div>
+
+						<!-- Address -->
+						<div>
+							<label for="desktop-address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+								Dirección (opcional)
+							</label>
+							<input
+								id="desktop-address"
+								type="text"
+								bind:value={address}
+								placeholder="Ej: Av. Brasil 2500"
+								class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
+							/>
+						</div>
+
+						{#if currentEditorMode === 'full'}
+							<!-- Description -->
 							<div>
-								<div class="flex items-center justify-between mb-3">
-									<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-										Fotos <span class="text-sm font-normal text-gray-500">({photos.length}/10)</span>
-									</h2>
+								<label for="desktop-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+									Descripción
+								</label>
+								{#if mode === 'create'}
+									<GuidedDescription bind:value={description} />
+								{:else}
+									<textarea
+										id="desktop-description"
+										bind:value={description}
+										rows="4"
+										placeholder="Contá sobre tu negocio, servicios, horarios..."
+										class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none resize-none"
+									></textarea>
+								{/if}
+							</div>
+
+							<!-- Gallery -->
+							<div>
+								<div class="flex items-center justify-between mb-2">
+									<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+										Fotos <span class="font-normal text-gray-500">({photos.length}/10)</span>
+									</label>
 									{#if photos.length < 10}
 										<button type="button" onclick={() => galleryInput?.click()} disabled={uploadingGallery} class="text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1">
 											{#if uploadingGallery}
@@ -619,9 +713,8 @@
 										</button>
 									{/if}
 								</div>
-
 								{#if photos.length > 0}
-									<div class="grid grid-cols-3 gap-3">
+									<div class="grid grid-cols-4 gap-3">
 										{#each photos as photo, i (photo)}
 											<div class="relative group aspect-square">
 												<img src={photo} alt="Foto {i + 1}" loading="lazy" class="w-full h-full object-cover rounded-lg" />
@@ -637,19 +730,14 @@
 											<Loader2 class="h-8 w-8 animate-spin text-primary-600 mx-auto mb-2" />
 											<p class="text-gray-500 text-sm text-center">Subiendo...</p>
 										{:else}
-											<div class="grid grid-cols-4 gap-3 mb-4">
-												<div class="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center justify-center p-2">
-													<span class="text-2xl mb-1">👤</span>
-													<span class="text-xs text-gray-500 dark:text-gray-400 text-center">Tu foto</span>
-												</div>
+											<div class="grid grid-cols-3 gap-3 mb-4 max-w-md mx-auto">
 												<div class="aspect-square bg-primary-50 dark:bg-primary-900/30 rounded-lg flex flex-col items-center justify-center p-2 ring-2 ring-primary-500">
 													<span class="text-2xl mb-1">🔧</span>
 													<span class="text-xs text-gray-500 dark:text-gray-400 text-center">Tu trabajo</span>
-													<span class="text-[10px] text-primary-600 font-medium">LA MÁS IMPORTANTE</span>
 												</div>
 												<div class="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center justify-center p-2">
 													<span class="text-2xl mb-1">⭐</span>
-													<span class="text-xs text-gray-500 dark:text-gray-400 text-center">Trabajo terminado</span>
+													<span class="text-xs text-gray-500 dark:text-gray-400 text-center">Resultados</span>
 												</div>
 												<div class="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg flex flex-col items-center justify-center p-2">
 													<span class="text-2xl mb-1">📍</span>
@@ -663,7 +751,7 @@
 								{/if}
 							</div>
 						{:else}
-							<button type="button" onclick={() => (currentEditorMode = 'full')} class="w-full py-3 text-primary-600 hover:text-primary-700 text-sm font-medium border-t border-gray-200 dark:border-gray-700 mt-4">
+							<button type="button" onclick={() => (currentEditorMode = 'full')} class="w-full py-3 text-primary-600 hover:text-primary-700 text-sm font-medium border-t border-gray-200 dark:border-gray-700">
 								+ Completar más datos (descripción, fotos...)
 							</button>
 						{/if}
