@@ -184,7 +184,7 @@
 		supabase.rpc('mb_increment_provider_view', { provider_uuid: provider.id });
 	}
 
-	async function handleContactClick(type: 'phone' | 'whatsapp' | 'email' | 'website' | 'social') {
+	async function handleContactClick(type: 'phone' | 'whatsapp' | 'email' | 'website' | 'instagram' | 'facebook') {
 		if (!provider) return;
 
 		// Log contact click and increment counter
@@ -497,7 +497,7 @@
 									href={ensureProtocol(provider.social_instagram)}
 									target="_blank"
 									rel="noopener noreferrer"
-									onclick={() => handleContactClick('social')}
+									onclick={() => handleContactClick('instagram')}
 									class="flex items-center gap-3 py-3 px-2 -mx-2 text-gray-600 dark:text-gray-400 hover:text-pink-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors"
 								>
 									<Instagram class="h-5 w-5 flex-shrink-0" />
@@ -514,7 +514,7 @@
 									href={ensureProtocol(provider.social_facebook)}
 									target="_blank"
 									rel="noopener noreferrer"
-									onclick={() => handleContactClick('social')}
+									onclick={() => handleContactClick('facebook')}
 									class="flex items-center gap-3 py-3 px-2 -mx-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors"
 								>
 									<Facebook class="h-5 w-5 flex-shrink-0" />

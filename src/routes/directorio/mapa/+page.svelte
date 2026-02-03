@@ -173,7 +173,7 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
 	<Header items={[{ label: 'Directorio', href: '/directorio' }, { label: 'Mapa', href: '/directorio/mapa' }]} />
 
-	<div class="relative h-[calc(100vh-64px)]">
+	<div class="relative h-[calc(100vh-64px-64px)] md:h-[calc(100vh-64px)]">
 		<!-- Loading overlay -->
 		{#if loading}
 			<div class="absolute inset-0 z-[1001] bg-white/80 dark:bg-gray-900/80 flex items-center justify-center">

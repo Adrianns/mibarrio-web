@@ -9,6 +9,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Categories with their PRD codes from 1122.com.uy
 const CATEGORIES = [
   // Hogar
+  { name: 'electricista', prd: 'PRD1000406', label: 'Electricistas' },
   { name: 'plomero', prd: 'PRD1000922', label: 'Sanitarios' },
   { name: 'albanil', prd: 'PRD1002184', label: 'Albañiles' },
   { name: 'cerrajero', prd: 'PRD1000247', label: 'Cerrajerías' },
@@ -44,9 +45,10 @@ const CATEGORIES = [
   { name: 'arquitecto', prd: 'PRD1000060', label: 'Arquitectos' },
 ];
 
-const LIMIT_PER_CATEGORY = 10;
+// No limit - scrape all available
+const LIMIT_PER_CATEGORY = 9999;
 
-// Get business URLs from listing page
+// Get business URLs from listing page with infinite scroll
 async function getBusinessUrls(page: Page, category: typeof CATEGORIES[0], limit: number): Promise<string[]> {
   const url = `https://1122.com.uy/rubro-zona/montevideo/${category.label.toLowerCase().replace(/í/g, 'i').replace(/ñ/g, 'n').replace(/é/g, 'e')}/${category.prd}/Z01000`;
 
@@ -54,7 +56,34 @@ async function getBusinessUrls(page: Page, category: typeof CATEGORIES[0], limit
 
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
+
+    // Scroll to load all results (infinite scroll)
+    let previousCount = 0;
+    let currentCount = 0;
+    let scrollAttempts = 0;
+    const maxScrollAttempts = 50; // Prevent infinite loops
+
+    do {
+      previousCount = currentCount;
+
+      // Scroll to bottom
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await page.waitForTimeout(1500);
+
+      // Count current links
+      currentCount = await page.evaluate(() => {
+        const links = document.querySelectorAll('a[href*="/local/"] h2');
+        return links.length;
+      });
+
+      scrollAttempts++;
+
+      if (currentCount > previousCount) {
+        console.log(`    Loaded ${currentCount} businesses...`);
+      }
+
+    } while (currentCount > previousCount && scrollAttempts < maxScrollAttempts && currentCount < limit);
 
     const pageUrls = await page.evaluate(() => {
       const links = document.querySelectorAll('a[href*="/local/"]');
@@ -279,7 +308,7 @@ async function importProvider(provider: ScrapedProvider): Promise<boolean> {
 
 async function scrapeAndImport() {
   console.log('=== 1122.com.uy Multi-Category Scraper ===');
-  console.log(`Scraping ${LIMIT_PER_CATEGORY} businesses per category\n`);
+  console.log(`Scraping ALL businesses from ${CATEGORIES.length} categories in Montevideo\n`);
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
