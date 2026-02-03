@@ -44,18 +44,24 @@
 
 		loading = true;
 
-		const { error } = await supabase.auth.updateUser({
-			password: password
-		});
+		try {
+			const { error } = await supabase.auth.updateUser({
+				password: password
+			});
 
-		loading = false;
+			if (error) {
+				loading = false;
+				toast.error('Error al cambiar la contraseña. El link puede haber expirado.');
+				return;
+			}
 
-		if (error) {
-			toast.error('Error al cambiar la contraseña. El link puede haber expirado.');
-			return;
+			toast.success('Contraseña actualizada correctamente');
+			goto('/');
+		} catch (err) {
+			loading = false;
+			toast.error('Error inesperado. Intentá de nuevo.');
+			console.error('Password reset error:', err);
 		}
-
-		success = true;
 	}
 </script>
 
