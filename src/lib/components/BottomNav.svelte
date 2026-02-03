@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { Home, Search, User } from 'lucide-svelte';
+	import { Home, Search, Store, User } from 'lucide-svelte';
 	import { isAuthenticated } from '$lib/stores/auth';
 
 	const navItems = [
 		{ label: 'Inicio', href: '/', icon: Home, matchPaths: ['/'] },
 		{ label: 'Directorio', href: '/directorio', icon: Search, matchPaths: ['/directorio'] },
-		{ label: 'Perfil', href: '/auth/login', authHref: '/mi-negocio', icon: User, matchPaths: ['/mi-negocio', '/auth/login'] }
+		{ label: 'Mi Negocio', href: '/auth/login', authHref: '/mi-negocio', icon: Store, matchPaths: ['/mi-negocio', '/auth/login'] },
+		{ label: 'Mi Perfil', href: '/perfil', icon: User, matchPaths: ['/perfil'] }
 	];
 
 	function isActive(matchPaths: string[], currentPath: string): boolean {
