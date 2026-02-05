@@ -6,13 +6,22 @@
 	import { toast } from '$lib/stores/toast';
 	import { auth, user, isAuthenticated } from '$lib/stores/auth';
 	import { supabase } from '$lib/supabase';
-	import { Loader2, User, Mail, Lock, Save, Eye, EyeOff } from 'lucide-svelte';
-	import { Button } from '$lib/components/ui/button';
+	import {
+		Loader2,
+		User,
+		Lock,
+		Eye,
+		EyeOff,
+		Camera,
+		Shield,
+		Check,
+		ArrowLeft,
+		LogOut
+	} from 'lucide-svelte';
 
 	let loading = $state(true);
 	let saving = $state(false);
 	let changingPassword = $state(false);
-	let showPasswordForm = $state(false);
 
 	// Form state
 	let fullName = $state('');
@@ -22,6 +31,7 @@
 	let newPassword = $state('');
 	let confirmPassword = $state('');
 	let showNewPassword = $state(false);
+	let showConfirmPassword = $state(false);
 
 	// Password errors and success
 	let passwordError = $state('');
@@ -71,7 +81,6 @@
 		changingPassword = true;
 
 		try {
-			// Update password directly - user is already authenticated
 			const { error: updateError } = await supabase.auth.updateUser({
 				password: newPassword
 			});
@@ -83,15 +92,24 @@
 			}
 
 			passwordSuccess = true;
-			showPasswordForm = false;
 			newPassword = '';
 			confirmPassword = '';
+			toast.success('Contraseña actualizada correctamente');
 		} catch (err) {
 			console.error('Password change error:', err);
 			passwordError = 'Error al cambiar la contraseña';
 		}
 
 		changingPassword = false;
+	}
+
+	async function handleLogout() {
+		try {
+			await auth.logout();
+			goto('/');
+		} catch (err) {
+			console.error('Logout error:', err);
+		}
 	}
 
 	onMount(async () => {
@@ -115,168 +133,425 @@
 	<title>Mi perfil - {APP_NAME}</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-	<Header items={[{ label: 'Directorio', href: '/directorio' }]} />
+<div class="min-h-screen bg-[#0F172A]">
+	<!-- Desktop Header -->
+	<div class="hidden md:block">
+		<Header items={[{ label: 'Directorio', href: '/directorio' }]} />
+	</div>
 
 	{#if loading}
-		<div class="flex items-center justify-center py-12">
-			<Loader2 class="h-8 w-8 animate-spin text-primary-600" />
-			<span class="ml-2 text-gray-600 dark:text-gray-400">Cargando...</span>
+		<div class="flex items-center justify-center py-20">
+			<Loader2 class="h-8 w-8 animate-spin text-blue-500" />
+			<span class="ml-3 text-slate-400">Cargando...</span>
 		</div>
 	{:else}
-		<div class="container py-8 max-w-xl">
-			<h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Mi perfil</h1>
-
-			<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 space-y-6">
-				<!-- Full name -->
-				<div>
-					<label for="fullName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						<User class="h-4 w-4 inline mr-1" />
-						Nombre completo
-					</label>
-					<input
-						id="fullName"
-						type="text"
-						bind:value={fullName}
-						placeholder="Tu nombre"
-						class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
-					/>
-				</div>
-
-				<!-- Email (read-only) -->
-				<div>
-					<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-						<Mail class="h-4 w-4 inline mr-1" />
-						Email
-					</label>
-					<input
-						id="email"
-						type="email"
-						value={email}
-						disabled
-						class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-					/>
-					<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-						El email no se puede cambiar
-					</p>
-				</div>
-
-				<!-- Save button -->
-				<Button onclick={handleSaveProfile} disabled={saving} class="w-full">
-					{#if saving}
-						<Loader2 class="h-4 w-4 mr-2 animate-spin" />
-						Guardando...
-					{:else}
-						<Save class="h-4 w-4 mr-2" />
-						Guardar cambios
-					{/if}
-				</Button>
-			</div>
-
-			<!-- Password section -->
-			<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mt-6">
-				<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-					<Lock class="h-5 w-5" />
-					Contraseña
-				</h2>
-
-				{#if passwordSuccess}
-					<div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
-						<p class="text-green-700 dark:text-green-300 text-sm font-medium">
-							✓ La contraseña se ha cambiado correctamente
-						</p>
+		<!-- ==================== MOBILE ==================== -->
+		<div class="md:hidden flex flex-col min-h-screen">
+			<div class="flex-1 overflow-y-auto pb-24">
+				<!-- Mobile Header -->
+				<div class="flex items-center justify-between px-6 py-4">
+					<div class="flex items-center gap-3">
+						<button
+							onclick={() => history.back()}
+							class="w-10 h-10 rounded-full border border-[#334155] flex items-center justify-center"
+						>
+							<ArrowLeft class="h-5 w-5 text-white" />
+						</button>
+						<h1 class="text-xl font-semibold text-white">Mi Perfil</h1>
 					</div>
-				{/if}
+				</div>
 
-				{#if !showPasswordForm}
-					<button
-						type="button"
-						onclick={() => { showPasswordForm = true; passwordSuccess = false; }}
-						class="text-primary-600 hover:text-primary-700 text-sm font-medium"
-					>
-						Cambiar contraseña
-					</button>
-				{:else}
-					<div class="space-y-4">
-						<!-- New password -->
-						<div>
-							<label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-								Nueva contraseña
-							</label>
-							<div class="relative">
-								<input
-									id="newPassword"
-									type={showNewPassword ? 'text' : 'password'}
-									bind:value={newPassword}
-									placeholder="••••••••"
-									class="w-full px-4 py-3 pr-12 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
-								/>
-								<button
-									type="button"
-									onclick={() => showNewPassword = !showNewPassword}
-									class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-								>
-									{#if showNewPassword}
-										<EyeOff class="h-5 w-5" />
-									{:else}
-										<Eye class="h-5 w-5" />
-									{/if}
-								</button>
-							</div>
-							<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-								Mínimo 6 caracteres
-							</p>
+				<div class="px-6 space-y-8">
+					<!-- Avatar Section -->
+					<div class="flex flex-col items-center gap-4">
+						<div
+							class="w-[120px] h-[120px] rounded-full bg-[#1E293B] flex items-center justify-center"
+						>
+							<User class="h-12 w-12 text-blue-500" />
 						</div>
+						<button
+							class="flex items-center gap-1.5 px-4 py-2 rounded-lg border-[1.5px] border-[#334155] text-blue-500 text-sm font-medium hover:bg-[#1E293B] transition-colors"
+						>
+							<Camera class="h-4 w-4" />
+							Cambiar foto
+						</button>
+					</div>
 
-						<!-- Confirm password -->
-						<div>
-							<label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-								Confirmar nueva contraseña
-							</label>
+					<!-- Info Section -->
+					<div class="space-y-4">
+						<p class="text-xs font-semibold text-slate-500 tracking-[1px]">
+							INFORMACIÓN DE LA CUENTA
+						</p>
+
+						<!-- Name card -->
+						<div class="bg-[#1E293B] rounded-2xl p-4 border border-[#334155] space-y-2">
+							<label for="m-fullName" class="text-[13px] text-slate-400"
+								>Nombre completo</label
+							>
 							<input
-								id="confirmPassword"
-								type="password"
-								bind:value={confirmPassword}
-								placeholder="••••••••"
-								class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
+								id="m-fullName"
+								type="text"
+								bind:value={fullName}
+								placeholder="Tu nombre"
+								class="w-full bg-transparent text-[15px] font-medium text-white outline-none placeholder:text-slate-600"
 							/>
 						</div>
 
-						<!-- Error message -->
-						{#if passwordError}
-							<p class="text-sm text-red-600 dark:text-red-400">{passwordError}</p>
-						{/if}
+						<!-- Email card -->
+						<div class="bg-[#1E293B] rounded-2xl p-4 border border-[#334155] space-y-2">
+							<p class="text-[13px] text-slate-400">Correo electrónico</p>
+							<p class="text-[15px] font-medium text-white">{email}</p>
+						</div>
 
-						<!-- Buttons -->
-						<div class="flex gap-3">
+						<!-- Save profile button -->
+						<button
+							onclick={handleSaveProfile}
+							disabled={saving}
+							class="w-full h-12 rounded-xl bg-blue-500 hover:bg-blue-600 text-white text-[15px] font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+						>
+							{#if saving}
+								<Loader2 class="h-[18px] w-[18px] animate-spin" />
+								Guardando...
+							{:else}
+								<Check class="h-[18px] w-[18px]" />
+								Guardar cambios
+							{/if}
+						</button>
+					</div>
+
+					<!-- Security Section -->
+					<div class="space-y-4">
+						<p class="text-xs font-semibold text-slate-500 tracking-[1px]">SEGURIDAD</p>
+
+						<div class="bg-[#1E293B] rounded-2xl p-4 border border-[#334155] space-y-4">
+							<!-- Title -->
+							<div class="flex items-center justify-between">
+								<p class="text-[15px] font-medium text-white">Cambiar contraseña</p>
+								<Lock class="h-[18px] w-[18px] text-slate-500" />
+							</div>
+
+							{#if passwordSuccess}
+								<div
+									class="bg-green-500/10 border border-green-500/30 rounded-lg p-3"
+								>
+									<p class="text-green-400 text-sm font-medium">
+										Contraseña actualizada correctamente
+									</p>
+								</div>
+							{/if}
+
+							<!-- Password inputs -->
+							<div class="space-y-3">
+								<!-- New password -->
+								<div class="space-y-1.5">
+									<label
+										for="m-newPass"
+										class="text-[13px] font-medium text-white"
+										>Nueva contraseña</label
+									>
+									<div class="relative">
+										<input
+											id="m-newPass"
+											type={showNewPassword ? 'text' : 'password'}
+											bind:value={newPassword}
+											placeholder="Ingresa tu nueva contraseña"
+											class="w-full h-11 px-3.5 pr-11 rounded-[10px] bg-[#0F172A] border border-[#334155] text-white text-sm outline-none placeholder:text-slate-500 focus:border-blue-500 transition-colors"
+										/>
+										<button
+											type="button"
+											onclick={() => (showNewPassword = !showNewPassword)}
+											class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+										>
+											{#if showNewPassword}
+												<EyeOff class="h-4 w-4" />
+											{:else}
+												<Eye class="h-4 w-4" />
+											{/if}
+										</button>
+									</div>
+								</div>
+
+								<!-- Confirm password -->
+								<div class="space-y-1.5">
+									<label
+										for="m-confirmPass"
+										class="text-[13px] font-medium text-white"
+										>Confirmar contraseña</label
+									>
+									<div class="relative">
+										<input
+											id="m-confirmPass"
+											type={showConfirmPassword ? 'text' : 'password'}
+											bind:value={confirmPassword}
+											placeholder="Confirma tu nueva contraseña"
+											class="w-full h-11 px-3.5 pr-11 rounded-[10px] bg-[#0F172A] border border-[#334155] text-white text-sm outline-none placeholder:text-slate-500 focus:border-blue-500 transition-colors"
+										/>
+										<button
+											type="button"
+											onclick={() =>
+												(showConfirmPassword = !showConfirmPassword)}
+											class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+										>
+											{#if showConfirmPassword}
+												<EyeOff class="h-4 w-4" />
+											{:else}
+												<Eye class="h-4 w-4" />
+											{/if}
+										</button>
+									</div>
+								</div>
+							</div>
+
+							{#if passwordError}
+								<p class="text-sm text-red-400">{passwordError}</p>
+							{/if}
+
+							<!-- Save password button -->
 							<button
-								type="button"
-								onclick={() => { showPasswordForm = false; passwordError = ''; newPassword = ''; confirmPassword = ''; }}
-								class="flex-1 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-sm font-medium"
+								onclick={handleChangePassword}
+								disabled={changingPassword}
+								class="w-full h-12 rounded-xl bg-blue-500 hover:bg-blue-600 text-white text-[15px] font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
 							>
-								Cancelar
-							</button>
-							<Button onclick={handleChangePassword} disabled={changingPassword} class="flex-1">
 								{#if changingPassword}
-									<Loader2 class="h-4 w-4 mr-2 animate-spin" />
+									<Loader2 class="h-[18px] w-[18px] animate-spin" />
 									Cambiando...
 								{:else}
-									Cambiar contraseña
+									<Check class="h-[18px] w-[18px]" />
+									Guardar cambios
 								{/if}
-							</Button>
+							</button>
 						</div>
 					</div>
-				{/if}
-			</div>
 
-			<!-- Link to mi-negocio if provider -->
-			{#if $user?.is_mibarrio_provider}
-				<div class="mt-6 text-center">
-					<a href="/mi-negocio" class="text-primary-600 hover:text-primary-700 text-sm font-medium">
-						Ir a Mi negocio →
-					</a>
+					<!-- Provider link -->
+					{#if $user?.is_mibarrio_provider}
+						<div class="text-center">
+							<a
+								href="/mi-negocio"
+								class="text-blue-500 hover:text-blue-400 text-sm font-medium"
+							>
+								Ir a Mi negocio →
+							</a>
+						</div>
+					{/if}
+
+					<!-- Logout -->
+					<button
+						onclick={handleLogout}
+						class="w-full flex items-center justify-center gap-2 py-3 text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
+					>
+						<LogOut class="h-4 w-4" />
+						Cerrar sesión
+					</button>
 				</div>
-			{/if}
+			</div>
+		</div>
+
+		<!-- ==================== DESKTOP ==================== -->
+		<div class="hidden md:block">
+			<div class="max-w-6xl mx-auto px-12 py-12">
+				<!-- Page Header -->
+				<div class="mb-10">
+					<h1 class="text-[28px] font-semibold text-white tracking-[-0.5px]">
+						Mi Perfil
+					</h1>
+					<p class="text-[15px] text-slate-400 mt-2">
+						Administra tu información personal y seguridad
+					</p>
+				</div>
+
+				<!-- Two Column Layout -->
+				<div class="flex gap-6">
+					<!-- Left: Profile Card -->
+					<div
+						class="flex-1 bg-[#1E293B] rounded-2xl p-6 border border-[#334155] space-y-6"
+					>
+						<!-- Profile header with avatar -->
+						<div class="flex items-center gap-5">
+							<div
+								class="w-[100px] h-[100px] rounded-full bg-[#0F172A] flex items-center justify-center shrink-0"
+							>
+								<User class="h-10 w-10 text-blue-500" />
+							</div>
+							<div class="flex-1 min-w-0">
+								<p class="text-xl font-semibold text-white truncate">
+									{fullName || 'Usuario'}
+								</p>
+								<p class="text-[15px] text-slate-400 truncate">{email}</p>
+							</div>
+							<button
+								class="flex items-center gap-1.5 px-4 py-2.5 rounded-lg border-[1.5px] border-[#334155] text-blue-500 text-sm font-medium hover:bg-[#0F172A] transition-colors shrink-0"
+							>
+								<Camera class="h-4 w-4" />
+								Cambiar foto
+							</button>
+						</div>
+
+						<!-- Divider -->
+						<div class="h-px bg-[#334155]"></div>
+
+						<!-- Name field -->
+						<div class="space-y-2">
+							<label for="d-fullName" class="text-[13px] font-medium text-slate-400"
+								>Nombre completo</label
+							>
+							<input
+								id="d-fullName"
+								type="text"
+								bind:value={fullName}
+								placeholder="Tu nombre"
+								class="w-full h-11 px-3.5 rounded-[10px] bg-[#0F172A] border border-[#334155] text-[15px] font-medium text-white outline-none placeholder:text-slate-500 focus:border-blue-500 transition-colors"
+							/>
+						</div>
+
+						<!-- Email display -->
+						<div class="space-y-2">
+							<p class="text-[13px] font-medium text-slate-400">
+								Correo electrónico
+							</p>
+							<p class="text-[15px] font-medium text-white">{email}</p>
+						</div>
+
+						<!-- Save profile -->
+						<button
+							onclick={handleSaveProfile}
+							disabled={saving}
+							class="w-full h-11 rounded-[10px] bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+						>
+							{#if saving}
+								<Loader2 class="h-[18px] w-[18px] animate-spin" />
+								Guardando...
+							{:else}
+								<Check class="h-[18px] w-[18px]" />
+								Guardar cambios
+							{/if}
+						</button>
+					</div>
+
+					<!-- Right: Security Card -->
+					<div
+						class="w-[400px] bg-[#1E293B] rounded-2xl p-6 border border-[#334155] space-y-5 shrink-0"
+					>
+						<!-- Security header -->
+						<div class="flex items-center justify-between">
+							<p class="text-lg font-semibold text-white">Cambiar contraseña</p>
+							<Shield class="h-5 w-5 text-slate-500" />
+						</div>
+
+						{#if passwordSuccess}
+							<div
+								class="bg-green-500/10 border border-green-500/30 rounded-lg p-3"
+							>
+								<p class="text-green-400 text-sm font-medium">
+									Contraseña actualizada correctamente
+								</p>
+							</div>
+						{/if}
+
+						<!-- Password inputs -->
+						<div class="space-y-4">
+							<!-- New password -->
+							<div class="space-y-1.5">
+								<label
+									for="d-newPass"
+									class="text-[13px] font-medium text-white"
+									>Nueva contraseña</label
+								>
+								<div class="relative">
+									<input
+										id="d-newPass"
+										type={showNewPassword ? 'text' : 'password'}
+										bind:value={newPassword}
+										placeholder="Ingresa tu nueva contraseña"
+										class="w-full h-11 px-3.5 pr-11 rounded-[10px] bg-[#0F172A] border border-[#334155] text-white text-sm outline-none placeholder:text-slate-500 focus:border-blue-500 transition-colors"
+									/>
+									<button
+										type="button"
+										onclick={() => (showNewPassword = !showNewPassword)}
+										class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+									>
+										{#if showNewPassword}
+											<EyeOff class="h-4 w-4" />
+										{:else}
+											<Eye class="h-4 w-4" />
+										{/if}
+									</button>
+								</div>
+							</div>
+
+							<!-- Confirm password -->
+							<div class="space-y-1.5">
+								<label
+									for="d-confirmPass"
+									class="text-[13px] font-medium text-white"
+									>Confirmar contraseña</label
+								>
+								<div class="relative">
+									<input
+										id="d-confirmPass"
+										type={showConfirmPassword ? 'text' : 'password'}
+										bind:value={confirmPassword}
+										placeholder="Confirma tu nueva contraseña"
+										class="w-full h-11 px-3.5 pr-11 rounded-[10px] bg-[#0F172A] border border-[#334155] text-white text-sm outline-none placeholder:text-slate-500 focus:border-blue-500 transition-colors"
+									/>
+									<button
+										type="button"
+										onclick={() =>
+											(showConfirmPassword = !showConfirmPassword)}
+										class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+									>
+										{#if showConfirmPassword}
+											<EyeOff class="h-4 w-4" />
+										{:else}
+											<Eye class="h-4 w-4" />
+										{/if}
+									</button>
+								</div>
+							</div>
+						</div>
+
+						{#if passwordError}
+							<p class="text-sm text-red-400">{passwordError}</p>
+						{/if}
+
+						<!-- Save password -->
+						<button
+							onclick={handleChangePassword}
+							disabled={changingPassword}
+							class="w-full h-11 rounded-[10px] bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+						>
+							{#if changingPassword}
+								<Loader2 class="h-[18px] w-[18px] animate-spin" />
+								Cambiando...
+							{:else}
+								<Check class="h-[18px] w-[18px]" />
+								Guardar cambios
+							{/if}
+						</button>
+					</div>
+				</div>
+
+				<!-- Footer actions -->
+				<div class="mt-8 flex items-center justify-between">
+					{#if $user?.is_mibarrio_provider}
+						<a
+							href="/mi-negocio"
+							class="text-blue-500 hover:text-blue-400 text-sm font-medium"
+						>
+							Ir a Mi negocio →
+						</a>
+					{:else}
+						<div></div>
+					{/if}
+					<button
+						onclick={handleLogout}
+						class="flex items-center gap-2 text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
+					>
+						<LogOut class="h-4 w-4" />
+						Cerrar sesión
+					</button>
+				</div>
+			</div>
 		</div>
 	{/if}
 </div>
