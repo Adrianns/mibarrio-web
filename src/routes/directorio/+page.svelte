@@ -125,6 +125,20 @@
 		categories
 	);
 
+	// Match search query to category (for searches like "plomeros", "electricistas")
+	function findMatchingCategory(query: string): string | null {
+		if (!query) return null;
+		const lowerQuery = query.toLowerCase().trim();
+		// Match by label (e.g., "Plomeros") or name (e.g., "plomero")
+		const match = categories.find(
+			c => c.label.toLowerCase().includes(lowerQuery) ||
+			     c.name.toLowerCase().includes(lowerQuery) ||
+			     lowerQuery.includes(c.label.toLowerCase()) ||
+			     lowerQuery.includes(c.name.toLowerCase())
+		);
+		return match?.name || null;
+	}
+
 	async function fetchProviders(loadMore = false) {
 		if (loadMore) {
 			loadingMore = true;
@@ -135,10 +149,16 @@
 			hasMore = true;
 		}
 
+		// Check if search query matches a category
+		const matchedCategory = findMatchingCategory(searchQuery);
+
 		// Determine category names for filtering
 		let categoryNames: string[] | null = null;
 		if (selectedCategory) {
 			categoryNames = [selectedCategory];
+		} else if (matchedCategory) {
+			// Search query matches a category - filter by it
+			categoryNames = [matchedCategory];
 		} else if (selectedType) {
 			categoryNames = (selectedType === 'service' ? serviceCategories : businessCategories)
 				.map(c => c.name);
@@ -171,8 +191,8 @@
 			query = query.eq('neighborhood', selectedNeighborhood);
 		}
 
-		// Apply search filter
-		if (searchQuery) {
+		// Apply search filter (skip if query matched a category)
+		if (searchQuery && !matchedCategory) {
 			query = query.or(
 				`business_name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`
 			);
