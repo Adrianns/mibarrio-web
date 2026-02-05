@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types';
 import { getServiceSupabase } from '$lib/server/supabase';
 import { SITE_URL } from '$lib/seo/constants';
+import { generateAllCategorySlugs } from '$lib/seo/category-slugs';
 
 interface SitemapUrl {
 	loc: string;
@@ -16,6 +17,14 @@ const staticPages: SitemapUrl[] = [
 	{ loc: '/privacy', changefreq: 'monthly', priority: '0.3' },
 	{ loc: '/terms', changefreq: 'monthly', priority: '0.3' }
 ];
+
+// SEO category landing pages (high priority for Google indexing)
+const categorySlugs = generateAllCategorySlugs();
+const categoryPages: SitemapUrl[] = categorySlugs.map((slug) => ({
+	loc: `/${slug}`,
+	changefreq: 'daily' as const,
+	priority: slug.includes('-') ? '0.85' : '0.9' // Category+department slightly lower
+}));
 
 function formatDate(date: string | Date): string {
 	const d = new Date(date);
@@ -34,7 +43,7 @@ function buildUrlEntry(url: SitemapUrl): string {
 }
 
 export const GET: RequestHandler = async () => {
-	const urls: SitemapUrl[] = [...staticPages];
+	const urls: SitemapUrl[] = [...staticPages, ...categoryPages];
 
 	try {
 		const supabase = getServiceSupabase();

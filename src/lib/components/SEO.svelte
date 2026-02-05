@@ -50,6 +50,13 @@
 		<meta name="robots" content="noindex, nofollow" />
 	{/if}
 
+	<!-- Language and Region -->
+	<link rel="alternate" hreflang="es-UY" href={canonicalUrl} />
+	<link rel="alternate" hreflang="es" href={canonicalUrl} />
+	<link rel="alternate" hreflang="x-default" href={canonicalUrl} />
+	<meta name="geo.region" content="UY" />
+	<meta name="geo.placename" content="Uruguay" />
+
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content={type} />
 	<meta property="og:url" content={canonicalUrl} />

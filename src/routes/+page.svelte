@@ -7,10 +7,13 @@
 	import { DEFAULT_CATEGORIES, DEPARTMENTS, MONTEVIDEO_NEIGHBORHOODS, type Department } from '$lib/domain/types';
 	import { APP_NAME, APP_TAGLINE } from '$lib/config';
 	import { isAuthenticated, hasMibarrioProvider, isInitialized } from '$lib/stores/auth';
-	import { buildOrganizationSchema } from '$lib/seo/schemas';
+	import { buildOrganizationSchema, buildWebSiteSchema } from '$lib/seo/schemas';
 	import { SITE_DESCRIPTION } from '$lib/seo/constants';
+	import { CATEGORY_SLUGS } from '$lib/seo/category-slugs';
 
 	const organizationSchema = buildOrganizationSchema(SITE_DESCRIPTION);
+	const webSiteSchema = buildWebSiteSchema(SITE_DESCRIPTION);
+	const jsonLdSchemas = [organizationSchema, webSiteSchema];
 
 	let searchQuery = $state('');
 	let selectedDepartment = $state<Department | ''>('');
@@ -37,7 +40,7 @@
 	}
 </script>
 
-<SEO url="/" jsonLd={organizationSchema} />
+<SEO url="/" jsonLd={jsonLdSchemas} />
 
 <div class="min-h-screen bg-gradient-to-b from-primary-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors">
 	<Header items={navItems} variant="transparent" />
@@ -151,8 +154,9 @@
 		<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Categorías populares</h2>
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
 			{#each featuredCategories as category}
+				{@const categorySlug = CATEGORY_SLUGS[category.name] || category.name}
 				<a
-					href="/directorio?categoria={category.name}"
+					href="/{categorySlug}"
 					class="flex flex-col items-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 dark:border-gray-700"
 				>
 					<div class="w-12 h-12 rounded-full {category.color} flex items-center justify-center mb-3">
@@ -190,8 +194,10 @@
 					<h4 class="text-white font-medium mb-4">Directorio</h4>
 					<ul class="space-y-2 text-sm">
 						<li><a href="/directorio" class="hover:text-white">Buscar servicios</a></li>
-						<li><a href="/directorio?tipo=service" class="hover:text-white">Profesionales</a></li>
-						<li><a href="/directorio?tipo=business" class="hover:text-white">Comercios</a></li>
+						<li><a href="/electricistas" class="hover:text-white">Electricistas</a></li>
+						<li><a href="/plomeros" class="hover:text-white">Plomeros</a></li>
+						<li><a href="/restaurantes" class="hover:text-white">Restaurantes</a></li>
+						<li><a href="/farmacias" class="hover:text-white">Farmacias</a></li>
 					</ul>
 				</div>
 				<div>

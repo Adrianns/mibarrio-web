@@ -284,6 +284,41 @@
 			: null
 	);
 
+	// FAQ Schema for SEO
+	const faqSchema = {
+		'@context': 'https://schema.org',
+		'@type': 'FAQPage',
+		mainEntity: [
+			{
+				'@type': 'Question',
+				name: '¿Cómo encuentro un servicio o negocio en Mi Barrio?',
+				acceptedAnswer: {
+					'@type': 'Answer',
+					text: 'Usá el buscador para encontrar servicios por nombre, categoría o ubicación. Podés filtrar por departamento, barrio y tipo de servicio para encontrar exactamente lo que necesitás.'
+				}
+			},
+			{
+				'@type': 'Question',
+				name: '¿Cómo contacto a un profesional o negocio?',
+				acceptedAnswer: {
+					'@type': 'Answer',
+					text: 'Cada perfil tiene botones para llamar directamente, enviar WhatsApp o email. El contacto es directo y gratuito, sin intermediarios.'
+				}
+			},
+			{
+				'@type': 'Question',
+				name: '¿Es gratis usar Mi Barrio?',
+				acceptedAnswer: {
+					'@type': 'Answer',
+					text: 'Sí, Mi Barrio es 100% gratuito para buscar y contactar servicios. Los profesionales también pueden registrar su negocio gratis.'
+				}
+			}
+		]
+	};
+
+	// Combined schemas for SEO
+	const jsonLdSchemas = $derived(itemListSchema ? [itemListSchema, faqSchema] : [faqSchema]);
+
 	let observer: IntersectionObserver | null = null;
 
 	function toggleRecentlyViewed() {
@@ -330,7 +365,7 @@
 	title="Directorio"
 	description="Encuentra servicios y negocios locales en Uruguay. Electricistas, plomeros, restaurantes, farmacias y más profesionales cerca tuyo."
 	url="/directorio"
-	jsonLd={itemListSchema}
+	jsonLd={jsonLdSchemas}
 />
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">

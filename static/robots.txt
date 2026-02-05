@@ -1,3 +1,24 @@
-# allow crawling everything by default
+# Mi Barrio - Robots.txt
 User-agent: *
-Disallow:
+Allow: /
+
+# Sitemap
+Sitemap: https://mibarrio.com.uy/sitemap.xml
+
+# Block auth pages from indexing
+Disallow: /auth/
+Disallow: /admin/
+Disallow: /api/
+
+# Allow category and directory pages
+Allow: /directorio
+Allow: /electricistas
+Allow: /plomeros
+Allow: /albaniles
+Allow: /pintores
+Allow: /carpinteros
+Allow: /jardineros
+Allow: /mecanicos
+Allow: /cerrajeros
+Allow: /restaurantes
+Allow: /farmacias

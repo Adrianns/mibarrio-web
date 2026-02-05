@@ -138,3 +138,82 @@ export function buildItemListSchema(items: ItemListItem[]): ItemListSchema {
 		}))
 	};
 }
+
+// WebSite schema for Google Sitelinks Search Box
+export interface WebSiteSchema {
+	'@context': string;
+	'@type': string;
+	name: string;
+	url: string;
+	description: string;
+	potentialAction: {
+		'@type': string;
+		target: {
+			'@type': string;
+			urlTemplate: string;
+		};
+		'query-input': string;
+	};
+}
+
+export function buildWebSiteSchema(description: string): WebSiteSchema {
+	return {
+		'@context': 'https://schema.org',
+		'@type': 'WebSite',
+		name: SITE_NAME,
+		url: SITE_URL,
+		description,
+		potentialAction: {
+			'@type': 'SearchAction',
+			target: {
+				'@type': 'EntryPoint',
+				urlTemplate: `${SITE_URL}/directorio?q={search_term_string}`
+			},
+			'query-input': 'required name=search_term_string'
+		}
+	};
+}
+
+// Service schema for service providers
+export interface ServiceSchema {
+	'@context': string;
+	'@type': string;
+	name: string;
+	description: string;
+	provider: {
+		'@type': string;
+		name: string;
+		url: string;
+	};
+	areaServed: {
+		'@type': string;
+		name: string;
+	};
+	serviceType: string;
+}
+
+export function buildServiceSchema(
+	serviceName: string,
+	description: string,
+	providerName: string,
+	providerUrl: string,
+	areaName: string,
+	serviceType: string
+): ServiceSchema {
+	return {
+		'@context': 'https://schema.org',
+		'@type': 'Service',
+		name: serviceName,
+		description,
+		provider: {
+			'@type': 'LocalBusiness',
+			name: providerName,
+			url: providerUrl
+		},
+		areaServed: {
+			'@type': 'AdministrativeArea',
+			name: areaName
+		},
+		serviceType
+	};
+}
