@@ -342,20 +342,32 @@ export function getCategorySEOData(categoryName: string): CategorySEOData | null
 	return CATEGORY_SEO_DATA[categoryName] || null;
 }
 
+// Build location string from department and neighborhood
+function buildLocationString(department?: string | null, neighborhood?: string | null): string {
+	if (neighborhood && department === 'Montevideo') {
+		return `${neighborhood}, Montevideo`;
+	}
+	return department || 'Uruguay';
+}
+
 // Generate optimized title for a category page
 export function getOptimizedTitle(
 	categoryName: string,
 	categoryLabel: string,
-	department?: string | null
+	department?: string | null,
+	neighborhood?: string | null
 ): string {
 	const seoData = CATEGORY_SEO_DATA[categoryName];
-	const location = department || 'Uruguay';
+	const location = buildLocationString(department, neighborhood);
 
 	if (seoData) {
 		return seoData.titleTemplate.replace(/{location}/g, location);
 	}
 
 	// Fallback with good SEO structure
+	if (neighborhood) {
+		return `${categoryLabel} en ${neighborhood} (Montevideo) - Contacto Directo | Mi Barrio`;
+	}
 	if (department) {
 		return `${categoryLabel} en ${department} - Contacto Directo | Mi Barrio`;
 	}
@@ -366,10 +378,11 @@ export function getOptimizedTitle(
 export function getOptimizedDescription(
 	categoryName: string,
 	categoryLabel: string,
-	department?: string | null
+	department?: string | null,
+	neighborhood?: string | null
 ): string {
 	const seoData = CATEGORY_SEO_DATA[categoryName];
-	const location = department || 'Uruguay';
+	const location = buildLocationString(department, neighborhood);
 
 	if (seoData) {
 		return seoData.descriptionTemplate.replace(/{location}/g, location);
@@ -383,10 +396,11 @@ export function getOptimizedDescription(
 export function getOptimizedFAQs(
 	categoryName: string,
 	categoryLabel: string,
-	department?: string | null
+	department?: string | null,
+	neighborhood?: string | null
 ): Array<{ question: string; answer: string }> {
 	const seoData = CATEGORY_SEO_DATA[categoryName];
-	const location = department || 'Uruguay';
+	const location = buildLocationString(department, neighborhood);
 
 	if (seoData) {
 		return seoData.faqs.map((faq) => ({

@@ -49,6 +49,11 @@ export const load: PageServerLoad = async ({ params }) => {
 		query = query.eq('department', parsed.department);
 	}
 
+	// Filter by neighborhood if specified (Montevideo only)
+	if (parsed.neighborhood) {
+		query = query.eq('neighborhood', parsed.neighborhood);
+	}
+
 	const { data: providers, error: dbError } = await query;
 
 	if (dbError) {
@@ -69,10 +74,19 @@ export const load: PageServerLoad = async ({ params }) => {
 		category_name: parsed.category
 	});
 
+	// Get count by neighborhood for internal linking (only if viewing Montevideo)
+	let neighborhoodCounts: Array<{ neighborhood: string; count: number }> = [];
+	if (parsed.department === 'Montevideo') {
+		const { data: nbCounts } = await supabase.rpc('get_category_neighborhood_counts', {
+			p_category_name: parsed.category
+		});
+		neighborhoodCounts = nbCounts || [];
+	}
+
 	// SEO metadata - optimized for Google search patterns
-	const title = getOptimizedTitle(parsed.category, parsed.categoryLabel!, parsed.department);
-	const description = getOptimizedDescription(parsed.category, parsed.categoryLabel!, parsed.department);
-	const faqs = getOptimizedFAQs(parsed.category, parsed.categoryLabel!, parsed.department);
+	const title = getOptimizedTitle(parsed.category, parsed.categoryLabel!, parsed.department, parsed.neighborhood);
+	const description = getOptimizedDescription(parsed.category, parsed.categoryLabel!, parsed.department, parsed.neighborhood);
+	const faqs = getOptimizedFAQs(parsed.category, parsed.categoryLabel!, parsed.department, parsed.neighborhood);
 	const seoData = getCategorySEOData(parsed.category);
 
 	// Canonical URL
@@ -85,8 +99,11 @@ export const load: PageServerLoad = async ({ params }) => {
 		categoryLabel: parsed.categoryLabel,
 		department: parsed.department,
 		departmentSlug: parsed.departmentSlug,
+		neighborhood: parsed.neighborhood,
+		neighborhoodSlug: parsed.neighborhoodSlug,
 		totalInCategory: totalInCategory || 0,
 		departmentCounts: departmentCounts || [],
+		neighborhoodCounts,
 		seo: {
 			title,
 			description,

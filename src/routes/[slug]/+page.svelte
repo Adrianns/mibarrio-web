@@ -3,10 +3,19 @@
 	import Header from '$lib/components/Header.svelte';
 	import SEO from '$lib/components/SEO.svelte';
 	import { getThumbUrl } from '$lib/utils/upload';
-	import { DEPARTMENT_SLUGS, CATEGORY_SLUGS } from '$lib/seo/category-slugs';
+	import { DEPARTMENT_SLUGS, CATEGORY_SLUGS, NEIGHBORHOOD_SLUGS } from '$lib/seo/category-slugs';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	// Build location string for display
+	const locationDisplay = $derived(
+		data.neighborhood
+			? `${data.neighborhood}, Montevideo`
+			: data.department
+				? data.department
+				: 'Uruguay'
+	);
 
 	// Build FAQPage schema for SEO
 	const faqSchema = $derived({
@@ -51,7 +60,7 @@
 	// Combine schemas
 	const jsonLd = $derived([faqSchema, itemListSchema]);
 
-	// Build breadcrumb schema
+	// Build breadcrumb schema (supports up to 4 levels: Home > Category > Montevideo > Neighborhood)
 	const breadcrumbSchema = $derived({
 		'@context': 'https://schema.org',
 		'@type': 'BreadcrumbList',
@@ -77,6 +86,16 @@
 							item: `https://mibarrio.com.uy/${data.categorySlug}-${data.departmentSlug}`
 						}
 					]
+				: []),
+			...(data.neighborhood
+				? [
+						{
+							'@type': 'ListItem',
+							position: 4,
+							name: data.neighborhood,
+							item: `https://mibarrio.com.uy/${data.categorySlug}-montevideo-${data.neighborhoodSlug}`
+						}
+					]
 				: [])
 		]
 	});
@@ -86,6 +105,13 @@
 		data.departmentCounts
 			.filter((d: { department: string }) => d.department !== data.department)
 			.slice(0, 8)
+	);
+
+	// Get other neighborhoods for internal linking (when viewing Montevideo)
+	const otherNeighborhoods = $derived(
+		data.neighborhoodCounts
+			?.filter((n: { neighborhood: string }) => n.neighborhood !== data.neighborhood)
+			.slice(0, 12) || []
 	);
 </script>
 
@@ -101,16 +127,25 @@
 
 	<main class="container py-8">
 		<!-- Breadcrumbs -->
-		<nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6" aria-label="Breadcrumb">
+		<nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6 flex-wrap" aria-label="Breadcrumb">
 			<a href="/" class="hover:text-primary-600">Inicio</a>
-			<ChevronRight class="h-4 w-4" />
+			<ChevronRight class="h-4 w-4 flex-shrink-0" />
 			<a href="/directorio" class="hover:text-primary-600">Directorio</a>
-			<ChevronRight class="h-4 w-4" />
-			{#if data.department}
+			<ChevronRight class="h-4 w-4 flex-shrink-0" />
+			{#if data.neighborhood}
+				<!-- 4-level breadcrumb: Category > Montevideo > Neighborhood -->
 				<a href="/{data.categorySlug}" class="hover:text-primary-600">{data.categoryLabel}</a>
-				<ChevronRight class="h-4 w-4" />
+				<ChevronRight class="h-4 w-4 flex-shrink-0" />
+				<a href="/{data.categorySlug}-montevideo" class="hover:text-primary-600">Montevideo</a>
+				<ChevronRight class="h-4 w-4 flex-shrink-0" />
+				<span class="text-gray-900 dark:text-white font-medium">{data.neighborhood}</span>
+			{:else if data.department}
+				<!-- 3-level breadcrumb: Category > Department -->
+				<a href="/{data.categorySlug}" class="hover:text-primary-600">{data.categoryLabel}</a>
+				<ChevronRight class="h-4 w-4 flex-shrink-0" />
 				<span class="text-gray-900 dark:text-white font-medium">{data.department}</span>
 			{:else}
+				<!-- 2-level breadcrumb: Category only -->
 				<span class="text-gray-900 dark:text-white font-medium">{data.categoryLabel}</span>
 			{/if}
 		</nav>
@@ -118,7 +153,7 @@
 		<!-- Page Header -->
 		<header class="mb-8">
 			<h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
-				{data.categoryLabel} {data.department ? `en ${data.department}` : 'en Uruguay'}
+				{data.categoryLabel} en {locationDisplay}
 			</h1>
 			<p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl">
 				{data.seo.description}
@@ -200,7 +235,7 @@
 				{#if data.providers.length >= 50}
 					<div class="mt-8 text-center">
 						<a
-							href="/directorio?categoria={data.category}{data.department ? `&departamento=${data.department}` : ''}"
+							href="/directorio?categoria={data.category}{data.department ? `&departamento=${data.department}` : ''}{data.neighborhood ? `&barrio=${data.neighborhood}` : ''}"
 							class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
 						>
 							Ver todos los resultados
@@ -212,7 +247,7 @@
 		{:else}
 			<section class="bg-white dark:bg-gray-800 rounded-xl p-8 text-center mb-12">
 				<p class="text-gray-600 dark:text-gray-400 mb-4">
-					No hay {data.categoryLabel?.toLowerCase()} registrados {data.department ? `en ${data.department}` : ''} todavía.
+					No hay {data.categoryLabel?.toLowerCase()} registrados en {locationDisplay} todavía.
 				</p>
 				<a
 					href="/auth/register?redirect=/registrar-negocio"
@@ -223,8 +258,31 @@
 			</section>
 		{/if}
 
+		<!-- Internal Links: Other Neighborhoods in Montevideo -->
+		{#if otherNeighborhoods.length > 0}
+			<section class="mb-12">
+				<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+					{data.categoryLabel} en otros barrios de Montevideo
+				</h2>
+				<div class="flex flex-wrap gap-2">
+					{#each otherNeighborhoods as nb}
+						{@const nbSlug = NEIGHBORHOOD_SLUGS[nb.neighborhood as keyof typeof NEIGHBORHOOD_SLUGS]}
+						{#if nbSlug}
+							<a
+								href="/{data.categorySlug}-montevideo-{nbSlug}"
+								class="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 dark:hover:text-primary-400 transition-colors shadow-sm"
+							>
+								{nb.neighborhood}
+								<span class="text-gray-400 dark:text-gray-500 text-sm ml-1">({nb.count})</span>
+							</a>
+						{/if}
+					{/each}
+				</div>
+			</section>
+		{/if}
+
 		<!-- Internal Links: Other Departments -->
-		{#if otherDepartments.length > 0}
+		{#if otherDepartments.length > 0 && !data.neighborhood}
 			<section class="mb-12">
 				<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
 					{data.categoryLabel} en otros departamentos
@@ -248,10 +306,10 @@
 		{#if data.seo.relatedServices && data.seo.relatedServices.length > 0}
 			<section class="mb-12">
 				<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-					Servicios de {data.categoryLabel?.toLowerCase()} {data.department ? `en ${data.department}` : ''}
+					Servicios de {data.categoryLabel?.toLowerCase()} en {locationDisplay}
 				</h2>
 				<p class="text-gray-600 dark:text-gray-400 mb-4">
-					Los {data.categoryLabel?.toLowerCase()} en {data.department || 'Uruguay'} ofrecen diversos servicios como:
+					Los {data.categoryLabel?.toLowerCase()} en {locationDisplay} ofrecen diversos servicios como:
 				</p>
 				<div class="flex flex-wrap gap-2">
 					{#each data.seo.relatedServices as service}
@@ -267,7 +325,7 @@
 		{#if data.seo.commonNeeds && data.seo.commonNeeds.length > 0}
 			<section class="bg-primary-50 dark:bg-primary-900/20 rounded-xl p-6 mb-12">
 				<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-					¿Necesitás {data.categoryLabel?.toLowerCase()} {data.department ? `en ${data.department}` : ''}?
+					¿Necesitás {data.categoryLabel?.toLowerCase()} en {locationDisplay}?
 				</h2>
 				<p class="text-gray-600 dark:text-gray-400 mb-4">
 					Ya sea por {data.seo.commonNeeds.slice(0, -1).join(', ')} o {data.seo.commonNeeds[data.seo.commonNeeds.length - 1]},
@@ -288,7 +346,7 @@
 		{#if data.seo.faqs.length > 0}
 			<section class="bg-white dark:bg-gray-800 rounded-xl p-6 md:p-8 mb-12">
 				<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-					Preguntas frecuentes sobre {data.categoryLabel?.toLowerCase()} {data.department ? `en ${data.department}` : ''}
+					Preguntas frecuentes sobre {data.categoryLabel?.toLowerCase()} en {locationDisplay}
 				</h2>
 				<div class="space-y-6">
 					{#each data.seo.faqs as faq, i}
@@ -308,13 +366,18 @@
 		<!-- Related Categories - Internal Links for SEO -->
 		<section>
 			<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-				Otras categorías {data.department ? `en ${data.department}` : 'populares'}
+				Otras categorías en {locationDisplay}
 			</h2>
 			<div class="flex flex-wrap gap-2">
 				{#each Object.entries(CATEGORY_SLUGS).slice(0, 12) as [catName, catSlug]}
 					{#if catSlug !== data.categorySlug && catSlug !== 'otros'}
+						{@const href = data.neighborhoodSlug
+							? `/${catSlug}-montevideo-${data.neighborhoodSlug}`
+							: data.departmentSlug
+								? `/${catSlug}-${data.departmentSlug}`
+								: `/${catSlug}`}
 						<a
-							href="/{catSlug}{data.departmentSlug ? `-${data.departmentSlug}` : ''}"
+							{href}
 							class="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 dark:hover:text-primary-400 transition-colors shadow-sm capitalize"
 						>
 							{catSlug.replace(/-/g, ' ')}

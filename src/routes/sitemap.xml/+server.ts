@@ -20,10 +20,10 @@ const staticPages: SitemapUrl[] = [
 
 // SEO category landing pages (high priority for Google indexing)
 const categorySlugs = generateAllCategorySlugs();
-const categoryPages: SitemapUrl[] = categorySlugs.map((slug) => ({
+const categoryPages: SitemapUrl[] = categorySlugs.map(({ slug, priority }) => ({
 	loc: `/${slug}`,
 	changefreq: 'daily' as const,
-	priority: slug.includes('-') ? '0.85' : '0.9' // Category+department slightly lower
+	priority: priority.toString()
 }));
 
 function formatDate(date: string | Date): string {

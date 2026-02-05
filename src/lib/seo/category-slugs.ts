@@ -1,4 +1,4 @@
-import { DEFAULT_CATEGORIES, DEPARTMENTS, type Department } from '$lib/domain/types';
+import { DEFAULT_CATEGORIES, DEPARTMENTS, type Department, type MontevideoNeighborhood } from '$lib/domain/types';
 
 // Map category name to URL slug (lowercase, no accents)
 export const CATEGORY_SLUGS: Record<string, string> = {
@@ -73,21 +73,85 @@ export const SLUG_TO_DEPARTMENT: Record<string, Department> = Object.fromEntries
 	Object.entries(DEPARTMENT_SLUGS).map(([k, v]) => [v, k as Department])
 ) as Record<string, Department>;
 
+// Montevideo neighborhood slug mapping (lowercase, no accents, hyphenated)
+export const NEIGHBORHOOD_SLUGS: Record<MontevideoNeighborhood, string> = {
+	Aguada: 'aguada',
+	'Barrio Sur': 'barrio-sur',
+	'Brazo Oriental': 'brazo-oriental',
+	Buceo: 'buceo',
+	Carrasco: 'carrasco',
+	Centro: 'centro',
+	Cerro: 'cerro',
+	'Ciudad Vieja': 'ciudad-vieja',
+	Colón: 'colon',
+	Cordón: 'cordon',
+	Goes: 'goes',
+	'Jacinto Vera': 'jacinto-vera',
+	'La Blanqueada': 'la-blanqueada',
+	'La Teja': 'la-teja',
+	Malvín: 'malvin',
+	Manga: 'manga',
+	Palermo: 'palermo',
+	'Parque Batlle': 'parque-batlle',
+	'Parque Rodó': 'parque-rodo',
+	'Paso Molino': 'paso-molino',
+	Peñarol: 'penarol',
+	'Piedras Blancas': 'piedras-blancas',
+	Pocitos: 'pocitos',
+	Prado: 'prado',
+	'Punta Carretas': 'punta-carretas',
+	Reducto: 'reducto',
+	Sayago: 'sayago',
+	'Tres Cruces': 'tres-cruces',
+	Unión: 'union',
+	'Villa Española': 'villa-espanola'
+};
+
+// Reverse mapping: slug to neighborhood name
+export const SLUG_TO_NEIGHBORHOOD: Record<string, MontevideoNeighborhood> = Object.fromEntries(
+	Object.entries(NEIGHBORHOOD_SLUGS).map(([k, v]) => [v, k as MontevideoNeighborhood])
+) as Record<string, MontevideoNeighborhood>;
+
 // Get all valid category slugs
 export const VALID_CATEGORY_SLUGS = Object.values(CATEGORY_SLUGS);
 
 // Get all valid department slugs
 export const VALID_DEPARTMENT_SLUGS = Object.values(DEPARTMENT_SLUGS);
 
-// Parse a combined slug like "electricistas-montevideo" or just "electricistas"
+// Get all valid neighborhood slugs
+export const VALID_NEIGHBORHOOD_SLUGS = Object.values(NEIGHBORHOOD_SLUGS);
+
+// Parse a combined slug like "electricistas-montevideo-pocitos", "electricistas-montevideo" or just "electricistas"
 export function parseLocationSlug(slug: string): {
 	category: string | null;
 	categorySlug: string | null;
 	categoryLabel: string | null;
 	department: Department | null;
 	departmentSlug: string | null;
+	neighborhood: MontevideoNeighborhood | null;
+	neighborhoodSlug: string | null;
 } {
-	// Try to find a matching category+department combination
+	// First try: category + montevideo + neighborhood (most specific)
+	// Pattern: electricistas-montevideo-pocitos
+	for (const [catName, catSlug] of Object.entries(CATEGORY_SLUGS)) {
+		for (const [nbName, nbSlug] of Object.entries(NEIGHBORHOOD_SLUGS)) {
+			const combined = `${catSlug}-montevideo-${nbSlug}`;
+			if (slug === combined) {
+				const category = DEFAULT_CATEGORIES.find((c) => c.name === catName);
+				return {
+					category: catName,
+					categorySlug: catSlug,
+					categoryLabel: category?.label || catSlug,
+					department: 'Montevideo' as Department,
+					departmentSlug: 'montevideo',
+					neighborhood: nbName as MontevideoNeighborhood,
+					neighborhoodSlug: nbSlug
+				};
+			}
+		}
+	}
+
+	// Second try: category + department combination
 	for (const [catName, catSlug] of Object.entries(CATEGORY_SLUGS)) {
 		for (const [deptName, deptSlug] of Object.entries(DEPARTMENT_SLUGS)) {
 			const combined = `${catSlug}-${deptSlug}`;
@@ -98,13 +162,15 @@ export function parseLocationSlug(slug: string): {
 					categorySlug: catSlug,
 					categoryLabel: category?.label || catSlug,
 					department: deptName as Department,
-					departmentSlug: deptSlug
+					departmentSlug: deptSlug,
+					neighborhood: null,
+					neighborhoodSlug: null
 				};
 			}
 		}
 	}
 
-	// Try just category
+	// Third try: just category
 	if (SLUG_TO_CATEGORY[slug]) {
 		const catName = SLUG_TO_CATEGORY[slug];
 		const category = DEFAULT_CATEGORIES.find((c) => c.name === catName);
@@ -113,7 +179,9 @@ export function parseLocationSlug(slug: string): {
 			categorySlug: slug,
 			categoryLabel: category?.label || slug,
 			department: null,
-			departmentSlug: null
+			departmentSlug: null,
+			neighborhood: null,
+			neighborhoodSlug: null
 		};
 	}
 
@@ -122,27 +190,38 @@ export function parseLocationSlug(slug: string): {
 		categorySlug: null,
 		categoryLabel: null,
 		department: null,
-		departmentSlug: null
+		departmentSlug: null,
+		neighborhood: null,
+		neighborhoodSlug: null
 	};
 }
 
-// Generate all valid slugs for sitemap
-export function generateAllCategorySlugs(): string[] {
-	const slugs: string[] = [];
+// Generate all valid slugs for sitemap with priorities
+export function generateAllCategorySlugs(): Array<{ slug: string; priority: number }> {
+	const slugs: Array<{ slug: string; priority: number }> = [];
 
-	// Category only
+	// Category only (highest priority: 0.9)
 	for (const catSlug of VALID_CATEGORY_SLUGS) {
 		if (catSlug !== 'otros') {
-			slugs.push(catSlug);
+			slugs.push({ slug: catSlug, priority: 0.9 });
 		}
 	}
 
-	// Category + Department (only for main departments)
+	// Category + Department (medium priority: 0.85)
 	const mainDepartments: Department[] = ['Montevideo', 'Canelones', 'Maldonado', 'Salto', 'Paysandú'];
 	for (const catSlug of VALID_CATEGORY_SLUGS) {
 		if (catSlug !== 'otros') {
 			for (const dept of mainDepartments) {
-				slugs.push(`${catSlug}-${DEPARTMENT_SLUGS[dept]}`);
+				slugs.push({ slug: `${catSlug}-${DEPARTMENT_SLUGS[dept]}`, priority: 0.85 });
+			}
+		}
+	}
+
+	// Category + Montevideo + Neighborhood (neighborhood priority: 0.8)
+	for (const catSlug of VALID_CATEGORY_SLUGS) {
+		if (catSlug !== 'otros') {
+			for (const nbSlug of VALID_NEIGHBORHOOD_SLUGS) {
+				slugs.push({ slug: `${catSlug}-montevideo-${nbSlug}`, priority: 0.8 });
 			}
 		}
 	}
