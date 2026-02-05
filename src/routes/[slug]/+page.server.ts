@@ -1,12 +1,13 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getServiceSupabase } from '$lib/server/supabase';
+import { parseLocationSlug } from '$lib/seo/category-slugs';
 import {
-	parseLocationSlug,
-	getCategoryPageTitle,
-	getCategoryPageDescription,
-	getCategoryFAQs
-} from '$lib/seo/category-slugs';
+	getOptimizedTitle,
+	getOptimizedDescription,
+	getOptimizedFAQs,
+	getCategorySEOData
+} from '$lib/seo/category-seo-data';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const { slug } = params;
@@ -68,10 +69,11 @@ export const load: PageServerLoad = async ({ params }) => {
 		category_name: parsed.category
 	});
 
-	// SEO metadata
-	const title = getCategoryPageTitle(parsed.categoryLabel!, parsed.department);
-	const description = getCategoryPageDescription(parsed.categoryLabel!, parsed.department);
-	const faqs = getCategoryFAQs(parsed.categoryLabel!, parsed.category, parsed.department);
+	// SEO metadata - optimized for Google search patterns
+	const title = getOptimizedTitle(parsed.category, parsed.categoryLabel!, parsed.department);
+	const description = getOptimizedDescription(parsed.category, parsed.categoryLabel!, parsed.department);
+	const faqs = getOptimizedFAQs(parsed.category, parsed.categoryLabel!, parsed.department);
+	const seoData = getCategorySEOData(parsed.category);
 
 	// Canonical URL
 	const canonicalPath = `/${slug}`;
@@ -89,7 +91,10 @@ export const load: PageServerLoad = async ({ params }) => {
 			title,
 			description,
 			canonicalPath,
-			faqs
+			faqs,
+			keywords: seoData?.keywords || [],
+			relatedServices: seoData?.relatedServices || [],
+			commonNeeds: seoData?.commonNeeds || []
 		}
 	};
 };

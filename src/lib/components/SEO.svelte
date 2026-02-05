@@ -28,8 +28,12 @@
 		noindex = false
 	}: Props = $props();
 
-	// Build full title
-	const fullTitle = $derived(title ? `${title} - ${SITE_NAME}` : `${SITE_NAME} - ${SITE_DESCRIPTION}`);
+	// Build full title - don't add site name if already present
+	const fullTitle = $derived(
+		title
+			? title.includes(SITE_NAME) ? title : `${title} - ${SITE_NAME}`
+			: `${SITE_NAME} - ${SITE_DESCRIPTION}`
+	);
 
 	// Build canonical URL
 	const canonicalUrl = $derived(url ? `${SITE_URL}${url}` : `${SITE_URL}${$page.url.pathname}`);

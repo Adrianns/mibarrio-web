@@ -130,7 +130,7 @@
 
 		<!-- Provider Grid -->
 		{#if data.providers.length > 0}
-			<section class="mb-12">
+			<section id="proveedores" class="mb-12">
 				<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{#each data.providers as provider (provider.id)}
 						<a
@@ -244,11 +244,51 @@
 			</section>
 		{/if}
 
+		<!-- SEO Content: Services and Keywords -->
+		{#if data.seo.relatedServices && data.seo.relatedServices.length > 0}
+			<section class="mb-12">
+				<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+					Servicios de {data.categoryLabel?.toLowerCase()} {data.department ? `en ${data.department}` : ''}
+				</h2>
+				<p class="text-gray-600 dark:text-gray-400 mb-4">
+					Los {data.categoryLabel?.toLowerCase()} en {data.department || 'Uruguay'} ofrecen diversos servicios como:
+				</p>
+				<div class="flex flex-wrap gap-2">
+					{#each data.seo.relatedServices as service}
+						<span class="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm">
+							{service}
+						</span>
+					{/each}
+				</div>
+			</section>
+		{/if}
+
+		<!-- SEO Content: Common Needs -->
+		{#if data.seo.commonNeeds && data.seo.commonNeeds.length > 0}
+			<section class="bg-primary-50 dark:bg-primary-900/20 rounded-xl p-6 mb-12">
+				<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+					¿Necesitás {data.categoryLabel?.toLowerCase()} {data.department ? `en ${data.department}` : ''}?
+				</h2>
+				<p class="text-gray-600 dark:text-gray-400 mb-4">
+					Ya sea por {data.seo.commonNeeds.slice(0, -1).join(', ')} o {data.seo.commonNeeds[data.seo.commonNeeds.length - 1]},
+					en Mi Barrio encontrás {data.categoryLabel?.toLowerCase()} profesionales listos para ayudarte.
+					Contactá directo por WhatsApp o teléfono, sin intermediarios.
+				</p>
+				<a
+					href="#proveedores"
+					class="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 font-medium hover:underline"
+				>
+					Ver {data.categoryLabel?.toLowerCase()} disponibles
+					<ChevronRight class="h-4 w-4" />
+				</a>
+			</section>
+		{/if}
+
 		<!-- FAQ Section -->
 		{#if data.seo.faqs.length > 0}
 			<section class="bg-white dark:bg-gray-800 rounded-xl p-6 md:p-8 mb-12">
 				<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-					Preguntas frecuentes
+					Preguntas frecuentes sobre {data.categoryLabel?.toLowerCase()} {data.department ? `en ${data.department}` : ''}
 				</h2>
 				<div class="space-y-6">
 					{#each data.seo.faqs as faq, i}
