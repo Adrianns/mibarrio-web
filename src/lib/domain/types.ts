@@ -211,7 +211,7 @@ export interface ProviderPromotion {
 export const DAY_NAMES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
 
 // Free tier service limit
-export const FREE_SERVICES_LIMIT = 10;
+export const FREE_SERVICES_LIMIT = 5;
 
 // Contact click types
 export type ContactType = 'phone' | 'whatsapp' | 'email' | 'website' | 'instagram' | 'facebook';

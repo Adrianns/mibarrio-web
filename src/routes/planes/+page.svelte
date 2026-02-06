@@ -20,7 +20,7 @@
 		{ text: 'Fotos de tu negocio', included: true },
 		{ text: 'Contacto directo (teléfono, WhatsApp, email)', included: true },
 		{ text: 'Redes sociales y sitio web', included: true },
-		{ text: 'Hasta 10 servicios', included: true },
+		{ text: 'Hasta 5 servicios', included: true },
 		{ text: 'Horarios de atención', included: true },
 		{ text: 'Servicios y productos ilimitados', included: false },
 		{ text: 'Catálogo de productos con imágenes', included: false },
@@ -237,7 +237,7 @@
 					<h3 class="font-semibold text-gray-900 dark:text-white mb-2">¿El plan gratuito tiene algún costo oculto?</h3>
 					<p class="text-gray-600 dark:text-gray-300">
 						No. El plan gratuito es completamente gratis para siempre. No necesitás tarjeta de crédito.
-						Incluye tu perfil, fotos, contacto, horarios y hasta 10 servicios.
+						Incluye tu perfil, fotos, contacto, horarios y hasta 5 servicios.
 					</p>
 				</div>
 
