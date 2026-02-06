@@ -94,9 +94,15 @@ export interface Provider {
 	created_at: string;
 	updated_at?: string;
 
+	// Premium
+	banner_url?: string | null;
+
 	// Joined data
 	categories?: Category[];
 	subscription?: Subscription;
+	services?: ProviderService[];
+	hours?: ProviderHours[];
+	promotions?: ProviderPromotion[];
 	user?: Partial<UserProfile>;
 }
 
@@ -110,13 +116,10 @@ export interface SubscriptionPlan {
 	label: string;
 	description?: string | null;
 	price_monthly: number;
+	price_annual: number;
 	features: string[];
-	max_photos: number;
-	highlight_in_search: boolean;
-	show_contact_directly: boolean;
-	priority_order: number;
+	max_services?: number | null; // null = unlimited
 	is_active: boolean;
-	mercadopago_plan_id?: string | null;
 	created_at: string;
 	updated_at?: string;
 }
@@ -160,6 +163,51 @@ export interface SubscriptionPayment {
 	paid_at?: string | null;
 	created_at: string;
 }
+
+// Service/Product item for a provider
+export interface ProviderService {
+	id: string;
+	provider_id: string;
+	name: string;
+	description?: string | null;
+	price?: number | null;
+	price_label?: string | null;
+	display_order: number;
+	is_active: boolean;
+	created_at: string;
+	updated_at?: string;
+}
+
+// Business hours for a day of the week
+export interface ProviderHours {
+	id: string;
+	provider_id: string;
+	day_of_week: number; // 0=Monday, 6=Sunday
+	open_time?: string | null; // HH:MM format
+	close_time?: string | null;
+	is_closed: boolean;
+	created_at: string;
+}
+
+// Promotion/special offer
+export interface ProviderPromotion {
+	id: string;
+	provider_id: string;
+	title: string;
+	description?: string | null;
+	discount_text?: string | null;
+	valid_from?: string | null;
+	valid_until?: string | null;
+	is_active: boolean;
+	created_at: string;
+	updated_at?: string;
+}
+
+// Day names in Spanish
+export const DAY_NAMES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
+
+// Free tier service limit
+export const FREE_SERVICES_LIMIT = 10;
 
 // Contact click types
 export type ContactType = 'phone' | 'whatsapp' | 'email' | 'website' | 'instagram' | 'facebook';
@@ -274,6 +322,12 @@ export const DEFAULT_CATEGORIES: Omit<Category, 'id' | 'created_at' | 'updated_a
 	{ name: 'optica', label: 'Ópticas', icon: 'Glasses', color: 'bg-sky-600', category_type: 'business', is_active: true, display_order: 33 },
 	{ name: 'informatica', label: 'Informática', icon: 'Cpu', color: 'bg-indigo-600', category_type: 'service', is_active: true, display_order: 34 },
 	{ name: 'ingenieria', label: 'Ingeniería', icon: 'HardHat', color: 'bg-stone-500', category_type: 'service', is_active: true, display_order: 35 },
+	{ name: 'arquitecto', label: 'Arquitectos', icon: 'Ruler', color: 'bg-slate-600', category_type: 'service', is_active: true, display_order: 36 },
+	{ name: 'gomeria', label: 'Gomerías', icon: 'CircleDot', color: 'bg-neutral-600', category_type: 'business', is_active: true, display_order: 37 },
+	{ name: 'fletes', label: 'Fletes', icon: 'PackageCheck', color: 'bg-sky-600', category_type: 'service', is_active: true, display_order: 38 },
+	{ name: 'herreria', label: 'Herrerías', icon: 'Anvil', color: 'bg-zinc-700', category_type: 'business', is_active: true, display_order: 39 },
+	{ name: 'vidrieria', label: 'Vidrierías', icon: 'Frame', color: 'bg-cyan-600', category_type: 'business', is_active: true, display_order: 40 },
+	{ name: 'tecnico-aire', label: 'Técnicos Aire Acondicionado', icon: 'AirVent', color: 'bg-blue-600', category_type: 'service', is_active: true, display_order: 41 },
 	{ name: 'otro', label: 'Otros', icon: 'MoreHorizontal', color: 'bg-gray-500', category_type: 'both', is_active: true, display_order: 99 }
 ];
 

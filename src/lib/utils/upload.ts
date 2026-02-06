@@ -6,7 +6,7 @@ const BUCKET = 'provider-photos';
  * Compress an image using Canvas API.
  * Returns a WebP blob at the specified max width and quality.
  */
-function compressImage(file: File, maxWidth: number, quality: number): Promise<Blob> {
+export function compressImage(file: File, maxWidth: number, quality: number): Promise<Blob> {
 	return new Promise((resolve, reject) => {
 		const img = new Image();
 		const url = URL.createObjectURL(file);
@@ -72,7 +72,7 @@ export function getThumbUrl(fullUrl: string): string {
 export async function uploadPhoto(
 	userId: string,
 	file: File,
-	type: 'logo' | 'gallery'
+	type: 'logo' | 'gallery' | 'banner'
 ): Promise<{ url: string | null; thumbUrl: string | null; error: string | null }> {
 	const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
 	const allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
@@ -90,8 +90,10 @@ export async function uploadPhoto(
 
 	try {
 		// Compress both versions in parallel
+		const fullMaxWidth = type === 'banner' ? 1920 : 1600;
+		const fullQuality = type === 'banner' ? 0.9 : 0.85;
 		const [fullBlob, thumbBlob] = await Promise.all([
-			compressImage(file, 1600, 0.85),
+			compressImage(file, fullMaxWidth, fullQuality),
 			compressImage(file, 400, 0.6)
 		]);
 
