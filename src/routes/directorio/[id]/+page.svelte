@@ -18,7 +18,8 @@
 		ChevronRight,
 		Camera,
 		FileText,
-		Plus
+		Plus,
+		Flag
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
@@ -203,6 +204,25 @@
 			);
 		} else if (type === 'email' && provider.contact_email) {
 			window.location.href = `mailto:${provider.contact_email}`;
+		}
+	}
+
+	let reportSent = $state(false);
+	let reportLoading = $state(false);
+
+	async function handleReport() {
+		if (!provider || reportSent || reportLoading) return;
+		reportLoading = true;
+		const { error } = await supabase.from('mb_provider_reports').insert({
+			provider_id: provider.id,
+			reason: 'non_existent'
+		});
+		reportLoading = false;
+		if (error) {
+			toast.error('Error al enviar el reporte');
+		} else {
+			reportSent = true;
+			toast.success('Reporte enviado, gracias');
 		}
 	}
 
@@ -534,6 +554,20 @@
 								providerId={provider.id}
 								providerName={provider.business_name}
 							/>
+							<button
+								onclick={handleReport}
+								disabled={reportSent || reportLoading}
+								class="mt-3 w-full flex items-center justify-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								<Flag class="h-3 w-3" />
+								{#if reportSent}
+									Reportado
+								{:else if reportLoading}
+									Enviando...
+								{:else}
+									Reportar como negocio inexistente
+								{/if}
+							</button>
 						{/if}
 					</div>
 				</div>
