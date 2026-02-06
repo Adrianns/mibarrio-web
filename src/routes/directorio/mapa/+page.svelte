@@ -400,55 +400,51 @@
 		<!-- Map container -->
 		<div bind:this={mapContainer} class="w-full h-full"></div>
 
-		<!-- Bottom Controls Bar -->
-		<div class="absolute bottom-0 left-0 right-0 z-[1200] p-3 bg-gradient-to-t from-black/20 to-transparent pointer-events-none">
-			<div class="flex items-end justify-between gap-2 pointer-events-auto">
-				<!-- Left controls -->
-				<div class="flex gap-2">
-					<a
-						href={listUrl}
-						class="flex items-center gap-2 px-3 py-2.5 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
-					>
-						<List class="h-4 w-4" />
-						<span class="hidden sm:inline">Lista</span>
-					</a>
+		<!-- Top Right Controls (Lista + Filtros) -->
+		<div class="absolute top-3 right-3 z-[1200] flex gap-2 pointer-events-auto">
+			<a
+				href={listUrl}
+				class="flex items-center gap-2 px-3 py-2.5 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
+			>
+				<List class="h-4 w-4" />
+				<span>Lista</span>
+			</a>
 
-					<button
-						onclick={() => showFilters = !showFilters}
-						class="flex items-center gap-2 px-3 py-2.5 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
-					>
-						<SlidersHorizontal class="h-4 w-4" />
-						<span>Filtros</span>
-						{#if activeFilterCount > 0}
-							<span class="bg-primary-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-								{activeFilterCount}
-							</span>
-						{/if}
-					</button>
-				</div>
-
-				<!-- Center: count -->
-				<div class="px-3 py-2.5 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-					<div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-						{#if loadingProviders}
-							<Loader2 class="h-4 w-4 animate-spin text-primary-600" />
-						{:else}
-							<MapPin class="h-4 w-4 text-primary-600" />
-						{/if}
-						<span>{providers.length}</span>
-					</div>
-				</div>
-
-				<!-- Right: locate me -->
-				{#if userLocation}
-					<button
-						onclick={centerOnUser}
-						class="flex items-center gap-2 px-3 py-2.5 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-primary-600 hover:bg-primary-50 dark:hover:bg-gray-700 transition-colors text-sm"
-					>
-						<Navigation class="h-4 w-4" />
-					</button>
+			<button
+				onclick={() => showFilters = !showFilters}
+				class="flex items-center gap-2 px-3 py-2.5 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
+			>
+				<SlidersHorizontal class="h-4 w-4" />
+				<span>Filtros</span>
+				{#if activeFilterCount > 0}
+					<span class="bg-primary-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+						{activeFilterCount}
+					</span>
 				{/if}
+			</button>
+		</div>
+
+		<!-- Bottom Controls (count + locate me) -->
+		<div class="absolute bottom-3 right-3 z-[1200] flex gap-2 pointer-events-auto">
+			<div class="px-3 py-2.5 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+				<div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+					{#if loadingProviders}
+						<Loader2 class="h-4 w-4 animate-spin text-primary-600" />
+					{:else}
+						<MapPin class="h-4 w-4 text-primary-600" />
+					{/if}
+					<span>{providers.length}</span>
+				</div>
 			</div>
+
+			{#if userLocation}
+				<button
+					onclick={centerOnUser}
+					class="flex items-center gap-2 px-3 py-2.5 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-primary-600 hover:bg-primary-50 dark:hover:bg-gray-700 transition-colors text-sm"
+				>
+					<Navigation class="h-4 w-4" />
+				</button>
+			{/if}
 		</div>
 
 		<!-- Filter Dialog (Bottom Sheet on mobile, centered on desktop) -->
