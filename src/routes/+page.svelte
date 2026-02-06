@@ -36,7 +36,8 @@
 		if (searchQuery) params.set('q', searchQuery);
 		if (selectedDepartment) params.set('departamento', selectedDepartment);
 		if (selectedNeighborhood) params.set('barrio', selectedNeighborhood);
-		window.location.href = `/directorio?${params.toString()}`;
+		const target = searchQuery ? '/directorio/lista' : '/directorio/mapa';
+		window.location.href = `${target}?${params.toString()}`;
 	}
 </script>
 
