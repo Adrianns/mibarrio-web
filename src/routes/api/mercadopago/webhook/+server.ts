@@ -90,7 +90,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
 			}
 
 			// Activate subscription
-			await supabase
+			const { data: activatedSub } = await supabase
 				.from('mb_subscriptions')
 				.update({
 					status: 'active',
@@ -101,7 +101,17 @@ export const POST: RequestHandler = async ({ request, url }) => {
 					mp_payment_id: String(payment.id),
 					updated_at: now.toISOString()
 				})
-				.eq('id', subscriptionId);
+				.eq('id', subscriptionId)
+				.select('provider_id')
+				.single();
+
+			// Mark provider as premium for search priority
+			if (activatedSub) {
+				await supabase
+					.from('mb_providers')
+					.update({ is_premium: true })
+					.eq('id', activatedSub.provider_id);
+			}
 
 			// Update payment record
 			await supabase

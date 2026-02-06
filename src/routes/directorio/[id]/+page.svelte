@@ -19,7 +19,8 @@
 		Camera,
 		FileText,
 		Plus,
-		Flag
+		Flag,
+		Crown
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
@@ -393,6 +394,12 @@
 									<div>
 										<div class="flex items-center gap-2 mb-2">
 											<h1 class="text-2xl font-bold text-gray-900 dark:text-white">{provider.business_name}</h1>
+											{#if hasPremium}
+												<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-amber-100 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30 rounded-full">
+													<Crown class="h-4 w-4 text-amber-500" />
+													<span class="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Premium</span>
+												</span>
+											{/if}
 											{#if provider.is_verified}
 												<CheckCircle class="h-6 w-6 text-green-500" />
 											{/if}

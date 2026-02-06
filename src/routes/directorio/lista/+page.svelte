@@ -8,7 +8,8 @@
 		SlidersHorizontal,
 		X,
 		Map as MapIcon,
-		Eye
+		Eye,
+		Crown
 	} from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import Header from '$lib/components/Header.svelte';
@@ -42,6 +43,7 @@
 		photos: string[];
 		is_verified: boolean;
 		is_featured: boolean;
+		is_premium: boolean;
 		is_active: boolean;
 		categories: string[];
 	}
@@ -177,13 +179,14 @@
 		// Build optimized query with embedded categories (single query instead of N+1)
 		// Use !inner join when filtering by category to ensure only matching providers are returned
 		const selectQuery = categoryNames
-			? `id, slug, business_name, description, department, neighborhood, logo_url, photos, is_verified, is_featured, is_active, mb_provider_categories!inner(category_name)`
-			: `id, slug, business_name, description, department, neighborhood, logo_url, photos, is_verified, is_featured, is_active, mb_provider_categories(category_name)`;
+			? `id, slug, business_name, description, department, neighborhood, logo_url, photos, is_verified, is_featured, is_premium, is_active, mb_provider_categories!inner(category_name)`
+			: `id, slug, business_name, description, department, neighborhood, logo_url, photos, is_verified, is_featured, is_premium, is_active, mb_provider_categories(category_name)`;
 
 		let query = supabase
 			.from('mb_providers')
 			.select(selectQuery)
 			.eq('is_active', true)
+			.order('is_premium', { ascending: false })
 			.order('is_featured', { ascending: false })
 			.order('created_at', { ascending: false });
 
@@ -227,6 +230,7 @@
 				photos: p.photos as string[],
 				is_verified: p.is_verified as boolean,
 				is_featured: p.is_featured as boolean,
+				is_premium: p.is_premium as boolean,
 				is_active: p.is_active as boolean,
 				categories: (p.mb_provider_categories as Array<{category_name: string}> || [])
 					.map(c => c.category_name)
@@ -637,7 +641,12 @@
 								{/if}
 								<div class="flex-1 min-w-0">
 									<div class="flex items-start justify-between">
-										<h3 class="font-semibold text-gray-900 dark:text-white truncate">{provider.business_name}</h3>
+										<div class="flex items-center gap-1.5 min-w-0">
+											<h3 class="font-semibold text-gray-900 dark:text-white truncate">{provider.business_name}</h3>
+											{#if provider.is_premium}
+												<Crown class="h-4 w-4 text-amber-500 flex-shrink-0" />
+											{/if}
+										</div>
 										{#if provider.is_featured}
 											<span class="text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 px-2 py-0.5 rounded-full flex-shrink-0 ml-2"
 												>Destacado</span

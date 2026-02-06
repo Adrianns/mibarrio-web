@@ -16,9 +16,10 @@
 	import BannerEditor from '$lib/components/ProviderCardEditor/BannerEditor.svelte';
 	import PromotionsEditor from '$lib/components/ProviderCardEditor/PromotionsEditor.svelte';
 	import PremiumGate from '$lib/components/PremiumGate.svelte';
+	import SubscriptionCard from '$lib/components/SubscriptionCard.svelte';
 	import { isPremium as checkPremium } from '$lib/utils/subscription';
 	import type { Department, ProviderService, ProviderHours, ProviderPromotion, Subscription } from '$lib/domain/types';
-	import { ImagePlus, Tag } from 'lucide-svelte';
+	import { ImagePlus, Tag, Link, ShoppingBag } from 'lucide-svelte';
 
 	let loading = $state(true);
 	let saving = $state(false);
@@ -214,6 +215,46 @@
 		saving = false;
 	}
 
+	async function checkPaymentReturn() {
+		const params = new URLSearchParams(window.location.search);
+		const paymentStatus = params.get('payment');
+		if (!paymentStatus || !subscription) return;
+
+		// Clean up URL
+		const cleanUrl = window.location.pathname;
+		window.history.replaceState({}, '', cleanUrl);
+
+		if (paymentStatus === 'success') {
+			toast.success('Pago recibido. Verificando...');
+			// Poll verify endpoint
+			const { data: { session } } = await supabase.auth.getSession();
+			if (!session) return;
+
+			for (let i = 0; i < 5; i++) {
+				await new Promise((r) => setTimeout(r, 2000));
+				const res = await fetch('/api/mercadopago/verify', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${session.access_token}`
+					},
+					body: JSON.stringify({ subscription_id: subscription.id })
+				});
+				const data = await res.json();
+				if (data.status === 'active') {
+					toast.success('Premium activado');
+					await loadProvider();
+					return;
+				}
+			}
+			toast.info('El pago está pendiente de confirmación. Puede demorar unos minutos.');
+		} else if (paymentStatus === 'failure') {
+			toast.error('El pago no se completó');
+		} else if (paymentStatus === 'pending') {
+			toast.info('El pago está pendiente de confirmación');
+		}
+	}
+
 	onMount(async () => {
 		let unsub: (() => void) | undefined;
 		unsub = auth.subscribe((state) => {
@@ -223,7 +264,7 @@
 				} else if (!state.provider) {
 					goto('/registrar-negocio');
 				} else {
-					loadProvider();
+					loadProvider().then(() => checkPaymentReturn());
 				}
 				queueMicrotask(() => unsub?.());
 			}
@@ -295,17 +336,24 @@
 
 			<ProfileCompleteness data={initialData} />
 
-			<!-- Slug Editor Section -->
+			<!-- Slug Editor Section (Premium) -->
 			<div class="mt-8">
-				<SlugEditor
-					providerId={providerId}
-					currentSlug={initialData.slug}
-					onSave={(newSlug) => {
-						if (initialData) {
-							initialData.slug = newSlug;
-						}
-					}}
-				/>
+				<PremiumGate
+					premium={hasPremium}
+					title="URL personalizada"
+					description="Creá una URL única y profesional para compartir tu negocio fácilmente"
+					icon={Link}
+				>
+					<SlugEditor
+						providerId={providerId}
+						currentSlug={initialData.slug}
+						onSave={(newSlug) => {
+							if (initialData) {
+								initialData.slug = newSlug;
+							}
+						}}
+					/>
+				</PremiumGate>
 			</div>
 
 			<!-- Services Section -->
@@ -318,16 +366,23 @@
 				/>
 			</div>
 
-			<!-- Products Catalog Section -->
+			<!-- Products Catalog Section (Premium) -->
 			<div class="mt-8">
-				<ProductsEditor
-					{supabase}
-					{providerId}
-					userId={$user?.id ?? ''}
+				<PremiumGate
 					premium={hasPremium}
-					initialProducts={products}
-					serviceCount={services.length}
-				/>
+					title="Catálogo de productos"
+					description="Mostrá tus productos con fotos, precios y descripciones para atraer más clientes"
+					icon={ShoppingBag}
+				>
+					<ProductsEditor
+						{supabase}
+						{providerId}
+						userId={$user?.id ?? ''}
+						premium={hasPremium}
+						initialProducts={products}
+						serviceCount={services.length}
+					/>
+				</PremiumGate>
 			</div>
 
 			<!-- Business Hours Section (free for all) -->
@@ -370,6 +425,15 @@
 						initialPromotions={promotions}
 					/>
 				</PremiumGate>
+			</div>
+
+			<!-- Subscription Section -->
+			<div class="mt-8">
+				<SubscriptionCard
+					{providerId}
+					{subscription}
+					onSubscriptionChange={(sub) => { subscription = sub; }}
+				/>
 			</div>
 		</div>
 	{/if}

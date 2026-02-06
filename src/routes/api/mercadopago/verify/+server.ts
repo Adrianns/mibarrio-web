@@ -90,6 +90,12 @@ export const POST: RequestHandler = async ({ request }) => {
 				})
 				.eq('id', subscription_id);
 
+			// Mark provider as premium for search priority
+			await supabase
+				.from('mb_providers')
+				.update({ is_premium: true })
+				.eq('id', sub.provider_id);
+
 			// Update payment record
 			await supabase
 				.from('mb_subscription_payments')
