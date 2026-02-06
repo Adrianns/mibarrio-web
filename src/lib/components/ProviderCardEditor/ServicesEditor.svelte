@@ -186,17 +186,19 @@
 		</div>
 	{:else if atLimit}
 		<!-- Upgrade prompt -->
-		<div class="border-2 border-dashed border-amber-200 dark:border-amber-800 rounded-lg p-4 bg-amber-50/50 dark:bg-amber-900/10">
+		<div class="border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-lg p-4 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/15 dark:to-yellow-900/10">
 			<div class="flex items-center gap-3">
-				<Crown class="h-5 w-5 text-amber-600 flex-shrink-0" />
+				<div class="w-8 h-8 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
+					<Crown class="h-4 w-4 text-white" />
+				</div>
 				<div class="flex-1">
 					<p class="text-sm font-medium text-gray-900 dark:text-white">¿Querés agregar más servicios?</p>
 					<p class="text-xs text-gray-500 dark:text-gray-400">Con Premium podés agregar servicios ilimitados</p>
 				</div>
-				<Button href="/planes" variant="outline" size="sm">
+				<a href="/planes" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white text-xs font-medium rounded-lg shadow-sm transition-all">
+					<Crown class="h-3 w-3" />
 					Premium
-					<ArrowRight class="h-3 w-3 ml-1" />
-				</Button>
+				</a>
 			</div>
 		</div>
 	{:else}

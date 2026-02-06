@@ -11,6 +11,7 @@
 	import { ProviderCardEditor, ProfileCompleteness } from '$lib/components/ProviderCardEditor';
 	import SlugEditor from '$lib/components/SlugEditor.svelte';
 	import ServicesEditor from '$lib/components/ProviderCardEditor/ServicesEditor.svelte';
+	import ProductsEditor from '$lib/components/ProviderCardEditor/ProductsEditor.svelte';
 	import HoursEditor from '$lib/components/ProviderCardEditor/HoursEditor.svelte';
 	import BannerEditor from '$lib/components/ProviderCardEditor/BannerEditor.svelte';
 	import PromotionsEditor from '$lib/components/ProviderCardEditor/PromotionsEditor.svelte';
@@ -47,6 +48,7 @@
 
 	let initialData = $state<ProviderData | null>(null);
 	let services = $state<ProviderService[]>([]);
+	let products = $state<ProviderService[]>([]);
 	let hours = $state<ProviderHours[]>([]);
 	let promotions = $state<ProviderPromotion[]>([]);
 	let subscription = $state<Subscription | null>(null);
@@ -140,7 +142,9 @@
 			supabase.from('mb_subscriptions').select('*, plan:mb_subscription_plans(*)').eq('provider_id', data.id).maybeSingle()
 		]);
 
-		services = servicesRes.data || [];
+		const allServices = servicesRes.data || [];
+		services = allServices.filter((s: ProviderService) => s.type !== 'product');
+		products = allServices.filter((s: ProviderService) => s.type === 'product');
 		hours = hoursRes.data || [];
 		promotions = promosRes.data || [];
 		subscription = subRes.data;
@@ -304,13 +308,25 @@
 				/>
 			</div>
 
-			<!-- Services/Products Section -->
+			<!-- Services Section -->
 			<div class="mt-8">
 				<ServicesEditor
 					{supabase}
 					{providerId}
 					premium={hasPremium}
 					initialServices={services}
+				/>
+			</div>
+
+			<!-- Products Catalog Section -->
+			<div class="mt-8">
+				<ProductsEditor
+					{supabase}
+					{providerId}
+					userId={$user?.id ?? ''}
+					premium={hasPremium}
+					initialProducts={products}
+					serviceCount={services.length}
 				/>
 			</div>
 

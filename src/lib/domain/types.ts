@@ -165,13 +165,17 @@ export interface SubscriptionPayment {
 }
 
 // Service/Product item for a provider
+export type ServiceType = 'service' | 'product';
+
 export interface ProviderService {
 	id: string;
 	provider_id: string;
+	type: ServiceType;
 	name: string;
 	description?: string | null;
 	price?: number | null;
 	price_label?: string | null;
+	image_url?: string | null;
 	display_order: number;
 	is_active: boolean;
 	created_at: string;

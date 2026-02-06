@@ -32,6 +32,7 @@
 	import type { ProviderService, ProviderHours, ProviderPromotion } from '$lib/domain/types';
 	import { isPremium as checkPremium } from '$lib/utils/subscription';
 	import ServicesList from '$lib/components/ServicesList.svelte';
+	import ProductsList from '$lib/components/ProductsList.svelte';
 	import BusinessHours from '$lib/components/BusinessHours.svelte';
 	import PromotionsList from '$lib/components/PromotionsList.svelte';
 	import { buildLocalBusinessSchema, buildBreadcrumbSchema } from '$lib/seo/schemas';
@@ -74,6 +75,7 @@
 	let provider = $state<ProviderDetail | null>(null);
 	let error = $state<string | null>(null);
 	let services = $state<ProviderService[]>([]);
+	let products = $state<ProviderService[]>([]);
 	let hours = $state<ProviderHours[]>([]);
 	let promotions = $state<ProviderPromotion[]>([]);
 	let hasPremium = $state(false);
@@ -189,7 +191,9 @@
 			supabase.from('mb_subscriptions').select('*').eq('provider_id', data.id).maybeSingle()
 		]);
 
-		services = servicesRes.data || [];
+		const allServices = servicesRes.data || [];
+		services = allServices.filter((s: ProviderService) => s.type !== 'product');
+		products = allServices.filter((s: ProviderService) => s.type === 'product');
 		hours = hoursRes.data || [];
 		hasPremium = checkPremium(subRes.data);
 		promotions = hasPremium ? (promosRes.data || []) : [];
@@ -469,6 +473,13 @@
 							{#if services.length > 0}
 								<div class="mt-8">
 									<ServicesList {services} />
+								</div>
+							{/if}
+
+							<!-- Products catalog section -->
+							{#if products.length > 0}
+								<div class="mt-8">
+									<ProductsList {products} />
 								</div>
 							{/if}
 
