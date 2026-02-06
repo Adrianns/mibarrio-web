@@ -198,7 +198,7 @@
 		} else if (type === 'whatsapp' && provider.contact_whatsapp) {
 			const whatsappNumber = provider.contact_whatsapp.replace(/\D/g, '');
 			window.open(
-				`https://wa.me/${whatsappNumber}?text=Hola, te contacto desde Mi Barrio`,
+				`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hola! Encontré tu perfil en mibarrio.com.uy y te escribo porque: ')}`,
 				'_blank'
 			);
 		} else if (type === 'email' && provider.contact_email) {
