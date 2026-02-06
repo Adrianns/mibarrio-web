@@ -10,7 +10,14 @@
 	import { get } from 'svelte/store';
 	import { ProviderCardEditor, ProfileCompleteness } from '$lib/components/ProviderCardEditor';
 	import SlugEditor from '$lib/components/SlugEditor.svelte';
-	import type { Department } from '$lib/domain/types';
+	import ServicesEditor from '$lib/components/ProviderCardEditor/ServicesEditor.svelte';
+	import HoursEditor from '$lib/components/ProviderCardEditor/HoursEditor.svelte';
+	import BannerEditor from '$lib/components/ProviderCardEditor/BannerEditor.svelte';
+	import PromotionsEditor from '$lib/components/ProviderCardEditor/PromotionsEditor.svelte';
+	import PremiumGate from '$lib/components/PremiumGate.svelte';
+	import { isPremium as checkPremium } from '$lib/utils/subscription';
+	import type { Department, ProviderService, ProviderHours, ProviderPromotion, Subscription } from '$lib/domain/types';
+	import { ImagePlus, Tag } from 'lucide-svelte';
 
 	let loading = $state(true);
 	let saving = $state(false);
@@ -39,6 +46,12 @@
 	}
 
 	let initialData = $state<ProviderData | null>(null);
+	let services = $state<ProviderService[]>([]);
+	let hours = $state<ProviderHours[]>([]);
+	let promotions = $state<ProviderPromotion[]>([]);
+	let subscription = $state<Subscription | null>(null);
+	let bannerUrl = $state<string | null>(null);
+	let hasPremium = $derived(checkPremium(subscription));
 
 	// Extract username from Instagram URL
 	function extractInstagramUsername(url: string | null): string {
@@ -116,6 +129,21 @@
 			categories: cats?.map((c) => c.category_name) || [],
 			isVerified: data.is_verified
 		};
+
+		bannerUrl = data.banner_url || null;
+
+		// Load additional data in parallel
+		const [servicesRes, hoursRes, promosRes, subRes] = await Promise.all([
+			supabase.from('mb_provider_services').select('*').eq('provider_id', data.id).order('display_order'),
+			supabase.from('mb_provider_hours').select('*').eq('provider_id', data.id).order('day_of_week'),
+			supabase.from('mb_provider_promotions').select('*').eq('provider_id', data.id).order('created_at', { ascending: false }),
+			supabase.from('mb_subscriptions').select('*, plan:mb_subscription_plans(*)').eq('provider_id', data.id).maybeSingle()
+		]);
+
+		services = servicesRes.data || [];
+		hours = hoursRes.data || [];
+		promotions = promosRes.data || [];
+		subscription = subRes.data;
 
 		loading = false;
 	}
@@ -274,6 +302,58 @@
 						}
 					}}
 				/>
+			</div>
+
+			<!-- Services/Products Section -->
+			<div class="mt-8">
+				<ServicesEditor
+					{supabase}
+					{providerId}
+					premium={hasPremium}
+					initialServices={services}
+				/>
+			</div>
+
+			<!-- Business Hours Section (free for all) -->
+			<div class="mt-8">
+				<HoursEditor
+					{supabase}
+					{providerId}
+					initialHours={hours}
+				/>
+			</div>
+
+			<!-- Banner Section (Premium) -->
+			<div class="mt-8">
+				<PremiumGate
+					premium={hasPremium}
+					title="Imagen de portada"
+					description="Destaca tu negocio con una imagen de portada profesional en tu perfil"
+					icon={ImagePlus}
+				>
+					<BannerEditor
+						{supabase}
+						{providerId}
+						userId={$user?.id ?? ''}
+						{bannerUrl}
+					/>
+				</PremiumGate>
+			</div>
+
+			<!-- Promotions Section (Premium) -->
+			<div class="mt-8">
+				<PremiumGate
+					premium={hasPremium}
+					title="Promociones"
+					description="Publica ofertas y descuentos para atraer más clientes a tu negocio"
+					icon={Tag}
+				>
+					<PromotionsEditor
+						{supabase}
+						{providerId}
+						initialPromotions={promotions}
+					/>
+				</PremiumGate>
 			</div>
 		</div>
 	{/if}

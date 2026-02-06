@@ -29,6 +29,11 @@
 	import { toast } from '$lib/stores/toast';
 	import { supabase } from '$lib/supabase';
 	import { DEFAULT_CATEGORIES } from '$lib/domain/types';
+	import type { ProviderService, ProviderHours, ProviderPromotion } from '$lib/domain/types';
+	import { isPremium as checkPremium } from '$lib/utils/subscription';
+	import ServicesList from '$lib/components/ServicesList.svelte';
+	import BusinessHours from '$lib/components/BusinessHours.svelte';
+	import PromotionsList from '$lib/components/PromotionsList.svelte';
 	import { buildLocalBusinessSchema, buildBreadcrumbSchema } from '$lib/seo/schemas';
 	import { SITE_DESCRIPTION } from '$lib/seo/constants';
 	import { addRecentlyViewed } from '$lib/stores/activity';
@@ -62,11 +67,16 @@
 		is_claimed: boolean;
 		view_count: number;
 		categories: string[];
+		banner_url: string | null;
 	}
 
 	let loading = $state(true);
 	let provider = $state<ProviderDetail | null>(null);
 	let error = $state<string | null>(null);
+	let services = $state<ProviderService[]>([]);
+	let hours = $state<ProviderHours[]>([]);
+	let promotions = $state<ProviderPromotion[]>([]);
+	let hasPremium = $state(false);
 
 	// Lightbox state
 	let lightboxOpen = $state(false);
@@ -139,7 +149,8 @@
 				is_featured,
 				is_claimed,
 				is_active,
-				view_count
+				view_count,
+				banner_url
 			`
 			)
 			.eq('is_active', true);
@@ -169,6 +180,19 @@
 			...data,
 			categories: categoriesData?.map((c) => c.category_name) || []
 		};
+
+		// Load additional data in parallel
+		const [servicesRes, hoursRes, promosRes, subRes] = await Promise.all([
+			supabase.from('mb_provider_services').select('*').eq('provider_id', data.id).eq('is_active', true).order('display_order'),
+			supabase.from('mb_provider_hours').select('*').eq('provider_id', data.id).order('day_of_week'),
+			supabase.from('mb_provider_promotions').select('*').eq('provider_id', data.id).eq('is_active', true).order('created_at', { ascending: false }),
+			supabase.from('mb_subscriptions').select('*').eq('provider_id', data.id).maybeSingle()
+		]);
+
+		services = servicesRes.data || [];
+		hours = hoursRes.data || [];
+		hasPremium = checkPremium(subRes.data);
+		promotions = hasPremium ? (promosRes.data || []) : [];
 
 		loading = false;
 
@@ -327,6 +351,16 @@
 				<!-- Main content -->
 				<div class="lg:col-span-2">
 					<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+						{#if provider.banner_url}
+							<div class="w-full h-48 sm:h-64 overflow-hidden">
+								<img
+									src={provider.banner_url}
+									alt="Portada de {provider.business_name}"
+									loading="lazy"
+									class="w-full h-full object-cover"
+								/>
+							</div>
+						{/if}
 						<div class="p-6">
 							<div class="flex items-start justify-between mb-4">
 								<div class="flex items-start gap-4">
@@ -430,6 +464,27 @@
 									</div>
 								{/if}
 							</div>
+
+							<!-- Services section -->
+							{#if services.length > 0}
+								<div class="mt-8">
+									<ServicesList {services} />
+								</div>
+							{/if}
+
+							<!-- Business hours section -->
+							{#if hours.length > 0}
+								<div class="mt-8">
+									<BusinessHours {hours} />
+								</div>
+							{/if}
+
+							<!-- Promotions section (premium only) -->
+							{#if promotions.length > 0}
+								<div class="mt-8">
+									<PromotionsList {promotions} />
+								</div>
+							{/if}
 						</div>
 					</div>
 				</div>
