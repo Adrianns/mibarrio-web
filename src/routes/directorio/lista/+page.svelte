@@ -277,7 +277,7 @@
 		if (selectedType) params.set('tipo', selectedType);
 
 		const url = params.toString() ? `?${params.toString()}` : '';
-		window.history.replaceState({}, '', `/directorio${url}`);
+		window.history.replaceState({}, '', `/directorio/lista${url}`);
 	}
 
 	function clearFilters() {
@@ -394,7 +394,7 @@
 <SEO
 	title="Directorio"
 	description="Encuentra servicios y negocios locales en Uruguay. Electricistas, plomeros, restaurantes, farmacias y más profesionales cerca tuyo."
-	url="/directorio"
+	url="/directorio/lista"
 	jsonLd={jsonLdSchemas}
 />
 

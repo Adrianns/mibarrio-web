@@ -7,7 +7,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Loader2, MapPin, List, X, Phone, Mail, ExternalLink,
-		Navigation, SlidersHorizontal
+		Navigation, SlidersHorizontal, Instagram
 	} from 'lucide-svelte';
 	import {
 		DEFAULT_CATEGORIES,
@@ -25,6 +25,7 @@
 		location_lng: number;
 		contact_phone: string | null;
 		contact_email: string | null;
+		social_instagram: string | null;
 		logo_url: string | null;
 		description: string | null;
 		categories: string[];
@@ -66,6 +67,45 @@
 	const defaultZoom = 7;
 	const geolocatedZoom = 14;
 
+	// Tailwind color class to hex mapping
+	const colorMap: Record<string, string> = {
+		'bg-yellow-500': '#eab308', 'bg-blue-500': '#3b82f6', 'bg-orange-500': '#f97316',
+		'bg-purple-500': '#a855f7', 'bg-amber-600': '#d97706', 'bg-green-500': '#22c55e',
+		'bg-zinc-600': '#52525b', 'bg-slate-600': '#475569', 'bg-gray-600': '#4b5563',
+		'bg-sky-500': '#0ea5e9', 'bg-cyan-500': '#06b6d4', 'bg-red-400': '#f87171',
+		'bg-emerald-500': '#10b981', 'bg-gray-700': '#374151', 'bg-cyan-600': '#0891b2',
+		'bg-amber-700': '#b45309', 'bg-yellow-600': '#ca8a04', 'bg-red-600': '#dc2626',
+		'bg-green-600': '#16a34a', 'bg-emerald-600': '#059669', 'bg-stone-600': '#57534e',
+		'bg-pink-500': '#ec4899', 'bg-lime-500': '#84cc16', 'bg-orange-400': '#fb923c',
+		'bg-blue-400': '#60a5fa', 'bg-violet-500': '#8b5cf6', 'bg-teal-500': '#14b8a6',
+		'bg-zinc-500': '#71717a', 'bg-indigo-500': '#6366f1', 'bg-rose-500': '#f43f5e',
+		'bg-amber-500': '#f59e0b', 'bg-sky-600': '#0284c7', 'bg-indigo-600': '#4f46e5',
+		'bg-stone-500': '#78716c', 'bg-neutral-600': '#525252', 'bg-zinc-700': '#3f3f46',
+		'bg-blue-600': '#2563eb', 'bg-gray-500': '#6b7280'
+	};
+
+	function getCategoryInfo(categoryName: string): { color: string; icon: string } {
+		const cat = DEFAULT_CATEGORIES.find(c => c.name === categoryName);
+		if (!cat) return { color: '#3b82f6', icon: 'map-pin' };
+		const hex = colorMap[cat.color] || '#3b82f6';
+		// Convert PascalCase icon name to kebab-case for lucide-static
+		const kebab = cat.icon.replace(/([a-z])([A-Z])/g, '$1-$2').replace(/(\D)(\d)/g, '$1-$2').toLowerCase();
+		return { color: hex, icon: kebab };
+	}
+
+	function createMarkerIcon(color: string, iconName: string): L.DivIcon {
+		if (!L) return null as unknown as L.DivIcon;
+		return L.divIcon({
+			className: '',
+			iconSize: [32, 32],
+			iconAnchor: [16, 16],
+			popupAnchor: [0, -18],
+			html: `<div style="width:32px;height:32px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35);">
+				<img src="https://unpkg.com/lucide-static@latest/icons/${iconName}.svg" width="16" height="16" style="filter:brightness(0) invert(1);" alt="" />
+			</div>`
+		});
+	}
+
 	// Category helpers
 	const categories = DEFAULT_CATEGORIES.filter((c) => c.is_active);
 	const serviceCategories = categories.filter(
@@ -92,7 +132,7 @@
 		if (selectedCategory) params.set('categoria', selectedCategory);
 		if (selectedType) params.set('tipo', selectedType);
 		const qs = params.toString();
-		return qs ? `/directorio?${qs}` : '/directorio';
+		return qs ? `/directorio/lista?${qs}` : '/directorio/lista';
 	});
 
 	// Geolocation
@@ -143,8 +183,8 @@
 		}
 
 		const selectQuery = categoryNames
-			? `id, business_name, department, neighborhood, address, location_lat, location_lng, contact_phone, contact_email, logo_url, description, mb_provider_categories!inner(category_name)`
-			: `id, business_name, department, neighborhood, address, location_lat, location_lng, contact_phone, contact_email, logo_url, description, mb_provider_categories(category_name)`;
+			? `id, business_name, department, neighborhood, address, location_lat, location_lng, contact_phone, contact_email, social_instagram, logo_url, description, mb_provider_categories!inner(category_name)`
+			: `id, business_name, department, neighborhood, address, location_lat, location_lng, contact_phone, contact_email, social_instagram, logo_url, description, mb_provider_categories(category_name)`;
 
 		let query = supabase
 			.from('mb_providers')
@@ -185,6 +225,7 @@
 						location_lng: p.location_lng as number,
 						contact_phone: p.contact_phone as string | null,
 						contact_email: p.contact_email as string | null,
+						social_instagram: p.social_instagram as string | null,
 						logo_url: p.logo_url as string | null,
 						description: p.description as string | null,
 						categories: ((p as Record<string, unknown>).mb_provider_categories as Array<{ category_name: string }> || [])
@@ -206,7 +247,9 @@
 		if (!map || !L || !markerLayer) return;
 		if (markerMap.has(provider.id)) return;
 
-		const marker = L.marker([provider.location_lat, provider.location_lng]);
+		const catInfo = getCategoryInfo(provider.categories[0] || '');
+		const icon = createMarkerIcon(catInfo.color, catInfo.icon);
+		const marker = L.marker([provider.location_lat, provider.location_lng], { icon });
 		marker.on('click', () => {
 			selectedProvider = provider;
 		});
@@ -280,18 +323,6 @@
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 		}).addTo(map);
-
-		// Custom marker icon
-		const defaultIcon = L.icon({
-			iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-			iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-			shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-			iconSize: [25, 41],
-			iconAnchor: [12, 41],
-			popupAnchor: [1, -34],
-			shadowSize: [41, 41]
-		});
-		L.Marker.prototype.options.icon = defaultIcon;
 
 		// Marker layer group
 		markerLayer = L.layerGroup().addTo(map);
@@ -370,7 +401,7 @@
 		<div bind:this={mapContainer} class="w-full h-full"></div>
 
 		<!-- Bottom Controls Bar -->
-		<div class="absolute bottom-0 left-0 right-0 z-[1000] p-3 bg-gradient-to-t from-black/20 to-transparent pointer-events-none">
+		<div class="absolute bottom-0 left-0 right-0 z-[1200] p-3 bg-gradient-to-t from-black/20 to-transparent pointer-events-none">
 			<div class="flex items-end justify-between gap-2 pointer-events-auto">
 				<!-- Left controls -->
 				<div class="flex gap-2">
@@ -424,12 +455,12 @@
 		{#if showFilters}
 			<button
 				type="button"
-				class="fixed inset-0 bg-black/50 z-[1100] cursor-default"
+				class="fixed inset-0 bg-black/50 z-[1300] cursor-default"
 				onclick={() => showFilters = false}
 				aria-label="Cerrar filtros"
 			></button>
 
-			<div class="fixed inset-x-0 bottom-0 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg z-[1101] bg-white dark:bg-gray-800 rounded-t-2xl md:rounded-2xl shadow-xl max-h-[70vh] flex flex-col">
+			<div class="fixed inset-x-0 bottom-0 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg z-[1301] bg-white dark:bg-gray-800 rounded-t-2xl md:rounded-2xl shadow-xl max-h-[70vh] flex flex-col pb-[env(safe-area-inset-bottom)]">
 				<!-- Drag handle (mobile) -->
 				<div class="md:hidden flex justify-center pt-3 pb-1">
 					<div class="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
@@ -529,7 +560,7 @@
 
 		<!-- Selected provider popup -->
 		{#if selectedProvider}
-			<div class="absolute bottom-20 left-3 right-3 sm:left-auto sm:right-4 sm:w-96 z-[1000] bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden">
+			<div class="absolute bottom-20 left-3 right-3 sm:left-auto sm:right-4 sm:w-96 z-[1200] bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden">
 				<div class="p-4">
 					<div class="flex items-start gap-3">
 						{#if selectedProvider.logo_url}
@@ -587,6 +618,17 @@
 							>
 								<Mail class="h-4 w-4" />
 								Email
+							</a>
+						{/if}
+						{#if selectedProvider.social_instagram}
+							<a
+								href={selectedProvider.social_instagram}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="flex items-center gap-1 px-3 py-1.5 bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 rounded-lg text-sm hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-colors"
+							>
+								<Instagram class="h-4 w-4" />
+								Instagram
 							</a>
 						{/if}
 						<a
