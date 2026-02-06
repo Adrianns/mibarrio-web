@@ -2,9 +2,9 @@
 export const APP_NAME = 'Mi Barrio';
 export const APP_TAGLINE = 'Descubrí los servicios de tu barrio';
 
-// Contact emails (shared with Appyuda)
-export const EMAIL_INFO = 'info@appyuda.com.uy';
-export const EMAIL_SUPPORT = 'soporte@appyuda.com.uy';
+// Contact email
+export const EMAIL_INFO = 'contacto@mibarrio.com.uy';
+export const EMAIL_SUPPORT = 'contacto@mibarrio.com.uy';
 
 // Domain - dynamic for dev/prod
 export const APP_DOMAIN =
