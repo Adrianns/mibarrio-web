@@ -5,7 +5,7 @@
 
 	const navItems = [
 		{ label: 'Inicio', href: '/', icon: Home, matchPaths: ['/'] },
-		{ label: 'Directorio', href: '/directorio', icon: Search, matchPaths: ['/directorio'] },
+		{ label: 'Directorio', href: '/directorio/mapa', icon: Search, matchPaths: ['/directorio'] },
 		{ label: 'Mi Negocio', href: '/auth/login', authHref: '/mi-negocio', icon: Store, matchPaths: ['/mi-negocio', '/auth/login'] },
 		{ label: 'Mi Perfil', href: '/perfil', icon: User, matchPaths: ['/perfil'] }
 	];

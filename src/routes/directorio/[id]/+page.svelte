@@ -297,7 +297,7 @@
 {/if}
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-	<Header items={[{ label: 'Directorio', href: '/directorio' }]} />
+	<Header items={[{ label: 'Directorio', href: '/directorio/mapa' }]} />
 
 	<div class="container py-8">
 		<!-- Back button -->

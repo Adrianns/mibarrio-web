@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 	import { supabase } from '$lib/supabase';
 	import Header from '$lib/components/Header.svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -83,6 +84,16 @@
 	let activeFilterCount = $derived(
 		[selectedDepartment, selectedCategory, selectedType].filter(Boolean).length
 	);
+
+	// Build list URL with current filters
+	let listUrl = $derived.by(() => {
+		const params = new URLSearchParams();
+		if (selectedDepartment) params.set('departamento', selectedDepartment);
+		if (selectedCategory) params.set('categoria', selectedCategory);
+		if (selectedType) params.set('tipo', selectedType);
+		const qs = params.toString();
+		return qs ? `/directorio?${qs}` : '/directorio';
+	});
 
 	// Geolocation
 	function requestGeolocation(): Promise<GeolocationPosition | null> {
@@ -245,9 +256,22 @@
 		selectedProvider = null;
 	}
 
+	// Read initial filters from URL params
+	function readUrlFilters() {
+		const params = $page.url.searchParams;
+		const dept = params.get('departamento');
+		const cat = params.get('categoria');
+		const tipo = params.get('tipo');
+		if (dept) selectedDepartment = dept as Department;
+		if (cat) selectedCategory = cat;
+		if (tipo === 'service' || tipo === 'business') selectedType = tipo;
+	}
+
 	// Map initialization
 	async function initMap() {
 		if (!browser || !mapContainer) return;
+
+		readUrlFilters();
 
 		L = await import('leaflet');
 
@@ -298,15 +322,6 @@
 				weight: 2
 			}).addTo(map);
 
-			// 5km radius indicator
-			L.circle([latitude, longitude], {
-				radius: 5000,
-				color: '#2563eb',
-				fillColor: '#2563eb',
-				fillOpacity: 0.06,
-				weight: 1,
-				dashArray: '5, 5'
-			}).addTo(map);
 		}
 
 		loading = false;
@@ -360,7 +375,7 @@
 				<!-- Left controls -->
 				<div class="flex gap-2">
 					<a
-						href="/directorio"
+						href={listUrl}
 						class="flex items-center gap-2 px-3 py-2.5 bg-white dark:bg-gray-800 rounded-lg shadow-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
 					>
 						<List class="h-4 w-4" />

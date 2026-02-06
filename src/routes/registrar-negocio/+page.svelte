@@ -211,7 +211,7 @@
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-	<Header items={[{ label: 'Directorio', href: '/directorio' }]} />
+	<Header items={[{ label: 'Directorio', href: '/directorio/mapa' }]} />
 
 	{#if !authChecked}
 		<div class="flex items-center justify-center py-12">

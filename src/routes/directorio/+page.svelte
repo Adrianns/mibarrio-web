@@ -118,6 +118,16 @@
 		(c) => c.category_type === 'business' || c.category_type === 'both'
 	);
 
+	// Build map URL with current filters
+	let mapUrl = $derived.by(() => {
+		const params = new URLSearchParams();
+		if (selectedDepartment) params.set('departamento', selectedDepartment);
+		if (selectedCategory) params.set('categoria', selectedCategory);
+		if (selectedType) params.set('tipo', selectedType);
+		const qs = params.toString();
+		return qs ? `/directorio/mapa?${qs}` : '/directorio/mapa';
+	});
+
 	// Derived categories based on selected type
 	let filteredCategories = $derived(
 		selectedType === 'service' ? serviceCategories :
@@ -419,7 +429,7 @@
 					{/if}
 				</button>
 				<a
-					href="/directorio/mapa"
+					href={mapUrl}
 					class="flex items-center gap-2 px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
 				>
 					<MapIcon class="h-5 w-5" />

@@ -136,7 +136,7 @@
 <div class="min-h-screen bg-[#0F172A]">
 	<!-- Desktop Header -->
 	<div class="hidden md:block">
-		<Header items={[{ label: 'Directorio', href: '/directorio' }]} />
+		<Header items={[{ label: 'Directorio', href: '/directorio/mapa' }]} />
 	</div>
 
 	{#if loading}
