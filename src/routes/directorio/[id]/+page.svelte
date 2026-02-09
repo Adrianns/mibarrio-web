@@ -361,7 +361,9 @@
 								<img
 									src={provider.banner_url}
 									alt="Portada de {provider.business_name}"
-									loading="lazy"
+									fetchpriority="high"
+									width="800"
+									height="256"
 									class="w-full h-full object-cover"
 								/>
 							</div>
@@ -374,14 +376,18 @@
 										<img
 											src={provider.logo_url}
 											alt={provider.business_name}
-											loading="lazy"
+											fetchpriority="high"
+											width="80"
+											height="80"
 											class="w-20 h-20 rounded-full object-cover flex-shrink-0"
 										/>
 									{:else if provider.photos && provider.photos.length > 0}
 										<img
 											src={provider.photos[0]}
 											alt={provider.business_name}
-											loading="lazy"
+											fetchpriority="high"
+											width="80"
+											height="80"
 											class="w-20 h-20 rounded-full object-cover flex-shrink-0"
 										/>
 									{:else}
@@ -462,7 +468,7 @@
 												onclick={() => openLightbox(i)}
 												class="cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-lg overflow-hidden"
 											>
-												<img src={photo} alt="Foto" loading="lazy" class="rounded-lg object-cover aspect-square w-full h-full hover:scale-105 transition-transform" />
+												<img src={photo} alt="Foto" loading="lazy" width="200" height="200" class="rounded-lg object-cover aspect-square w-full h-full hover:scale-105 transition-transform" />
 											</button>
 										{/each}
 									</div>

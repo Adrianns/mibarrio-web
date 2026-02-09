@@ -9,7 +9,7 @@
 	import { isAuthenticated, hasMibarrioProvider, isInitialized } from '$lib/stores/auth';
 	import { buildOrganizationSchema, buildWebSiteSchema } from '$lib/seo/schemas';
 	import { SITE_DESCRIPTION } from '$lib/seo/constants';
-	import { CATEGORY_SLUGS } from '$lib/seo/category-slugs';
+	import { CATEGORY_SLUGS, DEPARTMENT_SLUGS } from '$lib/seo/category-slugs';
 
 	const organizationSchema = buildOrganizationSchema(SITE_DESCRIPTION);
 	const webSiteSchema = buildWebSiteSchema(SITE_DESCRIPTION);
@@ -175,10 +175,57 @@
 		</div>
 	</section>
 
+	<!-- How it works -->
+	<section class="container py-16">
+		<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">¿Cómo funciona?</h2>
+		<div class="grid md:grid-cols-3 gap-8">
+			<div class="text-center">
+				<div class="w-14 h-14 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center mx-auto mb-4">
+					<Search class="w-7 h-7 text-primary-600" />
+				</div>
+				<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Buscá</h3>
+				<p class="text-gray-600 dark:text-gray-400">Encontrá el servicio que necesitás filtrando por categoría, departamento o barrio en todo Uruguay.</p>
+			</div>
+			<div class="text-center">
+				<div class="w-14 h-14 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center mx-auto mb-4">
+					<MapPin class="w-7 h-7 text-primary-600" />
+				</div>
+				<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Compará</h3>
+				<p class="text-gray-600 dark:text-gray-400">Mirá perfiles, fotos, servicios, horarios y ubicación en el mapa para elegir la mejor opción.</p>
+			</div>
+			<div class="text-center">
+				<div class="w-14 h-14 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center mx-auto mb-4">
+					<Briefcase class="w-7 h-7 text-primary-600" />
+				</div>
+				<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Contactá</h3>
+				<p class="text-gray-600 dark:text-gray-400">Comunicate directamente por teléfono, WhatsApp o email con el profesional o negocio que elegiste.</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- Department coverage -->
+	<section class="container py-16">
+		<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 text-center">Servicios en todo Uruguay</h2>
+		<p class="text-gray-600 dark:text-gray-400 text-center mb-8 max-w-2xl mx-auto">
+			Encontrá electricistas, plomeros, cerrajeros, albañiles, pintores, mecánicos, restaurantes, farmacias y más en los 19 departamentos del país.
+		</p>
+		<div class="flex flex-wrap justify-center gap-2">
+			{#each DEPARTMENTS as dept}
+				{@const deptSlug = DEPARTMENT_SLUGS[dept]}
+				<a
+					href="/electricistas-{deptSlug}"
+					class="px-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-gray-700 dark:text-gray-300 hover:border-primary-500 hover:text-primary-600 transition-colors"
+				>
+					{dept}
+				</a>
+			{/each}
+		</div>
+	</section>
+
 	<!-- Footer -->
 	<footer class="bg-gray-900 text-gray-400 py-12 pb-24 md:pb-12">
 		<div class="container">
-			<div class="grid md:grid-cols-4 gap-8">
+			<div class="grid md:grid-cols-5 gap-8">
 				<div>
 					<h3 class="flex items-center gap-2 text-white font-bold text-lg mb-4">
 						<svg width="24" height="17" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -189,27 +236,62 @@
 						</svg>
 						{APP_NAME}
 					</h3>
-					<p class="text-sm">El directorio de servicios locales de Uruguay.</p>
+					<p class="text-sm">El directorio de servicios locales de Uruguay. Encontrá profesionales y negocios cerca tuyo.</p>
 				</div>
 				<div>
-					<h4 class="text-white font-medium mb-4">Directorio</h4>
+					<h4 class="text-white font-medium mb-4">Servicios</h4>
 					<ul class="space-y-2 text-sm">
-						<li><a href="/directorio" class="hover:text-white">Buscar servicios</a></li>
 						<li><a href="/electricistas" class="hover:text-white">Electricistas</a></li>
 						<li><a href="/plomeros" class="hover:text-white">Plomeros</a></li>
+						<li><a href="/cerrajeros" class="hover:text-white">Cerrajeros</a></li>
+						<li><a href="/albaniles" class="hover:text-white">Albañiles</a></li>
+						<li><a href="/pintores" class="hover:text-white">Pintores</a></li>
+						<li><a href="/mecanicos" class="hover:text-white">Mecánicos</a></li>
+						<li><a href="/tecnicos-pc" class="hover:text-white">Técnicos PC</a></li>
+						<li><a href="/carpinteros" class="hover:text-white">Carpinteros</a></li>
+						<li><a href="/mudanzas" class="hover:text-white">Mudanzas</a></li>
+					</ul>
+				</div>
+				<div>
+					<h4 class="text-white font-medium mb-4">Comercios</h4>
+					<ul class="space-y-2 text-sm">
 						<li><a href="/restaurantes" class="hover:text-white">Restaurantes</a></li>
 						<li><a href="/farmacias" class="hover:text-white">Farmacias</a></li>
+						<li><a href="/panaderias" class="hover:text-white">Panaderías</a></li>
+						<li><a href="/peluquerias" class="hover:text-white">Peluquerías</a></li>
+						<li><a href="/veterinarias" class="hover:text-white">Veterinarias</a></li>
+						<li><a href="/ferreterias" class="hover:text-white">Ferreterías</a></li>
+						<li><a href="/cafes" class="hover:text-white">Cafés</a></li>
+						<li><a href="/directorio" class="hover:text-white">Ver todo</a></li>
+					</ul>
+				</div>
+				<div>
+					<h4 class="text-white font-medium mb-4">Departamentos</h4>
+					<ul class="space-y-2 text-sm">
+						<li><a href="/electricistas-montevideo" class="hover:text-white">Montevideo</a></li>
+						<li><a href="/electricistas-canelones" class="hover:text-white">Canelones</a></li>
+						<li><a href="/electricistas-maldonado" class="hover:text-white">Maldonado</a></li>
+						<li><a href="/electricistas-colonia" class="hover:text-white">Colonia</a></li>
+						<li><a href="/electricistas-salto" class="hover:text-white">Salto</a></li>
+						<li><a href="/electricistas-paysandu" class="hover:text-white">Paysandú</a></li>
+					</ul>
+					<h4 class="text-white font-medium mb-3 mt-6">Búsquedas populares</h4>
+					<ul class="space-y-2 text-sm">
+						<li><a href="/electricistas-montevideo" class="hover:text-white">Electricistas en Montevideo</a></li>
+						<li><a href="/plomeros-montevideo" class="hover:text-white">Plomeros en Montevideo</a></li>
+						<li><a href="/cerrajeros-montevideo" class="hover:text-white">Cerrajeros en Montevideo</a></li>
+						<li><a href="/mecanicos-canelones" class="hover:text-white">Mecánicos en Canelones</a></li>
+						<li><a href="/restaurantes-maldonado" class="hover:text-white">Restaurantes en Maldonado</a></li>
 					</ul>
 				</div>
 				<div>
 					<h4 class="text-white font-medium mb-4">Para proveedores</h4>
 					<ul class="space-y-2 text-sm">
 						<li><a href="/auth/login?redirect=/registrar-negocio" class="hover:text-white">Ofrecer servicios</a></li>
+						<li><a href="/planes" class="hover:text-white">Planes premium</a></li>
 						<li><a href="/auth/login" class="hover:text-white">Ingresar</a></li>
 					</ul>
-				</div>
-				<div>
-					<h4 class="text-white font-medium mb-4">Legal</h4>
+					<h4 class="text-white font-medium mb-3 mt-6">Legal</h4>
 					<ul class="space-y-2 text-sm">
 						<li><a href="/terms" class="hover:text-white">Términos de uso</a></li>
 						<li><a href="/privacy" class="hover:text-white">Privacidad</a></li>

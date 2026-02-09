@@ -563,6 +563,8 @@
 							<img
 								src={selectedProvider.logo_url}
 								alt={selectedProvider.business_name}
+								width="56"
+								height="56"
 								class="w-14 h-14 rounded-lg object-cover flex-shrink-0"
 							/>
 						{:else}

@@ -545,6 +545,8 @@
 											src={item.logoUrl}
 											alt={item.name}
 											loading="lazy"
+											width="48"
+											height="48"
 											class="w-12 h-12 rounded-full object-cover flex-shrink-0"
 										/>
 									{:else}
@@ -623,6 +625,8 @@
 										src={getThumbUrl(provider.logo_url)}
 										alt={provider.business_name}
 										loading="lazy"
+										width="48"
+										height="48"
 										class="w-12 h-12 rounded-full object-cover flex-shrink-0"
 									/>
 								{:else if provider.photos && provider.photos.length > 0}
@@ -630,6 +634,8 @@
 										src={getThumbUrl(provider.photos[0])}
 										alt={provider.business_name}
 										loading="lazy"
+										width="48"
+										height="48"
 										class="w-12 h-12 rounded-full object-cover flex-shrink-0"
 									/>
 								{:else}
@@ -668,6 +674,8 @@
 											src={getThumbUrl(photo)}
 											alt="Foto"
 											loading="lazy"
+											width="64"
+											height="64"
 											class="w-16 h-16 rounded-lg object-cover flex-shrink-0"
 										/>
 									{/each}
