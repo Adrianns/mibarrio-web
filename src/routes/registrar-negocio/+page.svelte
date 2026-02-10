@@ -25,6 +25,8 @@
 		department: Department | '';
 		neighborhood: string;
 		address: string;
+		locationLat: number | null;
+		locationLng: number | null;
 		phone: string;
 		whatsapp: string;
 		email: string;
@@ -44,6 +46,8 @@
 		department: '',
 		neighborhood: '',
 		address: '',
+		locationLat: null,
+		locationLng: null,
 		phone: '',
 		whatsapp: '',
 		email: '',
@@ -132,6 +136,8 @@
 					department: data.department,
 					neighborhood: data.neighborhood || null,
 					address: data.address.trim() || null,
+					location_lat: data.locationLat,
+					location_lng: data.locationLng,
 					contact_phone: data.phone.trim() || null,
 					contact_whatsapp: data.whatsapp.trim() || null,
 					contact_email: data.email.trim() || currentUser.email,

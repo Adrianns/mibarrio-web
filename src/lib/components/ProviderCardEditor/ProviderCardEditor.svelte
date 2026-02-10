@@ -5,6 +5,7 @@
 	import EditableTextarea from './EditableTextarea.svelte';
 	import CategoryPicker from './CategoryPicker.svelte';
 	import LocationPicker from './LocationPicker.svelte';
+	import MapPicker from './MapPicker.svelte';
 	import ContactEditor from './ContactEditor.svelte';
 	import GuidedDescription from './GuidedDescription.svelte';
 	import { toast } from '$lib/stores/toast';
@@ -20,6 +21,8 @@
 		department: Department | '';
 		neighborhood: string;
 		address: string;
+		locationLat: number | null;
+		locationLng: number | null;
 		phone: string;
 		whatsapp: string;
 		email: string;
@@ -66,6 +69,8 @@
 	let department = $state<Department | ''>(initialData?.department ?? '');
 	let neighborhood = $state(initialData?.neighborhood ?? '');
 	let address = $state(initialData?.address ?? '');
+	let locationLat = $state<number | null>(initialData?.locationLat ?? null);
+	let locationLng = $state<number | null>(initialData?.locationLng ?? null);
 	let phone = $state(initialData?.phone ?? '');
 	let whatsapp = $state(initialData?.whatsapp ?? '');
 	let email = $state(initialData?.email ?? '');
@@ -158,6 +163,8 @@
 			department,
 			neighborhood,
 			address,
+			locationLat,
+			locationLng,
 			phone,
 			whatsapp,
 			email,
@@ -298,6 +305,12 @@
 							</div>
 						</div>
 					</div>
+
+					{#if locationLat !== null && locationLng !== null}
+						<div class="mb-6">
+							<MapPicker bind:lat={locationLat} bind:lng={locationLng} readOnly={true} />
+						</div>
+					{/if}
 
 					{#if currentEditorMode === 'full'}
 						<div class="mb-6">
@@ -469,6 +482,9 @@
 								class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
 							/>
 						</div>
+
+						<!-- Map location -->
+						<MapPicker bind:lat={locationLat} bind:lng={locationLng} />
 
 						{#if currentEditorMode === 'full'}
 							<!-- Description -->
@@ -704,6 +720,9 @@
 								class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800 outline-none"
 							/>
 						</div>
+
+						<!-- Map location -->
+						<MapPicker bind:lat={locationLat} bind:lng={locationLng} />
 
 						{#if currentEditorMode === 'full'}
 							<!-- Description -->
