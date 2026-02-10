@@ -153,13 +153,18 @@ export async function deletePhoto(publicUrl: string): Promise<{ error: string | 
 	const path = decodeURIComponent(match[1]);
 	const thumbPath = path.replace(/\.webp$/, '_thumb.webp');
 
-	// Delete both full and thumbnail
-	const { error } = await supabase.storage.from(BUCKET).remove([path, thumbPath]);
+	try {
+		// Delete both full and thumbnail
+		const { error } = await supabase.storage.from(BUCKET).remove([path, thumbPath]);
 
-	if (error) {
-		console.error('Delete error:', error);
+		if (error) {
+			console.error('Delete error:', error);
+			return { error: 'Error al eliminar la imagen.' };
+		}
+
+		return { error: null };
+	} catch (err) {
+		console.error('Delete exception:', err);
 		return { error: 'Error al eliminar la imagen.' };
 	}
-
-	return { error: null };
 }

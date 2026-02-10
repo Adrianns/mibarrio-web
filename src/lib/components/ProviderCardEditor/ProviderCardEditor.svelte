@@ -82,6 +82,8 @@
 	// Upload states
 	let uploadingLogo = $state(false);
 	let uploadingGallery = $state(false);
+	let deletingLogo = $state(false);
+	let deletingPhotoIndex = $state<number | null>(null);
 	let logoInput = $state<HTMLInputElement | null>(null);
 	let galleryInput = $state<HTMLInputElement | null>(null);
 
@@ -201,9 +203,16 @@
 	}
 
 	async function removeLogo() {
-		if (!logoUrl) return;
-		await deletePhoto(logoUrl);
+		if (!logoUrl || deletingLogo) return;
+		deletingLogo = true;
+		const result = await deletePhoto(logoUrl);
+		if (result.error) {
+			toast.error(result.error);
+			deletingLogo = false;
+			return;
+		}
 		logoUrl = null;
+		deletingLogo = false;
 		toast.success('Foto de perfil eliminada');
 	}
 
@@ -238,9 +247,17 @@
 	}
 
 	async function removeGalleryPhoto(index: number) {
+		if (deletingPhotoIndex !== null) return;
 		const url = photos[index];
-		await deletePhoto(url);
+		deletingPhotoIndex = index;
+		const result = await deletePhoto(url);
+		if (result.error) {
+			toast.error(result.error);
+			deletingPhotoIndex = null;
+			return;
+		}
 		photos = photos.filter((_, i) => i !== index);
+		deletingPhotoIndex = null;
 		toast.success('Foto eliminada');
 	}
 </script>
@@ -309,8 +326,12 @@
 							<div class="relative">
 								{#if logoUrl}
 									<img src={logoUrl} alt="Logo" class="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600" />
-									<button type="button" onclick={removeLogo} class="absolute -top-2 -right-2 w-9 h-9 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md" aria-label="Eliminar foto">
-										<X class="h-5 w-5" />
+									<button type="button" onclick={removeLogo} disabled={deletingLogo} class="absolute -top-2 -right-2 w-9 h-9 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md disabled:opacity-50" aria-label="Eliminar foto">
+										{#if deletingLogo}
+											<Loader2 class="h-5 w-5 animate-spin" />
+										{:else}
+											<X class="h-5 w-5" />
+										{/if}
 									</button>
 								{:else}
 									<button type="button" onclick={() => logoInput?.click()} disabled={uploadingLogo} class="w-24 h-24 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
@@ -490,8 +511,12 @@
 										{#each photos as photo, i (photo)}
 											<div class="relative aspect-square">
 												<img src={photo} alt="Foto {i + 1}" loading="lazy" class="w-full h-full object-cover rounded-lg" />
-												<button type="button" onclick={() => removeGalleryPhoto(i)} class="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center">
-													<Trash2 class="h-3 w-3" />
+												<button type="button" onclick={() => removeGalleryPhoto(i)} disabled={deletingPhotoIndex !== null} class="absolute top-1 right-1 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center disabled:opacity-50">
+													{#if deletingPhotoIndex === i}
+														<Loader2 class="h-4 w-4 animate-spin" />
+													{:else}
+														<Trash2 class="h-4 w-4" />
+													{/if}
 												</button>
 											</div>
 										{/each}
@@ -536,9 +561,13 @@
 								<div class="relative">
 									{#if logoUrl}
 										<img src={logoUrl} alt="Logo" class="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600" />
-										<button type="button" onclick={removeLogo} class="absolute -top-2 -right-2 w-9 h-9 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-md" aria-label="Eliminar foto">
+										<button type="button" onclick={removeLogo} disabled={deletingLogo} class="absolute -top-2 -right-2 w-9 h-9 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-md disabled:opacity-50" aria-label="Eliminar foto">
+										{#if deletingLogo}
+											<Loader2 class="h-5 w-5 animate-spin" />
+										{:else}
 											<X class="h-5 w-5" />
-										</button>
+										{/if}
+									</button>
 									{:else}
 										<button type="button" onclick={() => logoInput?.click()} disabled={uploadingLogo} class="w-24 h-24 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-400 transition-colors cursor-pointer">
 											{#if uploadingLogo}
@@ -718,8 +747,12 @@
 										{#each photos as photo, i (photo)}
 											<div class="relative group aspect-square">
 												<img src={photo} alt="Foto {i + 1}" loading="lazy" class="w-full h-full object-cover rounded-lg" />
-												<button type="button" onclick={() => removeGalleryPhoto(i)} class="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600">
-													<Trash2 class="h-3 w-3" />
+												<button type="button" onclick={() => removeGalleryPhoto(i)} disabled={deletingPhotoIndex !== null} class="absolute top-1 right-1 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50">
+													{#if deletingPhotoIndex === i}
+														<Loader2 class="h-4 w-4 animate-spin" />
+													{:else}
+														<Trash2 class="h-4 w-4" />
+													{/if}
 												</button>
 											</div>
 										{/each}

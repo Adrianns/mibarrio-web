@@ -14,6 +14,8 @@
 
 	let uploadingLogo = $state(false);
 	let uploadingGallery = $state(false);
+	let deletingLogo = $state(false);
+	let deletingPhotoIndex = $state<number | null>(null);
 	let logoInput: HTMLInputElement;
 	let galleryInput: HTMLInputElement;
 
@@ -45,11 +47,17 @@
 	}
 
 	async function removeLogo() {
-		if (!logoUrl) return;
-
-		await deletePhoto(logoUrl);
+		if (!logoUrl || deletingLogo) return;
+		deletingLogo = true;
+		const result = await deletePhoto(logoUrl);
+		if (result.error) {
+			toast.error(result.error);
+			deletingLogo = false;
+			return;
+		}
 		logoUrl = null;
 		onLogoChange(null);
+		deletingLogo = false;
 		toast.success('Foto de perfil eliminada');
 	}
 
@@ -85,10 +93,18 @@
 	}
 
 	async function removeGalleryPhoto(index: number) {
+		if (deletingPhotoIndex !== null) return;
 		const url = photos[index];
-		await deletePhoto(url);
+		deletingPhotoIndex = index;
+		const result = await deletePhoto(url);
+		if (result.error) {
+			toast.error(result.error);
+			deletingPhotoIndex = null;
+			return;
+		}
 		photos = photos.filter((_, i) => i !== index);
 		onPhotosChange(photos);
+		deletingPhotoIndex = null;
 		toast.success('Foto eliminada');
 	}
 </script>
@@ -107,9 +123,14 @@
 				<button
 					type="button"
 					onclick={removeLogo}
-					class="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+					disabled={deletingLogo}
+					class="absolute -top-1 -right-1 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 disabled:opacity-50"
 				>
-					<X class="h-3 w-3" />
+					{#if deletingLogo}
+						<Loader2 class="h-4 w-4 animate-spin" />
+					{:else}
+						<X class="h-4 w-4" />
+					{/if}
 				</button>
 			{:else}
 				<button
@@ -192,9 +213,14 @@
 						<button
 							type="button"
 							onclick={() => removeGalleryPhoto(i)}
-							class="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+							disabled={deletingPhotoIndex !== null}
+							class="absolute top-1 right-1 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50"
 						>
-							<Trash2 class="h-3 w-3" />
+							{#if deletingPhotoIndex === i}
+								<Loader2 class="h-4 w-4 animate-spin" />
+							{:else}
+								<Trash2 class="h-4 w-4" />
+							{/if}
 						</button>
 					</div>
 				{/each}
